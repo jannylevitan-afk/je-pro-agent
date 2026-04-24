@@ -46,3 +46,10 @@ It owns the full Layer 0 path:
 - Firecrawl MCP and Apify MCP are for structured page extraction
 - Playwright MCP is a fallback for public pages that need rendering
 - Avoid authenticated scraping unless compliance explicitly allows it
+
+## MCP Routing
+
+- Use `exa` to expand the source universe before monitoring starts
+- Use `firecrawl` when a public page needs clean content extraction or page search
+- Use `apify` when extraction is platform-specific and actor tooling is the better fit
+- Use `playwright` only after lighter public-source methods are insufficient
