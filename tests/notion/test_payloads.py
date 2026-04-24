@@ -24,8 +24,8 @@ def test_build_draft_properties_contains_linkedin_bilingual_fields(linkedin_draf
     assert _first_text(properties["Draft text EN"]) == "English publish version."
     assert properties["Working language"] == {"select": {"name": "ru"}}
     assert properties["Publish language"] == {"select": {"name": "en"}}
-    assert properties["Linked brief"] == {"relation": [{"id": "brief_001"}]}
-    assert properties["Parent draft"] == {"relation": []}
+    assert _first_text(properties["Linked brief"]) == "brief_001"
+    assert properties["Parent draft"] == {"rich_text": []}
     assert properties["Approval decided at"] == {"date": None}
 
 
@@ -46,7 +46,7 @@ def test_build_brief_properties_keeps_reference_sources() -> None:
     properties = build_brief_properties(brief)
 
     assert _first_text(properties["Brief ID"]) == "brief_001"
-    assert properties["Linked draft"] == {"relation": []}
+    assert properties["Linked draft"] == {"rich_text": []}
     assert properties["Review notes"] == {"rich_text": []}
     assert _first_text(properties["Reference sources"]) == "https://a.example\nhttps://b.example\nhttps://c.example"
 
@@ -60,7 +60,7 @@ def test_build_calendar_properties_maps_approved_item(linkedin_draft_record) -> 
     properties = build_calendar_properties(calendar_item)
 
     assert properties["Platform"] == {"select": {"name": "linkedin"}}
-    assert properties["Source draft"] == {"relation": [{"id": "dr_001"}]}
+    assert _first_text(properties["Source draft"]) == "dr_001"
     assert _first_text(properties["Final text RU"]) == "Русская мастер-версия."
     assert _first_text(properties["Final text EN"]) == "English publish version."
     assert properties["Approval decided at"] == {"date": {"start": "2026-04-24T12:00:00Z"}}
@@ -77,8 +77,8 @@ def test_build_orchestration_event_properties_maps_event_fields(linkedin_draft_r
 
     assert properties["Event name"] == {"select": {"name": "draft_submitted_for_review"}}
     assert properties["Entity type"] == {"select": {"name": "draft"}}
-    assert properties["Draft ID"] == {"relation": [{"id": "dr_001"}]}
-    assert properties["Brief ID"] == {"relation": []}
+    assert _first_text(properties["Draft ID"]) == "dr_001"
+    assert properties["Brief ID"] == {"rich_text": []}
     assert properties["Payload ref"] == {"rich_text": []}
 
 
@@ -123,7 +123,7 @@ def test_build_analytics_properties_map_decision_metrics() -> None:
 
     properties = build_content_performance_properties(record, metrics)
 
-    assert properties["Linked content item"] == {"relation": [{"id": "cal_dr_001"}]}
+    assert _first_text(properties["Linked content item"]) == "cal_dr_001"
     assert properties["Engagement rate"] == {"number": 0.205}
     assert properties["CTR"] == {"number": 0.015}
     assert properties["Attribution model"] == {"select": {"name": "time_decay"}}

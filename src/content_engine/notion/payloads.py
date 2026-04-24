@@ -30,14 +30,14 @@ def build_draft_properties(draft: DraftRecord) -> PropertyPayload:
         "Workflow stage": _select(draft.workflow_stage),
         "Review decision": _select(draft.review_decision),
         "Review Notes": _rich_text(draft.review_notes),
-        "Parent draft": _relation(draft.parent_draft_id),
+        "Parent draft": _reference_id(draft.parent_draft_id),
         "Review requested at": _date(draft.review_requested_at),
         "Approval decided at": _date(draft.approval_decided_at),
         "AI edited": _checkbox(draft.ai_edited),
         "7-point test passed": _checkbox(draft.seven_point_test_passed),
         "Factual safety": _select(draft.factual_safety),
-        "Linked brief": _relation(draft.linked_brief_id),
-        "Linked calendar": _relation(draft.linked_calendar_id),
+        "Linked brief": _reference_id(draft.linked_brief_id),
+        "Linked calendar": _reference_id(draft.linked_calendar_id),
         "Archived": _checkbox(draft.archived),
     }
 
@@ -53,7 +53,7 @@ def build_brief_properties(brief: BriefRecord) -> PropertyPayload:
         "Funnel role": _select(brief.funnel_role),
         "Workflow stage": _select(brief.workflow_stage),
         "Review decision": _select(brief.review_decision),
-        "Linked draft": _relation(brief.linked_draft_id),
+        "Linked draft": _reference_id(brief.linked_draft_id),
         "Revision requested at": _date(brief.revision_requested_at),
         "Review notes": _rich_text(brief.review_notes),
         "Source rigor": _select(brief.source_rigor),
@@ -75,7 +75,7 @@ def build_calendar_properties(calendar_item: CalendarItem) -> PropertyPayload:
         "Hook": _rich_text(calendar_item.hook),
         "Final text RU": _rich_text(calendar_item.final_text_ru),
         "Final text EN": _rich_text(calendar_item.final_text_en),
-        "Source draft": _relation(calendar_item.source_draft_id),
+        "Source draft": _reference_id(calendar_item.source_draft_id),
         "Publish date target": _date(calendar_item.publish_date_target),
         "Approval status": _select(calendar_item.approval_status),
         "Approval decided at": _date(calendar_item.approval_decided_at),
@@ -90,9 +90,9 @@ def build_orchestration_event_properties(event: OrchestrationEvent) -> PropertyP
         "Entity ID": _rich_text(event.entity_id),
         "Status": _select(event.status),
         "Triggered at": _date(event.triggered_at),
-        "Draft ID": _relation(event.draft_id),
-        "Brief ID": _relation(event.brief_id),
-        "Calendar item ID": _relation(event.calendar_item_id),
+        "Draft ID": _reference_id(event.draft_id),
+        "Brief ID": _reference_id(event.brief_id),
+        "Calendar item ID": _reference_id(event.calendar_item_id),
         "Payload ref": _rich_text(event.payload_ref),
     }
 
@@ -145,7 +145,7 @@ def build_content_performance_properties(
     metrics: DecisionMetrics,
 ) -> PropertyPayload:
     return {
-        "Linked content item": _relation(record.linked_content_item_id),
+        "Linked content item": _reference_id(record.linked_content_item_id),
         "Platform": _select(record.platform),
         "Reach": _number(record.reach),
         "Impressions": _number(record.impressions),
@@ -228,6 +228,10 @@ def _relation(value: str | None) -> PropertyPayload:
     return {"relation": [{"id": value}]}
 
 
+def _reference_id(value: str | None) -> PropertyPayload:
+    return _rich_text(value)
+
+
 def _url(value: str | None) -> PropertyPayload:
     return {"url": value}
 
@@ -249,7 +253,7 @@ def build_script_properties(script: VideoScript) -> PropertyPayload:
 
 def build_filming_card_properties(card: FilmingCard) -> PropertyPayload:
     return {
-        "Linked script": _relation(card.linked_script_id),
+        "Linked script": _reference_id(card.linked_script_id),
         "Shoot date": _date(card.shoot_date),
         "Filmed": _checkbox(card.filmed),
         "Raw file link": _url(card.raw_file_link),

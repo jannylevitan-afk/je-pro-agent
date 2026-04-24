@@ -77,12 +77,36 @@ class SourceCollector(Protocol):
         ...
 
 
+class WorkflowWriter(Protocol):
+    def write_video_script(
+        self,
+        *,
+        item: SourceItem,
+        title: str,
+        hook: str,
+        body_points: list[str],
+        cta: str,
+    ) -> str:
+        ...
+
+    def write_workflow_b_draft(
+        self,
+        *,
+        item: SourceItem,
+        insight: Any,
+        decision: WorkflowBDecision,
+        brief: Any,
+    ) -> Any:
+        ...
+
+
 def run_live_pipeline(
     client: NotionClientLike,
     targets: LivePipelineTargets,
     items: list[SourceItem],
     verified_facts: set[str],
     submitted_at: str,
+    writer: WorkflowWriter | None = None,
 ) -> list[LivePipelineItemResult]:
     return [
         process_source_item(
@@ -91,6 +115,7 @@ def run_live_pipeline(
             item=item,
             verified_facts=verified_facts,
             submitted_at=submitted_at,
+            writer=writer,
         )
         for item in items
     ]
@@ -102,6 +127,7 @@ def run_collector_cycle(
     targets: LivePipelineTargets,
     verified_facts: set[str],
     submitted_at: str,
+    writer: WorkflowWriter | None = None,
 ) -> list[LivePipelineItemResult]:
     return run_live_pipeline(
         client=client,
@@ -109,6 +135,7 @@ def run_collector_cycle(
         items=collector.collect(),
         verified_facts=verified_facts,
         submitted_at=submitted_at,
+        writer=writer,
     )
 
 
@@ -118,6 +145,7 @@ def process_source_item(
     item: SourceItem,
     verified_facts: set[str],
     submitted_at: str,
+    writer: WorkflowWriter | None = None,
 ) -> LivePipelineItemResult:
     source_response = upsert_source(client, targets.sources_database_id, item)
     source_page_id = _page_id(source_response)
@@ -131,6 +159,7 @@ def process_source_item(
             client=client,
             targets=targets,
             item=item,
+            writer=writer,
         )
 
     insight_page_id: str | None = None
@@ -151,6 +180,7 @@ def process_source_item(
             item=item,
             verified_facts=verified_facts,
             submitted_at=submitted_at,
+            writer=writer,
         )
 
     return LivePipelineItemResult(
@@ -171,6 +201,7 @@ def _run_workflow_a(
     client: NotionClientLike,
     targets: LivePipelineTargets,
     item: SourceItem,
+    writer: WorkflowWriter | None,
 ) -> tuple[str, str]:
     platform = _select_video_platform(item)
     hooks = develop_video_hooks(item, platform=platform)
@@ -187,6 +218,18 @@ def _run_workflow_a(
         body_points=body_points,
         cta="Save this before your next Bali property review.",
     )
+    if writer is not None:
+        script = script.model_copy(
+            update={
+                "script_text": writer.write_video_script(
+                    item=item,
+                    title=title,
+                    hook=best_hook.hook_text,
+                    body_points=body_points,
+                    cta="Save this before your next Bali property review.",
+                )
+            }
+        )
     card = build_filming_card(script, filming_priority=1)
 
     script_response = create_script(client, targets.scripts_database_id, script)
@@ -200,6 +243,7 @@ def _run_workflow_b(
     item: SourceItem,
     verified_facts: set[str],
     submitted_at: str,
+    writer: WorkflowWriter | None,
 ) -> tuple[str, list[str], list[str], list[str], list[str]]:
     note = normalize_source_item(item)
     insight = build_insight_card(
@@ -280,12 +324,24 @@ def _run_workflow_b(
         brief_response = upsert_brief(client, targets.briefs_database_id, brief_record)
         brief_page_ids.append(_page_id(brief_response))
 
+        draft_text_ru = _draft_text_ru(item, insight, decision)
+        draft_text_en = _draft_text_en(item, insight, decision)
+        if writer is not None:
+            writer_output = writer.write_workflow_b_draft(
+                item=item,
+                insight=insight,
+                decision=decision,
+                brief=brief,
+            )
+            draft_text_ru = writer_output.draft_text_ru
+            draft_text_en = writer_output.draft_text_en
+
         draft_bundle = build_draft_bundle(
             brief=brief,
-            draft_text_ru=_draft_text_ru(item, insight, decision),
+            draft_text_ru=draft_text_ru,
             voice_register=decision.tone,
             audience_portrait=insight.audience,
-            draft_text_en=_draft_text_en(item, insight, decision),
+            draft_text_en=draft_text_en,
         )
         editing_result = run_editorial_gate(
             draft=draft_bundle,

@@ -15,14 +15,14 @@ DRAFTS_DB_SCHEMA = {
     "Workflow stage": "select",
     "Review decision": "select",
     "Review Notes": "rich_text",
-    "Parent draft": "relation",
+    "Parent draft": "rich_text",
     "Review requested at": "date",
     "Approval decided at": "date",
     "AI edited": "checkbox",
     "7-point test passed": "checkbox",
     "Factual safety": "select",
-    "Linked brief": "relation",
-    "Linked calendar": "relation",
+    "Linked brief": "rich_text",
+    "Linked calendar": "rich_text",
     "Archived": "checkbox",
 }
 
@@ -35,7 +35,7 @@ BRIEFS_DB_SCHEMA = {
     "Funnel role": "select",
     "Workflow stage": "select",
     "Review decision": "select",
-    "Linked draft": "relation",
+    "Linked draft": "rich_text",
     "Revision requested at": "date",
     "Review notes": "rich_text",
     "Source rigor": "select",
@@ -55,7 +55,7 @@ CONTENT_CALENDAR_SCHEMA = {
     "Hook": "rich_text",
     "Final text RU": "rich_text",
     "Final text EN": "rich_text",
-    "Source draft": "relation",
+    "Source draft": "rich_text",
     "Publish date target": "date",
     "Approval status": "select",
     "Approval decided at": "date",
@@ -125,9 +125,9 @@ ORCHESTRATION_EVENT_SCHEMA = {
     "Entity ID": "rich_text",
     "Status": "select",
     "Triggered at": "date",
-    "Draft ID": "relation",
-    "Brief ID": "relation",
-    "Calendar item ID": "relation",
+    "Draft ID": "rich_text",
+    "Brief ID": "rich_text",
+    "Calendar item ID": "rich_text",
     "Payload ref": "rich_text",
 }
 
@@ -141,7 +141,7 @@ SCRIPTS_QUEUE_SCHEMA = {
 }
 
 FILMING_CARDS_SCHEMA = {
-    "Linked script": "relation",
+    "Linked script": "rich_text",
     "Shoot date": "date",
     "Filmed": "checkbox",
     "Raw file link": "url",
@@ -164,7 +164,7 @@ VIDEO_PERFORMANCE_SCHEMA = {
 }
 
 CONTENT_PERFORMANCE_SCHEMA = {
-    "Linked content item": "relation",
+    "Linked content item": "rich_text",
     "Platform": "select",
     "Reach": "number",
     "Impressions": "number",

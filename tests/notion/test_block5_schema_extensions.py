@@ -13,7 +13,7 @@ def test_scripts_queue_schema_contains_required_fields() -> None:
 
 
 def test_filming_cards_schema_contains_required_fields() -> None:
-    assert FILMING_CARDS_SCHEMA["Linked script"] == "relation"
+    assert FILMING_CARDS_SCHEMA["Linked script"] == "rich_text"
     assert FILMING_CARDS_SCHEMA["Raw file link"] == "url"
 
 

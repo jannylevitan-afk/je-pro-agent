@@ -217,3 +217,80 @@ def test_run_collector_cycle_uses_external_collector(source_item) -> None:
 
     assert len(results) == 1
     assert results[0].source_item_id == source_item.item_id
+
+
+def test_process_source_item_uses_injected_writer_for_script_and_draft(
+    video_source_item,
+) -> None:
+    class FakeWriter:
+        def write_video_script(
+            self,
+            *,
+            item,
+            title: str,
+            hook: str,
+            body_points: list[str],
+            cta: str,
+        ) -> str:
+            return "Anthropic video script"
+
+        def write_workflow_b_draft(
+            self,
+            *,
+            item,
+            insight,
+            decision,
+            brief,
+        ):
+            class Draft:
+                draft_text_ru = "Anthropic Russian draft"
+                draft_text_en = "Anthropic English draft"
+
+            return Draft()
+
+    client = StubNotionClient(
+        query_results=[
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+        ],
+        create_results=[
+            {"id": "src_page_1"},
+            {"id": "script_page_1"},
+            {"id": "filming_page_1"},
+            {"id": "insight_page_1"},
+            {"id": "idea_page_1"},
+            {"id": "brief_page_1"},
+            {"id": "draft_page_1"},
+            {"id": "event_page_1"},
+            {"id": "idea_page_2"},
+            {"id": "brief_page_2"},
+            {"id": "draft_page_2"},
+            {"id": "event_page_2"},
+        ],
+    )
+    targets = LivePipelineTargets(
+        sources_database_id="db_sources",
+        insights_database_id="db_insights",
+        ideas_database_id="db_ideas",
+        briefs_database_id="db_briefs",
+        drafts_database_id="db_drafts",
+        events_database_id="db_events",
+        scripts_database_id="db_scripts",
+        filming_cards_database_id="db_filming",
+    )
+
+    process_source_item(
+        client=client,
+        targets=targets,
+        item=video_source_item,
+        verified_facts={"Boutique hotel ROI beats mass-market in Bali."},
+        submitted_at="2026-04-24T10:00:00Z",
+        writer=FakeWriter(),
+    )
+
+    assert client.create_calls[1][1]["Script text"]["rich_text"][0]["text"]["content"] == "Anthropic video script"
+    assert client.create_calls[6][1]["Draft text RU"]["rich_text"][0]["text"]["content"] == "Anthropic Russian draft"
+    assert client.create_calls[6][1]["Draft text EN"]["rich_text"][0]["text"]["content"] == "Anthropic English draft"

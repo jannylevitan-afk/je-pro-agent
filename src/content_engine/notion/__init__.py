@@ -5,6 +5,7 @@ from content_engine.notion.client import (
     NotionDecodeError,
     NotionHTTPError,
 )
+from content_engine.notion.bootstrap import ensure_live_pipeline_targets
 from content_engine.notion.payloads import (
     build_brief_properties,
     build_calendar_properties,
@@ -44,6 +45,7 @@ __all__ = [
     "NotionClientError",
     "NotionDecodeError",
     "NotionHTTPError",
+    "ensure_live_pipeline_targets",
     # payload builders
     "build_brief_properties",
     "build_calendar_properties",

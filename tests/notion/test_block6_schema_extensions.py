@@ -2,7 +2,7 @@ from content_engine.notion.schema_defs import CONTENT_PERFORMANCE_SCHEMA, RESEAR
 
 
 def test_content_performance_schema_contains_decision_fields() -> None:
-    assert CONTENT_PERFORMANCE_SCHEMA["Linked content item"] == "relation"
+    assert CONTENT_PERFORMANCE_SCHEMA["Linked content item"] == "rich_text"
     assert CONTENT_PERFORMANCE_SCHEMA["Attribution model"] == "select"
     assert CONTENT_PERFORMANCE_SCHEMA["Deal influenced"] == "checkbox"
 

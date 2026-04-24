@@ -93,6 +93,44 @@ class NotionClient:
     def retrieve_page(self, page_id: str) -> JsonObject:
         return self._request("GET", f"/pages/{page_id}")
 
+    def search(self, query: str) -> JsonObject:
+        return self._request("POST", "/search", payload={"query": query})
+
+    def create_database(
+        self,
+        parent_page_id: str,
+        title: str,
+        properties: JsonObject,
+    ) -> JsonObject:
+        return self._request(
+            "POST",
+            "/databases",
+            payload={
+                "parent": {"type": "page_id", "page_id": parent_page_id},
+                "title": [
+                    {
+                        "type": "text",
+                        "text": {"content": title},
+                    }
+                ],
+                "properties": properties,
+            },
+        )
+
+    def retrieve_database(self, database_id: str) -> JsonObject:
+        return self._request("GET", f"/databases/{database_id}")
+
+    def update_database(
+        self,
+        database_id: str,
+        properties: JsonObject,
+    ) -> JsonObject:
+        return self._request(
+            "PATCH",
+            f"/databases/{database_id}",
+            payload={"properties": properties},
+        )
+
     def query_database(
         self,
         database_id: str,

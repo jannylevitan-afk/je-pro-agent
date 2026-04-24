@@ -65,7 +65,7 @@ def test_build_filming_card_properties_maps_relation_and_flags() -> None:
     card = make_filming_card()
     props = build_filming_card_properties(card)
 
-    assert props["Linked script"] == {"relation": [{"id": "scr_001"}]}
+    assert first_text(props["Linked script"]) == "scr_001"
     assert props["Shoot date"] == {"date": {"start": "2026-04-25"}}
     assert props["Filmed"] == {"checkbox": False}
     assert props["Raw file link"] == {"url": None}
@@ -101,7 +101,7 @@ def test_create_filming_card_creates_with_linked_script() -> None:
 
     assert response["id"] == "page_film_001"
     sent_props = client.create_calls[0][1]
-    assert sent_props["Linked script"] == {"relation": [{"id": "scr_001"}]}
+    assert first_text(sent_props["Linked script"]) == "scr_001"
 
 
 def test_create_video_publish_item_creates_page() -> None:

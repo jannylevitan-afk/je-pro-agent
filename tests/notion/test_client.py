@@ -114,6 +114,68 @@ def test_retrieve_page_uses_get_without_payload() -> None:
     assert payload is None
 
 
+def test_search_uses_post_search_endpoint() -> None:
+    recorded_calls: list[TransportCall] = []
+    transport = _make_transport(
+        recorded_calls,
+        responses=[(200, '{"results":[]}')],
+    )
+    client = NotionClient(NotionClientConfig(token="secret"), transport=transport)
+
+    result = client.search(query="Content Engine Drafts")
+
+    assert result == {"results": []}
+    method, path, _, payload = recorded_calls[0]
+    assert method == "POST"
+    assert path == "/search"
+    assert payload == {"query": "Content Engine Drafts"}
+
+
+def test_create_database_shapes_request() -> None:
+    recorded_calls: list[TransportCall] = []
+    transport = _make_transport(
+        recorded_calls,
+        responses=[(200, '{"id":"db_123"}')],
+    )
+    client = NotionClient(NotionClientConfig(token="secret"), transport=transport)
+
+    result = client.create_database(
+        parent_page_id="page_123",
+        title="Content Engine Sources",
+        properties={"Title": {"title": {}}},
+    )
+
+    assert result == {"id": "db_123"}
+    method, path, _, payload = recorded_calls[0]
+    assert method == "POST"
+    assert path == "/databases"
+    assert payload == {
+        "parent": {"type": "page_id", "page_id": "page_123"},
+        "title": [{"type": "text", "text": {"content": "Content Engine Sources"}}],
+        "properties": {"Title": {"title": {}}},
+    }
+
+
+def test_update_database_shapes_request() -> None:
+    recorded_calls: list[TransportCall] = []
+    transport = _make_transport(
+        recorded_calls,
+        responses=[(200, '{"id":"db_123"}')],
+    )
+    client = NotionClient(NotionClientConfig(token="secret"), transport=transport)
+
+    result = client.update_database(
+        database_id="db_123",
+        properties={"Draft ID": {"rich_text": {}}},
+    )
+
+    assert result == {"id": "db_123"}
+    method, path, _, payload = recorded_calls[0]
+    assert method == "PATCH"
+    assert path == "/databases/db_123"
+    assert payload == {"properties": {"Draft ID": {"rich_text": {}}}}
+
+
 def test_http_error_maps_status_and_body() -> None:
     transport = _make_transport(
         recorded_calls=[],
