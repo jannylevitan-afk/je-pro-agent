@@ -1,16 +1,23 @@
 DRAFTS_DB_SCHEMA = {
+    "Draft ID": "rich_text",
     "Title": "title",
     "Draft text RU": "rich_text",
     "Draft text EN": "rich_text",
     "Platform": "select",
+    "Platform lane": "select",
+    "Language mode": "select",
     "Audience portrait": "select",
     "Voice register": "select",
+    "Funnel role": "select",
     "Version": "number",
     "Working language": "select",
     "Publish language": "select",
     "Workflow stage": "select",
     "Review decision": "select",
     "Review Notes": "rich_text",
+    "Parent draft": "relation",
+    "Review requested at": "date",
+    "Approval decided at": "date",
     "AI edited": "checkbox",
     "7-point test passed": "checkbox",
     "Factual safety": "select",
@@ -32,8 +39,10 @@ CONTENT_CALENDAR_SCHEMA = {
     "Hook": "rich_text",
     "Final text RU": "rich_text",
     "Final text EN": "rich_text",
+    "Source draft": "relation",
     "Publish date target": "date",
     "Approval status": "select",
+    "Approval decided at": "date",
     "Repurpose status": "select",
 }
 
@@ -60,4 +69,16 @@ MONITORING_RUN_SCHEMA = {
     "Retry count": "number",
     "Staleness hours": "number",
     "Run status": "select",
+}
+
+ORCHESTRATION_EVENT_SCHEMA = {
+    "Event name": "select",
+    "Entity type": "select",
+    "Entity ID": "rich_text",
+    "Status": "select",
+    "Triggered at": "date",
+    "Draft ID": "relation",
+    "Brief ID": "relation",
+    "Calendar item ID": "relation",
+    "Payload ref": "rich_text",
 }
