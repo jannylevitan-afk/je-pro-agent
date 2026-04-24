@@ -5,7 +5,8 @@ from typing import Any
 from content_engine.models.analytics import ContentPerformanceRecord, DecisionMetrics, FeedbackSignal
 from content_engine.models.approval import CalendarItem, DraftRecord, OrchestrationEvent
 from content_engine.models.source_item import SourceItem
-from content_engine.models.workflow_b import BriefRecord
+from content_engine.models.workflow_a import FilmingCard, VideoPublishItem, VideoScript
+from content_engine.models.workflow_b import BriefRecord, IdeaCandidate, InsightCard
 
 
 PropertyPayload = dict[str, Any]
@@ -109,6 +110,36 @@ def build_source_properties(source_item: SourceItem) -> PropertyPayload:
     }
 
 
+def build_insight_properties(insight: InsightCard) -> PropertyPayload:
+    return {
+        "Topic": _rich_text(insight.content_theme),
+        "Angle": _rich_text(insight.useful_lesson),
+        "Audience portrait": _select(insight.audience),
+        "Narrative type": _select(insight.narrative_type),
+        "Emotional trigger": _rich_text(insight.emotional_trigger),
+        "Reuse score": _number(insight.reuse_score),
+    }
+
+
+def build_idea_properties(
+    idea: IdeaCandidate,
+    gate_passed: bool,
+    status: str,
+) -> PropertyPayload:
+    return {
+        "Title": _title(idea.working_title),
+        "Platform": _select(idea.target_platform),
+        "Platform lane": _select(idea.platform_lane),
+        "Language mode": _select(idea.language_mode),
+        "Funnel role": _select(idea.funnel_role),
+        "Audience portrait": _select(idea.target_audience),
+        "Emotional hook": _rich_text(idea.emotional_hook),
+        "Desired reaction": _rich_text(idea.desired_reaction),
+        "Gate passed": _checkbox(gate_passed),
+        "Status": _select(status),
+    }
+
+
 def build_content_performance_properties(
     record: ContentPerformanceRecord,
     metrics: DecisionMetrics,
@@ -195,3 +226,40 @@ def _relation(value: str | None) -> PropertyPayload:
     if value is None or value == "":
         return {"relation": []}
     return {"relation": [{"id": value}]}
+
+
+def _url(value: str | None) -> PropertyPayload:
+    return {"url": value}
+
+
+# ---------------------------------------------------------------------------
+# Workflow A — Video Pipeline
+# ---------------------------------------------------------------------------
+
+def build_script_properties(script: VideoScript) -> PropertyPayload:
+    return {
+        "Title": _title(script.title),
+        "Hook": _rich_text(script.hook_text),
+        "Platform": _select(script.platform),
+        "Script text": _rich_text(script.script_text),
+        "Filming priority": _number(script.filming_priority),
+        "Status": _select(script.status),
+    }
+
+
+def build_filming_card_properties(card: FilmingCard) -> PropertyPayload:
+    return {
+        "Linked script": _relation(card.linked_script_id),
+        "Shoot date": _date(card.shoot_date),
+        "Filmed": _checkbox(card.filmed),
+        "Raw file link": _url(card.raw_file_link),
+    }
+
+
+def build_video_publish_properties(item: VideoPublishItem) -> PropertyPayload:
+    return {
+        "Platform": _select(item.platform),
+        "Publish date": _date(item.publish_date),
+        "Caption": _rich_text(item.caption),
+        "Status": _select(item.status),
+    }

@@ -4,6 +4,53 @@ audience_segments:
     seed_profiles:
       - platform: instagram
         handle: artur_mkhitaryan_
+      - platform: instagram
+        handle: anton.karotki
+
+  - name: real_estate_broker
+    route_to: workflow_b
+    seed_profiles:
+      - platform: instagram
+        handle: kseniya_asap
+      - platform: instagram
+        handle: joravdubae
+      - platform: instagram
+        handle: demuntergilles
+
+  - name: architect_designer
+    route_to: workflow_b
+    seed_profiles:
+      - platform: instagram
+        handle: antoniusrichard
+      - platform: instagram
+        handle: alyona_miller__
+
+  - name: lifestyle_expat
+    route_to: workflow_b
+    seed_profiles:
+      - platform: instagram
+        handle: viktoriya.onelife
+      - platform: instagram
+        handle: polinka.apelsinka
+
 content_theme_sources:
+  - name: founder_lifestyle
+    route_to: workflow_b
+
+  - name: bali_real_estate_expertise
+    route_to: workflow_b
+
+  - name: bali_travel
+    route_to: both
+
+  - name: global_trends
+    route_to: both
+
+  - name: wellness_architecture
+    route_to: workflow_b
+
   - name: boutique_hotels
     route_to: both
+
+  - name: marketing_cases
+    route_to: workflow_b

@@ -1,8 +1,16 @@
 from content_engine.models.source_item import SourceItem
-from content_engine.models.workflow_a import FilmingCard, VideoHook, VideoPublishItem, VideoScript
+from content_engine.models.workflow_a import (
+    FilmingCard,
+    HookType,
+    VideoHook,
+    VideoPublishItem,
+    VideoPublishStatus,
+    VideoScript,
+    VideoPlatform,
+)
 
 
-HOOK_BLUEPRINTS = [
+HOOK_BLUEPRINTS: list[tuple[HookType, str]] = [
     ("market_warning", "What looks cheap first is often the most expensive later."),
     ("story_moment", "A buyer thinks price is the risk. It usually is not."),
     ("tactical_tip", "Check these three things before you trust a villa price tag."),
@@ -13,7 +21,7 @@ HOOK_BLUEPRINTS = [
 
 def develop_video_hooks(
     item: SourceItem,
-    platform: str,
+    platform: VideoPlatform,
 ) -> list[VideoHook]:
     hooks: list[VideoHook] = []
     for index, (hook_type, default_line) in enumerate(HOOK_BLUEPRINTS, start=1):
@@ -76,7 +84,7 @@ def build_video_publish_item(
     caption: str,
     publish_date: str | None = None,
 ) -> VideoPublishItem:
-    status = "published" if publish_date else "ready"
+    status: VideoPublishStatus = "published" if publish_date else "ready"
     return VideoPublishItem(
         publish_item_id=f"pub_{script.script_id}",
         linked_script_id=script.script_id,

@@ -1,8 +1,26 @@
+from typing import TypedDict
+
 from content_engine.models.source_item import SourceItem
-from content_engine.models.workflow_b import ContentBrief, InsightCard, SourceNote
+from content_engine.models.workflow_b import (
+    ContentBrief,
+    FunnelRole,
+    IdeaCandidate,
+    InsightCard,
+    Language,
+    LengthTarget,
+    Platform,
+    PlatformLane,
+    SourceNote,
+    SourceRigor,
+)
 
 
-SOURCE_THEME_HINTS = {
+class _ThemeHint(TypedDict):
+    content_pillar: str
+    priority: int
+
+
+SOURCE_THEME_HINTS: dict[str, _ThemeHint] = {
     "wellness_architecture": {
         "content_pillar": "expertise_lifestyle",
         "priority": 2,
@@ -57,6 +75,32 @@ def build_insight_card(
     )
 
 
+def build_idea_candidate(
+    insight: InsightCard,
+    platform: Platform,
+    platform_lane: PlatformLane,
+    language_mode: Language,
+    funnel_role: FunnelRole,
+    working_title: str,
+    emotional_hook: str,
+    desired_reaction: str,
+    suggested_format: str,
+) -> IdeaCandidate:
+    return IdeaCandidate(
+        working_title=working_title,
+        target_platform=platform,
+        platform_lane=platform_lane,
+        language_mode=language_mode,
+        funnel_role=funnel_role,
+        target_audience=insight.audience,
+        content_pillar=insight.content_pillar,
+        emotional_hook=emotional_hook,
+        useful_point=insight.useful_lesson,
+        desired_reaction=desired_reaction,
+        suggested_format=suggested_format,
+    )
+
+
 def gate_idea_candidate(gates: dict[str, bool]) -> tuple[bool, list[str]]:
     failed = [name for name, passed in gates.items() if not passed]
     return len(failed) == 0, failed
@@ -64,21 +108,21 @@ def gate_idea_candidate(gates: dict[str, bool]) -> tuple[bool, list[str]]:
 
 def build_content_brief(
     insight: InsightCard,
-    platform: str,
-    platform_lane: str,
-    funnel_role: str,
+    platform: Platform,
+    platform_lane: PlatformLane,
+    funnel_role: FunnelRole,
     purpose: str,
     hook: str,
     key_points: list[str],
     cta_type: str,
     tone: str,
-    length_target: str,
+    length_target: LengthTarget,
     engagement_objective: str,
     fact_pack: list[str],
-    source_rigor: str,
+    source_rigor: SourceRigor,
     reference_sources: list[str],
 ) -> ContentBrief:
-    publish_language = "en" if platform_lane == "linkedin_b2b" else "ru"
+    publish_language: Language = "en" if platform_lane == "linkedin_b2b" else "ru"
     return ContentBrief(
         audience=insight.audience,
         platform=platform,

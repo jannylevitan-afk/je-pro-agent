@@ -3,13 +3,24 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from content_engine.models.analytics import ContentPerformanceRecord, DecisionMetrics, FeedbackSignal
 from content_engine.models.approval import ApprovalResult, CalendarItem, DraftRecord, OrchestrationEvent
-from content_engine.models.workflow_b import BriefRecord
+from content_engine.models.source_item import SourceItem
+from content_engine.models.workflow_a import FilmingCard, VideoPublishItem, VideoScript
+from content_engine.models.workflow_b import BriefRecord, IdeaCandidate, InsightCard
 from content_engine.notion.payloads import (
     build_brief_properties,
     build_calendar_properties,
+    build_content_performance_properties,
     build_draft_properties,
+    build_feedback_signal_properties,
+    build_filming_card_properties,
+    build_idea_properties,
+    build_insight_properties,
     build_orchestration_event_properties,
+    build_script_properties,
+    build_source_properties,
+    build_video_publish_properties,
 )
 
 
@@ -155,6 +166,116 @@ def sync_approval_result(
         brief_page_id=brief_page_id,
         calendar_page_id=calendar_page_id,
         event_page_ids=event_page_ids,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Layer 0C — Research Agent sources
+# ---------------------------------------------------------------------------
+
+def upsert_source(
+    client: NotionClientLike,
+    database_id: str,
+    source_item: SourceItem,
+) -> dict[str, Any]:
+    return _upsert_by_external_id(
+        client=client,
+        database_id=database_id,
+        external_id_property="Dedupe key",
+        external_id_value=source_item.dedupe_key,
+        properties=build_source_properties(source_item),
+    )
+
+
+def create_insight(
+    client: NotionClientLike,
+    database_id: str,
+    insight: InsightCard,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_insight_properties(insight),
+    )
+
+
+def create_idea(
+    client: NotionClientLike,
+    database_id: str,
+    idea: IdeaCandidate,
+    gate_passed: bool,
+    status: str,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_idea_properties(
+            idea,
+            gate_passed=gate_passed,
+            status=status,
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Workflow A — Video Pipeline
+# ---------------------------------------------------------------------------
+
+def create_script(
+    client: NotionClientLike,
+    database_id: str,
+    script: VideoScript,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_script_properties(script),
+    )
+
+
+def create_filming_card(
+    client: NotionClientLike,
+    database_id: str,
+    card: FilmingCard,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_filming_card_properties(card),
+    )
+
+
+def create_video_publish_item(
+    client: NotionClientLike,
+    database_id: str,
+    item: VideoPublishItem,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_video_publish_properties(item),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Analytics
+# ---------------------------------------------------------------------------
+
+def create_content_performance(
+    client: NotionClientLike,
+    database_id: str,
+    record: ContentPerformanceRecord,
+    metrics: DecisionMetrics,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_content_performance_properties(record, metrics),
+    )
+
+
+def create_feedback_signal(
+    client: NotionClientLike,
+    database_id: str,
+    signal: FeedbackSignal,
+) -> dict[str, Any]:
+    return client.create_database_page(
+        database_id=database_id,
+        properties=build_feedback_signal_properties(signal),
     )
 
 

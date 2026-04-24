@@ -5,6 +5,8 @@ from content_engine.models.analytics import (
     DecisionMetrics,
     FeedbackSignal,
     PerformanceTier,
+    SignalScope,
+    SignalType,
 )
 
 
@@ -35,18 +37,19 @@ def classify_performance_tier(
 def build_feedback_signal(
     record: ContentPerformanceRecord,
     metrics: DecisionMetrics,
-    signal_scope: str,
+    signal_scope: SignalScope,
     dimension_value: str,
 ) -> FeedbackSignal:
     performance_tier = classify_performance_tier(
         metrics,
         deal_influenced=record.deal_influenced,
     )
-    signal_type = {
+    _tier_to_signal: dict[PerformanceTier, SignalType] = {
         "top": "boost",
         "average": "monitor",
         "weak": "suppress",
-    }[performance_tier]
+    }
+    signal_type: SignalType = _tier_to_signal[performance_tier]
     score = min(metrics.engagement_rate + (metrics.dm_rate * 10), 1.0)
     return FeedbackSignal(
         signal_id=f"sig_{record.record_id}_{signal_scope}",

@@ -2,6 +2,8 @@ from content_engine.models.approval import (
     ApprovalResult,
     CalendarItem,
     DraftRecord,
+    EventEntityType,
+    EventName,
     OrchestrationEvent,
     ReviewAction,
 )
@@ -204,8 +206,8 @@ def build_calendar_item(
 
 
 def _build_event(
-    event_name: str,
-    entity_type: str,
+    event_name: EventName,
+    entity_type: EventEntityType,
     entity_id: str,
     triggered_at: str,
     draft_id: str | None = None,

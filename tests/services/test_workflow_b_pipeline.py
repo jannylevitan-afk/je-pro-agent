@@ -1,6 +1,7 @@
 from content_engine.models.source_item import SourceItem
 from content_engine.services.workflow_b import (
     build_content_brief,
+    build_idea_candidate,
     build_insight_card,
     gate_idea_candidate,
     normalize_source_item,
@@ -51,6 +52,33 @@ def test_build_insight_card_uses_seed_hints() -> None:
 
     assert insight.content_theme == "wellness_architecture"
     assert insight.reuse_score == 4
+
+
+def test_build_idea_candidate_inherits_audience_and_pillar_from_insight() -> None:
+    note = normalize_source_item(make_source_item())
+    insight = build_insight_card(
+        note,
+        emotional_trigger="status anxiety",
+        useful_lesson="Wellness design is no longer decorative.",
+        narrative_type="market_observation",
+        reuse_score=4,
+    )
+
+    idea = build_idea_candidate(
+        insight,
+        platform="instagram",
+        platform_lane="instagram_professional",
+        language_mode="ru",
+        funnel_role="authority",
+        working_title="What buyers miss when they read a villa listing",
+        emotional_hook="Fear of paying for the wrong thing",
+        desired_reaction="save",
+        suggested_format="carousel",
+    )
+
+    assert idea.target_audience == "developer_investor"
+    assert idea.content_pillar == "expertise_lifestyle"
+    assert idea.useful_point == "Wellness design is no longer decorative."
 
 
 def test_gate_idea_candidate_checks_four_gates() -> None:

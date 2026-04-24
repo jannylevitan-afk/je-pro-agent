@@ -1,7 +1,67 @@
 facts:
-  - claim: "Clear Real Estate uses the phrase Zero bullshit."
+  # Brand facts — evergreen, public
+  - claim: "Clear Real Estate operates under the 'Zero bullshit' positioning."
     fact_type: brand
     verification_status: verified_public
-    evidence: "public brand materials"
+    evidence: "public brand materials and social profiles"
     freshness_window: evergreen
     allowed_usage: public
+
+  - claim: "AILLA Villa is the flagship experience-development project in Bali."
+    fact_type: brand
+    verification_status: verified_public
+    evidence: "public project page and brand communications"
+    freshness_window: evergreen
+    allowed_usage: public
+
+  - claim: "HANDARA is a Bali-based land and development project under Clear Real Estate."
+    fact_type: project
+    verification_status: verified_internal
+    evidence: "internal project brief"
+    freshness_window: evergreen
+    allowed_usage: public
+
+  # Founder facts
+  - claim: "Jane Levitan is the founder behind Clear Real Estate and the personal brand driving it."
+    fact_type: founder
+    verification_status: verified_public
+    evidence: "public social profiles and bio"
+    freshness_window: evergreen
+    allowed_usage: public
+
+  # Market facts — time-sensitive, must include source before use
+  - claim: "Front-loaded payment schemes in Bali real estate carry higher buyer risk than milestone-based structures."
+    fact_type: market
+    verification_status: verified_public
+    evidence: "industry practitioner consensus; cite specific source when used in copy"
+    freshness_window: evergreen
+    allowed_usage: public
+
+  - claim: "Boutique hotel occupancy rates in Bali vary significantly by season; any figure must include date and source."
+    fact_type: market
+    verification_status: needs_human_confirmation
+    evidence: "general market knowledge — requires dated report before use in final copy"
+    freshness_window: 90d
+    allowed_usage: public
+
+  - claim: "Premium villa rental yield in Bali ranges from 8% to 15% depending on location and management quality."
+    fact_type: market
+    verification_status: needs_human_confirmation
+    evidence: "practitioner estimates — verify with current market data before publication"
+    freshness_window: 90d
+    allowed_usage: public
+
+  # Sensitive facts — internal only or forbidden in copy
+  - claim: "Client names, deal terms, and closed transaction details are internal and may not appear in published copy."
+    fact_type: legal
+    verification_status: verified_internal
+    evidence: "internal operating rule"
+    freshness_window: evergreen
+    allowed_usage: internal only
+
+  - claim: "Revenue figures, private investor terms, and undisclosed partnership agreements are forbidden in all AI output."
+    fact_type: legal
+    verification_status: verified_internal
+    evidence: "internal operating rule"
+    freshness_window: evergreen
+    allowed_usage: never in copy
