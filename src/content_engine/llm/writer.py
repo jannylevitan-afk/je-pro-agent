@@ -130,7 +130,7 @@ class AnthropicPipelineWriter:
 
         return PipelineDraftText(
             draft_text_ru=draft_text_ru.strip(),
-            draft_text_en=draft_text_en.strip() if isinstance(draft_text_en, str) else None,
+            draft_text_en=_normalize_optional_text(draft_text_en),
         )
 
 
@@ -190,3 +190,12 @@ def _length_constraint(platform_lane: str) -> str:
     if platform_lane == "instagram_lifestyle":
         return "RU caption 80-130 words."
     return "Keep it concise."
+
+
+def _normalize_optional_text(value: object) -> str | None:
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip()
+    if normalized.lower() in {"", "null", "none", "n/a"}:
+        return None
+    return normalized

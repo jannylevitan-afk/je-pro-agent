@@ -1,0 +1,462 @@
+from __future__ import annotations
+
+import json
+import re
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from hashlib import sha256
+from html import unescape
+from html.parser import HTMLParser
+from typing import Any, Literal
+from urllib.request import urlopen
+from xml.etree import ElementTree
+
+from content_engine.models.source_item import SourceItem
+from content_engine.services.ingestion import build_dedupe_key
+
+
+Fetcher = Callable[[str, float], str]
+NativePlatform = Literal["telegram", "instagram", "linkedin", "youtube", "tiktok"]
+
+
+@dataclass(frozen=True, slots=True)
+class NativeSourceTarget:
+    platform: NativePlatform
+    handle: str
+    audience_segment: str
+    content_theme: str
+    source_url: str | None = None
+    source_name: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class NativeSourceCollector:
+    targets: list[NativeSourceTarget]
+    timeout_seconds: float = 30.0
+    fetcher: Fetcher | None = None
+    collected_at: str | None = None
+
+    def collect(self) -> list[SourceItem]:
+        return collect_native_source_items(
+            targets=self.targets,
+            timeout_seconds=self.timeout_seconds,
+            fetcher=self.fetcher,
+            collected_at=self.collected_at,
+        )
+
+
+def collect_native_source_items(
+    *,
+    targets: list[NativeSourceTarget],
+    timeout_seconds: float = 30.0,
+    fetcher: Fetcher | None = None,
+    collected_at: str | None = None,
+) -> list[SourceItem]:
+    resolved_fetcher = fetcher or _default_fetcher
+    collected_timestamp = collected_at or _utc_now_iso()
+    items: list[SourceItem] = []
+
+    for target in targets:
+        target_url = resolve_target_url(target)
+        raw_text = resolved_fetcher(target_url, timeout_seconds)
+        if target.platform == "telegram":
+            items.extend(_parse_telegram_channel_page(target, target_url, raw_text, collected_timestamp))
+        elif target.platform == "youtube":
+            items.extend(_parse_youtube_feed(target, target_url, raw_text, collected_timestamp))
+        else:
+            item = _parse_html_meta_page(target, target_url, raw_text, collected_timestamp)
+            items.append(item)
+    return items
+
+
+def resolve_target_url(target: NativeSourceTarget) -> str:
+    if target.source_url:
+        return target.source_url
+
+    normalized = target.handle.strip().lstrip("@").strip("/")
+    if target.platform == "telegram":
+        return f"https://t.me/s/{normalized}"
+    if target.platform == "instagram":
+        return f"https://www.instagram.com/{normalized}/"
+    if target.platform == "linkedin":
+        return f"https://www.linkedin.com/in/{normalized}/"
+    if target.platform == "youtube":
+        if normalized.startswith("UC"):
+            return f"https://www.youtube.com/feeds/videos.xml?channel_id={normalized}"
+        return f"https://www.youtube.com/@{normalized}"
+    if target.platform == "tiktok":
+        if normalized.startswith("@"):
+            return f"https://www.tiktok.com/{normalized}"
+        return f"https://www.tiktok.com/@{normalized}"
+    raise ValueError(f"Unsupported native platform: {target.platform}")
+
+
+def _parse_telegram_channel_page(
+    target: NativeSourceTarget,
+    target_url: str,
+    html: str,
+    collected_at: str,
+) -> list[SourceItem]:
+    blocks = re.findall(
+        r'(<div class="tgme_widget_message_wrap.*?(?=<div class="tgme_widget_message_wrap|\Z))',
+        html,
+        flags=re.DOTALL,
+    )
+    items: list[SourceItem] = []
+    for block in blocks:
+        post_match = re.search(r'data-post="([^"]+/([^"]+))"', block)
+        link_match = re.search(r'href="(https://t\.me/[^"]+)"', block)
+        datetime_match = re.search(r'<time[^>]*datetime="([^"]+)"', block)
+        text_match = re.search(
+            r'<div class="tgme_widget_message_text js-message_text"[^>]*>(.*?)</div>',
+            block,
+            flags=re.DOTALL,
+        )
+        if post_match is None or link_match is None or datetime_match is None:
+            continue
+
+        text_html = text_match.group(1) if text_match is not None else ""
+        transcript_text = _clean_html_text(text_html)
+        if not transcript_text:
+            continue
+
+        external_item_id = post_match.group(2)
+        published_at = _normalize_timestamp(datetime_match.group(1))
+        media_urls = _extract_media_urls(block)
+        views_text = _find_first(
+            block,
+            r'<span class="tgme_widget_message_views"[^>]*>([^<]+)</span>',
+        )
+        engagement_signals = {}
+        if views_text:
+            engagement_signals["views"] = _parse_metric_value(views_text)
+
+        source_type = "telegram_post"
+        route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
+        content_hash = _content_hash(transcript_text, media_urls)
+        source_url = link_match.group(1)
+        item = SourceItem(
+            item_id=f"telegram_{external_item_id}",
+            source_type=source_type,
+            source_name=target.source_name or f"@{target.handle.lstrip('@')}",
+            source_url=source_url,
+            external_item_id=external_item_id,
+            collected_at=collected_at,
+            published_at=published_at,
+            content_hash=content_hash,
+            dedupe_key=build_dedupe_key(
+                platform="telegram",
+                external_item_id=external_item_id,
+                source_url=source_url,
+                published_at=published_at,
+                content_hash=content_hash,
+            ),
+            audience_segment=target.audience_segment,
+            content_theme=target.content_theme,
+            raw_payload={
+                "platform": "telegram",
+                "target_url": target_url,
+                "post_ref": post_match.group(1),
+            },
+            transcript_text=transcript_text,
+            media_urls=media_urls,
+            engagement_signals=engagement_signals,
+            routing_decision=route,
+            routing_reason=reason,
+            routing_confidence=confidence,
+            processing_state="collected",
+        )
+        items.append(item)
+    return items
+
+
+def _parse_youtube_feed(
+    target: NativeSourceTarget,
+    target_url: str,
+    xml_text: str,
+    collected_at: str,
+) -> list[SourceItem]:
+    namespaces = {
+        "atom": "http://www.w3.org/2005/Atom",
+        "yt": "http://www.youtube.com/xml/schemas/2015",
+        "media": "http://search.yahoo.com/mrss/",
+    }
+    root = ElementTree.fromstring(xml_text)
+    channel_title = root.findtext("atom:title", default="", namespaces=namespaces).strip()
+    items: list[SourceItem] = []
+    for entry in root.findall("atom:entry", namespaces):
+        video_id = entry.findtext("yt:videoId", default="", namespaces=namespaces).strip()
+        if not video_id:
+            continue
+        title = entry.findtext("atom:title", default="", namespaces=namespaces).strip()
+        description = entry.findtext(
+            "media:group/media:description",
+            default="",
+            namespaces=namespaces,
+        ).strip()
+        link = entry.find("atom:link", namespaces)
+        link_url = link.get("href") if link is not None else f"https://www.youtube.com/watch?v={video_id}"
+        published_at = _normalize_timestamp(
+            entry.findtext("atom:published", default=collected_at, namespaces=namespaces)
+        )
+        thumbnail = entry.find("media:group/media:thumbnail", namespaces)
+        media_urls = [thumbnail.get("url")] if thumbnail is not None and thumbnail.get("url") else []
+
+        transcript_text = ". ".join(part for part in [title, description] if part).strip()
+        content_hash = _content_hash(transcript_text, media_urls)
+        route, reason, confidence = _infer_route("youtube_video", transcript_text, media_urls)
+        item = SourceItem(
+            item_id=f"youtube_{video_id}",
+            source_type="youtube_video",
+            source_name=target.source_name or channel_title or target.handle,
+            source_url=link_url,
+            external_item_id=video_id,
+            collected_at=collected_at,
+            published_at=published_at,
+            content_hash=content_hash,
+            dedupe_key=build_dedupe_key(
+                platform="youtube",
+                external_item_id=video_id,
+                source_url=link_url,
+                published_at=published_at,
+                content_hash=content_hash,
+            ),
+            audience_segment=target.audience_segment,
+            content_theme=target.content_theme,
+            raw_payload={
+                "platform": "youtube",
+                "target_url": target_url,
+                "title": title,
+                "description": description,
+            },
+            transcript_text=transcript_text,
+            media_urls=media_urls,
+            engagement_signals={},
+            routing_decision=route,
+            routing_reason=reason,
+            routing_confidence=confidence,
+            processing_state="collected",
+        )
+        items.append(item)
+    return items
+
+
+def _parse_html_meta_page(
+    target: NativeSourceTarget,
+    target_url: str,
+    html: str,
+    collected_at: str,
+) -> SourceItem:
+    parser = _MetadataParser()
+    parser.feed(html)
+
+    source_url = parser.meta.get("og:url") or target_url
+    title = parser.meta.get("og:title", "").strip()
+    description = parser.meta.get("og:description", "").strip()
+    transcript_text = ". ".join(part for part in [title, description] if part).strip()
+    if not transcript_text:
+        raise ValueError(f"Could not extract transcript text from {target.platform} page")
+
+    media_urls = [
+        value
+        for value in [
+            parser.meta.get("og:video"),
+            parser.meta.get("og:image"),
+        ]
+        if value
+    ]
+    published_at = _normalize_timestamp(
+        parser.meta.get("article:published_time")
+        or parser.json_ld.get("datePublished")
+        or collected_at
+    )
+    engagement_signals = _extract_interaction_signals(parser.json_ld)
+    external_item_id = _extract_external_id_from_url(source_url)
+    source_type = _infer_html_source_type(target.platform, source_url, media_urls)
+    route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
+    content_hash = _content_hash(transcript_text, media_urls)
+
+    return SourceItem(
+        item_id=f"{target.platform}_{external_item_id}",
+        source_type=source_type,
+        source_name=target.source_name or target.handle,
+        source_url=source_url,
+        external_item_id=external_item_id,
+        collected_at=collected_at,
+        published_at=published_at,
+        content_hash=content_hash,
+        dedupe_key=build_dedupe_key(
+            platform=target.platform,
+            external_item_id=external_item_id,
+            source_url=source_url,
+            published_at=published_at,
+            content_hash=content_hash,
+        ),
+        audience_segment=target.audience_segment,
+        content_theme=target.content_theme,
+        raw_payload={
+            "platform": target.platform,
+            "target_url": target_url,
+            "meta": parser.meta,
+            "json_ld": parser.json_ld,
+        },
+        transcript_text=transcript_text,
+        media_urls=media_urls,
+        engagement_signals=engagement_signals,
+        routing_decision=route,
+        routing_reason=reason,
+        routing_confidence=confidence,
+        processing_state="collected",
+    )
+
+
+class _MetadataParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.meta: dict[str, str] = {}
+        self.json_ld: dict[str, Any] = {}
+        self._in_json_ld = False
+        self._json_ld_chunks: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attr_map = {key: value or "" for key, value in attrs}
+        if tag == "meta":
+            key = attr_map.get("property") or attr_map.get("name")
+            value = attr_map.get("content", "")
+            if key:
+                self.meta[key] = value
+        elif tag == "script" and attr_map.get("type") == "application/ld+json":
+            self._in_json_ld = True
+            self._json_ld_chunks = []
+
+    def handle_data(self, data: str) -> None:
+        if self._in_json_ld:
+            self._json_ld_chunks.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "script" and self._in_json_ld:
+            self._in_json_ld = False
+            raw_json = "".join(self._json_ld_chunks).strip()
+            if not raw_json:
+                return
+            try:
+                decoded = json.loads(raw_json)
+            except json.JSONDecodeError:
+                return
+            if isinstance(decoded, dict):
+                self.json_ld = decoded
+            elif isinstance(decoded, list):
+                merged = next((item for item in decoded if isinstance(item, dict)), None)
+                if isinstance(merged, dict):
+                    self.json_ld = merged
+
+
+def _default_fetcher(url: str, timeout_seconds: float) -> str:
+    with urlopen(url, timeout=timeout_seconds) as response:
+        return response.read().decode("utf-8")
+
+
+def _clean_html_text(text_html: str) -> str:
+    with_breaks = re.sub(r"<br\s*/?>", "\n", text_html, flags=re.IGNORECASE)
+    without_tags = re.sub(r"<[^>]+>", " ", with_breaks)
+    normalized = unescape(without_tags)
+    normalized = re.sub(r"[ \t]+", " ", normalized)
+    normalized = re.sub(r"\n\s+", "\n", normalized)
+    return normalized.strip()
+
+
+def _extract_media_urls(block_or_html: str) -> list[str]:
+    urls = re.findall(r'(?:src|href)="(https://[^"]+)"', block_or_html)
+    return [
+        url
+        for url in urls
+        if any(url.lower().endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp", ".mp4"))
+    ]
+
+
+def _parse_metric_value(raw_value: str) -> int:
+    normalized = raw_value.strip().upper().replace(",", ".")
+    multiplier = 1
+    if normalized.endswith("K"):
+        multiplier = 1000
+        normalized = normalized[:-1]
+    elif normalized.endswith("M"):
+        multiplier = 1_000_000
+        normalized = normalized[:-1]
+
+    try:
+        return int(float(normalized) * multiplier)
+    except ValueError:
+        return 0
+
+
+def _content_hash(transcript_text: str, media_urls: list[str]) -> str:
+    payload = f"{transcript_text}|{'|'.join(media_urls)}"
+    return sha256(payload.encode("utf-8")).hexdigest()[:16]
+
+
+def _infer_route(source_type: str, transcript_text: str, media_urls: list[str]) -> tuple[str, str, float]:
+    words = len(transcript_text.split())
+    has_video_signal = bool(media_urls) or any(token in source_type for token in ("video", "reel", "tiktok"))
+    if has_video_signal and words >= 8:
+        return "both", "video signal with textual depth", 0.92
+    if has_video_signal:
+        return "workflow_a", "video-native source", 0.88
+    if words >= 8:
+        return "workflow_b", "textual depth from native collector", 0.84
+    return "drop", "insufficient signal from native collector", 0.55
+
+
+def _normalize_timestamp(value: str) -> str:
+    normalized = value.strip()
+    if normalized.endswith("+00:00"):
+        return normalized.replace("+00:00", "Z")
+    return normalized
+
+
+def _extract_external_id_from_url(url: str) -> str:
+    clean = url.split("?", 1)[0].rstrip("/")
+    parts = [part for part in clean.split("/") if part]
+    if not parts:
+        return sha256(url.encode("utf-8")).hexdigest()[:12]
+    if parts[-2:] and parts[-2] in {"reel", "video", "posts", "post"}:
+        return parts[-1]
+    return parts[-1]
+
+
+def _infer_html_source_type(platform: NativePlatform, source_url: str, media_urls: list[str]) -> str:
+    normalized_url = source_url.lower()
+    if platform == "instagram":
+        if "/reel/" in normalized_url:
+            return "instagram_reel"
+        return "instagram_post"
+    if platform == "linkedin":
+        if media_urls and any(url.lower().endswith(".mp4") for url in media_urls):
+            return "linkedin_video"
+        return "linkedin_post"
+    if platform == "tiktok":
+        return "tiktok_video"
+    return f"{platform}_post"
+
+
+def _extract_interaction_signals(json_ld: dict[str, Any]) -> dict[str, int]:
+    interaction = json_ld.get("interactionStatistic")
+    if isinstance(interaction, list):
+        for item in interaction:
+            if isinstance(item, dict) and "userInteractionCount" in item:
+                return {"interactions": int(item["userInteractionCount"])}
+    if isinstance(interaction, dict) and "userInteractionCount" in interaction:
+        return {"interactions": int(interaction["userInteractionCount"])}
+    return {}
+
+
+def _find_first(text: str, pattern: str) -> str | None:
+    match = re.search(pattern, text, flags=re.DOTALL)
+    if match is None:
+        return None
+    return match.group(1).strip()
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
