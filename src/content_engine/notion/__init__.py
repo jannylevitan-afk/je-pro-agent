@@ -14,6 +14,15 @@ from content_engine.notion.payloads import (
     build_orchestration_event_properties,
     build_source_properties,
 )
+from content_engine.notion.sync import (
+    ApprovalNotionTargets,
+    ApprovalSyncResult,
+    create_calendar_item,
+    create_orchestration_event,
+    sync_approval_result,
+    upsert_brief,
+    upsert_draft,
+)
 
 
 __all__ = [
@@ -29,4 +38,11 @@ __all__ = [
     "build_feedback_signal_properties",
     "build_orchestration_event_properties",
     "build_source_properties",
+    "ApprovalNotionTargets",
+    "ApprovalSyncResult",
+    "create_calendar_item",
+    "create_orchestration_event",
+    "sync_approval_result",
+    "upsert_brief",
+    "upsert_draft",
 ]
