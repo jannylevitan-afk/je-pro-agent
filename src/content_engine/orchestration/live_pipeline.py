@@ -41,21 +41,10 @@ from content_engine.services.workflow_b import (
     gate_idea_candidate,
     normalize_source_item,
 )
+from content_engine.orchestration.targets import LivePipelineTargets
 
 
 Route = Literal["workflow_a", "workflow_b", "both", "drop"]
-
-
-@dataclass(frozen=True, slots=True)
-class LivePipelineTargets:
-    sources_database_id: str
-    insights_database_id: str
-    ideas_database_id: str
-    briefs_database_id: str
-    drafts_database_id: str
-    events_database_id: str
-    scripts_database_id: str
-    filming_cards_database_id: str
 
 
 @dataclass(frozen=True, slots=True)

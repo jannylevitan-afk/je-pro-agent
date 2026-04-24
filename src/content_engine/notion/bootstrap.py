@@ -13,7 +13,7 @@ from content_engine.notion.schema_defs import (
     SCRIPTS_QUEUE_SCHEMA,
     SOURCES_DB_SCHEMA,
 )
-from content_engine.orchestration.live_pipeline import LivePipelineTargets
+from content_engine.orchestration.targets import LivePipelineTargets
 
 
 class NotionBootstrapClient(Protocol):

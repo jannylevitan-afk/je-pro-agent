@@ -1,3 +1,8 @@
+from content_engine.runtime.dry_run import (
+    InMemoryNotionClient,
+    LocalPipelineDryRunReport,
+    run_local_pipeline_dry_run,
+)
 from content_engine.runtime.live_run import (
     HTTPJsonSourceCollector,
     StaticSourceCollector,
@@ -12,6 +17,8 @@ from content_engine.runtime.settings import RuntimeSettings, load_runtime_settin
 
 __all__ = [
     "HTTPJsonSourceCollector",
+    "InMemoryNotionClient",
+    "LocalPipelineDryRunReport",
     "StaticSourceCollector",
     "RuntimeSettings",
     "build_notion_client",
@@ -19,5 +26,6 @@ __all__ = [
     "build_source_collector",
     "load_runtime_settings",
     "resolve_anthropic_model",
+    "run_local_pipeline_dry_run",
     "run_configured_live_pipeline",
 ]
