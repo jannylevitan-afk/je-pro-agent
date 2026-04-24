@@ -1,4 +1,4 @@
-from content_engine.notion.schema_defs import CONTENT_CALENDAR_SCHEMA, DRAFTS_DB_SCHEMA, ORCHESTRATION_EVENT_SCHEMA
+from content_engine.notion.schema_defs import BRIEFS_DB_SCHEMA, CONTENT_CALENDAR_SCHEMA, DRAFTS_DB_SCHEMA, ORCHESTRATION_EVENT_SCHEMA
 
 
 def test_drafts_schema_contains_block4_review_fields() -> None:
@@ -17,3 +17,9 @@ def test_orchestration_event_schema_exists() -> None:
     assert ORCHESTRATION_EVENT_SCHEMA["Event name"] == "select"
     assert ORCHESTRATION_EVENT_SCHEMA["Entity type"] == "select"
     assert ORCHESTRATION_EVENT_SCHEMA["Payload ref"] == "rich_text"
+
+
+def test_briefs_schema_contains_revision_fields() -> None:
+    assert "Brief ID" in BRIEFS_DB_SCHEMA
+    assert "Workflow stage" in BRIEFS_DB_SCHEMA
+    assert "Linked draft" in BRIEFS_DB_SCHEMA

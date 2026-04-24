@@ -1,6 +1,7 @@
 import pytest
 
 from content_engine.models.approval import CalendarItem, DraftRecord, OrchestrationEvent, ReviewAction
+from content_engine.models.workflow_b import BriefRecord
 
 
 def test_draft_record_keeps_review_and_bilingual_metadata() -> None:
@@ -39,6 +40,15 @@ def test_review_action_requires_notes_for_needs_rewrite() -> None:
         )
 
 
+def test_review_action_requires_rewritten_text_for_needs_rewrite() -> None:
+    with pytest.raises(ValueError, match="rewritten_text_ru"):
+        ReviewAction(
+            decision="needs_rewrite",
+            notes="Needs a rewrite.",
+            decided_at="2026-04-24T09:00:00Z",
+        )
+
+
 def test_calendar_item_requires_english_publish_version_for_linkedin() -> None:
     with pytest.raises(ValueError, match="English"):
         CalendarItem(
@@ -71,3 +81,19 @@ def test_orchestration_event_keeps_stable_event_name() -> None:
     )
 
     assert event.event_name == "calendar_item_scheduled"
+
+
+def test_brief_record_tracks_revision_needed_state() -> None:
+    brief = BriefRecord(
+        brief_id="brief_001",
+        title="Wellness architecture as investor signal",
+        audience_portrait="developer_investor",
+        platform_lane="linkedin_b2b",
+        language_mode="ru",
+        funnel_role="authority",
+        workflow_stage="revision_needed",
+        review_decision="pending",
+        linked_draft_id="dr_001",
+    )
+
+    assert brief.workflow_stage == "revision_needed"

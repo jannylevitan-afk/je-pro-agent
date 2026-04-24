@@ -26,6 +26,22 @@ DRAFTS_DB_SCHEMA = {
     "Archived": "checkbox",
 }
 
+BRIEFS_DB_SCHEMA = {
+    "Brief ID": "rich_text",
+    "Title": "title",
+    "Audience portrait": "select",
+    "Platform lane": "select",
+    "Language mode": "select",
+    "Funnel role": "select",
+    "Workflow stage": "select",
+    "Review decision": "select",
+    "Linked draft": "relation",
+    "Revision requested at": "date",
+    "Review notes": "rich_text",
+    "Source rigor": "select",
+    "Reference sources": "rich_text",
+}
+
 CONTENT_CALENDAR_SCHEMA = {
     "Platform": "select",
     "Platform lane": "select",
@@ -69,6 +85,38 @@ MONITORING_RUN_SCHEMA = {
     "Retry count": "number",
     "Staleness hours": "number",
     "Run status": "select",
+}
+
+SOURCES_DB_SCHEMA = {
+    "Title": "title",
+    "Platform": "select",
+    "Raw text": "rich_text",
+    "External item ID": "rich_text",
+    "Dedupe key": "rich_text",
+    "Content hash": "rich_text",
+    "Ingestion status": "select",
+}
+
+INSIGHTS_DB_SCHEMA = {
+    "Topic": "rich_text",
+    "Angle": "rich_text",
+    "Audience portrait": "select",
+    "Narrative type": "select",
+    "Emotional trigger": "rich_text",
+    "Reuse score": "number",
+}
+
+IDEAS_DB_SCHEMA = {
+    "Title": "title",
+    "Platform": "select",
+    "Platform lane": "select",
+    "Language mode": "select",
+    "Funnel role": "select",
+    "Audience portrait": "select",
+    "Emotional hook": "rich_text",
+    "Desired reaction": "rich_text",
+    "Gate passed": "checkbox",
+    "Status": "select",
 }
 
 ORCHESTRATION_EVENT_SCHEMA = {

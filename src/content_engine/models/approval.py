@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from content_engine.models.workflow_b import DraftBundle, FunnelRole, Language, Platform, PlatformLane
+from content_engine.models.workflow_b import BriefRecord, DraftBundle, FunnelRole, Language, Platform, PlatformLane
 
 
 LanguageMode = Literal["ru", "en"]
@@ -56,11 +56,15 @@ class ReviewAction(BaseModel):
     decision: ReviewActionDecision
     decided_at: str
     notes: str | None = None
+    rewritten_text_ru: str | None = None
+    rewritten_text_en: str | None = None
 
     @model_validator(mode="after")
     def validate_notes_requirement(self) -> "ReviewAction":
         if self.decision == "needs_rewrite" and not self.notes:
             raise ValueError("needs_rewrite requires review notes")
+        if self.decision == "needs_rewrite" and not self.rewritten_text_ru:
+            raise ValueError("needs_rewrite requires rewritten_text_ru")
         return self
 
 
@@ -116,4 +120,5 @@ class ApprovalResult(BaseModel):
     updated_draft: DraftRecord
     next_draft: DraftRecord | None = None
     calendar_item: CalendarItem | None = None
+    brief_update: BriefRecord | None = None
     events: list[OrchestrationEvent]

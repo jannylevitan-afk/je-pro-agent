@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 Platform = Literal["instagram", "linkedin", "telegram"]
@@ -110,4 +110,29 @@ class ContentBrief(BaseModel):
                 raise ValueError("LinkedIn briefs must keep Russian working language")
             if self.publish_language != "en":
                 raise ValueError("LinkedIn briefs must publish in English")
+        if self.source_rigor in {"expert", "market-critical"}:
+            if not 3 <= len(self.reference_sources) <= 5:
+                raise ValueError("expert and market-critical briefs require 3 to 5 reference sources")
         return self
+
+
+BriefWorkflowStage = Literal["brief_ready", "revision_needed", "draft_in_progress", "done"]
+BriefReviewDecision = Literal["pending", "approved", "needs_rewrite", "re_brief", "deleted"]
+
+
+class BriefRecord(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    brief_id: str
+    title: str
+    audience_portrait: str
+    platform_lane: PlatformLane
+    language_mode: Language
+    funnel_role: FunnelRole
+    workflow_stage: BriefWorkflowStage
+    review_decision: BriefReviewDecision
+    linked_draft_id: str | None = None
+    revision_requested_at: str | None = None
+    review_notes: str | None = None
+    source_rigor: SourceRigor = "standard"
+    reference_sources: list[str] = Field(default_factory=list)

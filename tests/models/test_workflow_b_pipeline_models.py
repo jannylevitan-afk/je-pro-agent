@@ -36,7 +36,11 @@ def test_content_brief_keeps_linkedin_language_policy() -> None:
         engagement_objective="Developer replies",
         fact_pack=["verified_public:wellness"],
         source_rigor="expert",
-        reference_sources=["https://example.com/report"],
+        reference_sources=[
+            "https://example.com/report-1",
+            "https://example.com/report-2",
+            "https://example.com/report-3",
+        ],
     )
 
     assert brief.publish_language == "en"

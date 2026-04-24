@@ -5,6 +5,7 @@ from content_engine.models.approval import (
     OrchestrationEvent,
     ReviewAction,
 )
+from content_engine.models.workflow_b import BriefRecord
 
 
 def submit_for_review(
@@ -86,6 +87,8 @@ def apply_review_action(
                 "archived": True,
             }
         )
+        if draft.platform_lane == "linkedin_b2b" and not action.rewritten_text_en:
+            raise ValueError("LinkedIn rewrite requires rewritten_text_en")
         next_draft = archived_draft.model_copy(
             update={
                 "draft_id": _next_draft_id(archived_draft),
@@ -98,6 +101,10 @@ def apply_review_action(
                 "approval_decided_at": None,
                 "linked_calendar_id": None,
                 "archived": False,
+                "draft_text_ru": action.rewritten_text_ru,
+                "draft_text_en": action.rewritten_text_en
+                if action.rewritten_text_en is not None
+                else archived_draft.draft_text_en,
             }
         )
         events.append(
@@ -117,6 +124,19 @@ def apply_review_action(
         )
 
     if action.decision == "re_brief":
+        brief_update = BriefRecord(
+            brief_id=draft.linked_brief_id or f"brief_{draft.draft_id}",
+            title=draft.title,
+            audience_portrait=draft.audience_portrait,
+            platform_lane=draft.platform_lane,
+            language_mode=draft.language_mode,
+            funnel_role=draft.funnel_role,
+            workflow_stage="revision_needed",
+            review_decision="pending",
+            linked_draft_id=draft.draft_id,
+            revision_requested_at=action.decided_at,
+            review_notes=action.notes,
+        )
         archived_draft = reviewed_draft.model_copy(
             update={
                 "workflow_stage": "archived",
@@ -135,6 +155,7 @@ def apply_review_action(
         )
         return ApprovalResult(
             updated_draft=archived_draft,
+            brief_update=brief_update,
             events=events,
         )
 

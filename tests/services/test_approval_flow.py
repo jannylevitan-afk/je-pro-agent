@@ -71,6 +71,8 @@ def test_apply_review_action_rewrite_creates_next_version() -> None:
         ReviewAction(
             decision="needs_rewrite",
             notes="Сделай открытие более живым и менее формальным.",
+            rewritten_text_ru="Русская мастер-версия после переписывания",
+            rewritten_text_en="English publish version after rewrite",
             decided_at="2026-04-24T09:15:00Z",
         ),
     )
@@ -82,7 +84,7 @@ def test_apply_review_action_rewrite_creates_next_version() -> None:
     assert result.next_draft.parent_draft_id == "dr_001"
     assert result.next_draft.workflow_stage == "awaiting_review"
     assert result.next_draft.review_decision == "pending"
-    assert result.next_draft.draft_text_ru == "Русская мастер-версия"
+    assert result.next_draft.draft_text_ru == "Русская мастер-версия после переписывания"
     assert [event.event_name for event in result.events] == [
         "draft_reviewed",
         "rewrite_requested",
@@ -107,10 +109,34 @@ def test_apply_review_action_re_brief_emits_brief_revision_event() -> None:
     assert result.updated_draft.review_decision == "re_brief"
     assert result.next_draft is None
     assert result.calendar_item is None
+    assert result.brief_update is not None
+    assert result.brief_update.workflow_stage == "revision_needed"
     assert [event.event_name for event in result.events] == [
         "draft_reviewed",
         "brief_revision_requested",
     ]
+
+
+def test_apply_review_action_rewrite_requires_english_version_for_linkedin() -> None:
+    submitted_draft, _ = submit_for_review(
+        make_linkedin_draft(),
+        submitted_at="2026-04-24T09:00:00Z",
+    )
+
+    try:
+        apply_review_action(
+            submitted_draft,
+            ReviewAction(
+                decision="needs_rewrite",
+                notes="Make it more direct.",
+                rewritten_text_ru="Русская мастер-версия после переписывания",
+                decided_at="2026-04-24T09:15:00Z",
+            ),
+        )
+    except ValueError as exc:
+        assert "rewritten_text_en" in str(exc)
+    else:
+        raise AssertionError("Expected LinkedIn rewrite to require an English version")
 
 
 def test_apply_review_action_deleted_archives_draft() -> None:
