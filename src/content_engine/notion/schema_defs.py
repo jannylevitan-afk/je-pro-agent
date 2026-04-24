@@ -82,3 +82,35 @@ ORCHESTRATION_EVENT_SCHEMA = {
     "Calendar item ID": "relation",
     "Payload ref": "rich_text",
 }
+
+SCRIPTS_QUEUE_SCHEMA = {
+    "Title": "title",
+    "Hook": "rich_text",
+    "Platform": "select",
+    "Script text": "rich_text",
+    "Filming priority": "number",
+    "Status": "select",
+}
+
+FILMING_CARDS_SCHEMA = {
+    "Linked script": "relation",
+    "Shoot date": "date",
+    "Filmed": "checkbox",
+    "Raw file link": "url",
+}
+
+VIDEO_PUBLISH_CALENDAR_SCHEMA = {
+    "Platform": "select",
+    "Publish date": "date",
+    "Caption": "rich_text",
+    "Status": "select",
+}
+
+VIDEO_PERFORMANCE_SCHEMA = {
+    "Linked video": "relation",
+    "Views": "number",
+    "Saves": "number",
+    "Hook type": "select",
+    "Performance tier": "select",
+    "Fed back to RA": "checkbox",
+}
