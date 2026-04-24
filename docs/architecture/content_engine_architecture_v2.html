@@ -1,0 +1,284 @@
+
+<h2 class="sr-only">Content Engine v2 — Research Agent собирает всё, воркфлоу принимают данные и обрабатывают</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+.wrap{padding:20px 4px 24px;font-family:var(--font-mono);font-size:12px;color:var(--color-text-primary);}
+.ra{border:1px solid #7F77DD;border-radius:12px;padding:14px 16px;background:#EEEDFE;}
+@media(prefers-color-scheme:dark){.ra{background:#26215C;border-color:#534AB7;}}
+.ra-badge{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#534AB7;margin-bottom:6px;}
+@media(prefers-color-scheme:dark){.ra-badge{color:#AFA9EC;}}
+.ra-title{font-size:15px;font-weight:500;color:#3C3489;margin-bottom:4px;}
+@media(prefers-color-scheme:dark){.ra-title{color:#CECBF6;}}
+.ra-desc{font-size:11px;color:#534AB7;margin-bottom:10px;line-height:1.5;}
+@media(prefers-color-scheme:dark){.ra-desc{color:#AFA9EC;}}
+.ra-out{display:flex;gap:8px;margin-top:4px;}
+.ra-out-item{flex:1;border:0.5px dashed #AFA9EC;border-radius:6px;padding:6px 8px;font-size:10px;}
+@media(prefers-color-scheme:dark){.ra-out-item{border-color:#534AB7;}}
+.ra-out-label{font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;}
+.ra-out-a .ra-out-label{color:#854F0B;}
+@media(prefers-color-scheme:dark){.ra-out-a .ra-out-label{color:#EF9F27;}}
+.ra-out-b .ra-out-label{color:#0F6E56;}
+@media(prefers-color-scheme:dark){.ra-out-b .ra-out-label{color:#5DCAA5;}}
+.ra-out-text{color:var(--color-text-secondary);line-height:1.4;}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;}
+.src-tag{font-size:10px;border:0.5px solid #AFA9EC;border-radius:4px;padding:2px 8px;color:#534AB7;background:rgba(127,119,221,0.08);}
+@media(prefers-color-scheme:dark){.src-tag{border-color:#534AB7;color:#AFA9EC;background:rgba(83,74,183,0.2);}}
+
+.split-label{text-align:center;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:10px 0 4px;}
+.arrow-down{text-align:center;color:var(--color-text-tertiary);font-size:18px;line-height:1;margin:2px 0;}
+.split-row{display:flex;gap:10px;}
+.col{flex:1;min-width:0;}
+.col-header{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;border-radius:8px 8px 0 0;margin-bottom:6px;text-align:center;}
+.col-vid .col-header{background:#FAC775;color:#633806;}
+@media(prefers-color-scheme:dark){.col-vid .col-header{background:#412402;color:#FAC775;}}
+.col-cf .col-header{background:#9FE1CB;color:#085041;}
+@media(prefers-color-scheme:dark){.col-cf .col-header{background:#04342C;color:#9FE1CB;}}
+
+/* Intake step — special first step receiving from RA */
+.intake-step{border:1px dashed;border-radius:8px;padding:8px 10px;margin-bottom:5px;}
+.col-vid .intake-step{border-color:#EF9F27;background:rgba(250,199,117,0.12);}
+@media(prefers-color-scheme:dark){.col-vid .intake-step{border-color:#854F0B;background:rgba(65,36,2,0.5);}}
+.col-cf .intake-step{border-color:#1D9E75;background:rgba(159,225,203,0.12);}
+@media(prefers-color-scheme:dark){.col-cf .intake-step{border-color:#0F6E56;background:rgba(4,52,44,0.5);}}
+.intake-badge{font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;}
+.col-vid .intake-badge{color:#854F0B;}
+@media(prefers-color-scheme:dark){.col-vid .intake-badge{color:#EF9F27;}}
+.col-cf .intake-badge{color:#0F6E56;}
+@media(prefers-color-scheme:dark){.col-cf .intake-badge{color:#5DCAA5;}}
+
+.step{border:0.5px solid;border-radius:8px;padding:8px 10px;margin-bottom:5px;position:relative;}
+.col-vid .step{border-color:#FAC775;background:#FAEEDA;}
+@media(prefers-color-scheme:dark){.col-vid .step{border-color:#633806;background:#412402;}}
+.col-cf .step{border-color:#9FE1CB;background:#E1F5EE;}
+@media(prefers-color-scheme:dark){.col-cf .step{border-color:#085041;background:#04342C;}}
+
+.step-num{font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.col-vid .step-num{color:#854F0B;}
+@media(prefers-color-scheme:dark){.col-vid .step-num{color:#EF9F27;}}
+.col-cf .step-num{color:#0F6E56;}
+@media(prefers-color-scheme:dark){.col-cf .step-num{color:#5DCAA5;}}
+.step-name{font-size:12px;font-weight:500;margin-bottom:2px;}
+.col-vid .step-name{color:#412402;}
+@media(prefers-color-scheme:dark){.col-vid .step-name{color:#FAC775;}}
+.col-cf .step-name{color:#04342C;}
+@media(prefers-color-scheme:dark){.col-cf .step-name{color:#9FE1CB;}}
+.step-slug{font-size:10px;margin-bottom:3px;}
+.col-vid .step-slug{color:#854F0B;}
+@media(prefers-color-scheme:dark){.col-vid .step-slug{color:#EF9F27;}}
+.col-cf .step-slug{color:#0F6E56;}
+@media(prefers-color-scheme:dark){.col-cf .step-slug{color:#5DCAA5;}}
+.step-desc{font-size:10px;color:var(--color-text-secondary);line-height:1.45;}
+.gate{display:inline-block;font-size:8px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;border-radius:3px;padding:1px 6px;margin-bottom:3px;background:#FAECE7;color:#993C1D;border:0.5px solid #F5C4B3;}
+@media(prefers-color-scheme:dark){.gate{background:#4A1B0C;color:#F0997B;border-color:#712B13;}}
+.human{display:inline-block;font-size:8px;letter-spacing:.04em;border-radius:3px;padding:1px 6px;margin-bottom:3px;background:#F1EFE8;color:#5F5E5A;border:0.5px solid #D3D1C7;}
+@media(prefers-color-scheme:dark){.human{background:#2C2C2A;color:#B4B2A9;border-color:#444441;}}
+.sarr{text-align:center;font-size:13px;color:var(--color-text-tertiary);line-height:1.2;margin:1px 0;}
+
+.merge-label{text-align:center;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:10px 0 4px;}
+.notion-hub{border:1px solid #D3D1C7;border-radius:12px;overflow:hidden;}
+@media(prefers-color-scheme:dark){.notion-hub{border-color:#444441;}}
+.notion-header{background:#F1EFE8;padding:10px 14px;display:flex;align-items:center;gap:8px;}
+@media(prefers-color-scheme:dark){.notion-header{background:#2C2C2A;}}
+.notion-title{font-size:13px;font-weight:500;color:#2C2C2A;}
+@media(prefers-color-scheme:dark){.notion-title{color:#D3D1C7;}}
+.notion-sub{font-size:10px;color:#5F5E5A;margin-left:auto;}
+@media(prefers-color-scheme:dark){.notion-sub{color:#888780;}}
+.notion-body{display:flex;gap:0;}
+.notion-section{flex:1;padding:12px 12px 14px;min-width:0;}
+.notion-section:first-child{border-right:0.5px solid #D3D1C7;}
+@media(prefers-color-scheme:dark){.notion-section:first-child{border-right-color:#444441;}}
+.ns-badge{font-size:8px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.ns-badge-vid{color:#854F0B;}
+@media(prefers-color-scheme:dark){.ns-badge-vid{color:#EF9F27;}}
+.ns-badge-cf{color:#0F6E56;}
+@media(prefers-color-scheme:dark){.ns-badge-cf{color:#5DCAA5;}}
+.ns-dot-vid{width:6px;height:6px;border-radius:50%;background:#EF9F27;flex-shrink:0;}
+.ns-dot-cf{width:6px;height:6px;border-radius:50%;background:#5DCAA5;flex-shrink:0;}
+.ns-db{border:0.5px solid #D3D1C7;border-radius:6px;padding:5px 8px;margin-bottom:4px;}
+@media(prefers-color-scheme:dark){.ns-db{border-color:#444441;}}
+.ns-db-title{font-size:10px;font-weight:500;color:var(--color-text-primary);margin-bottom:1px;}
+.ns-db-fields{font-size:9px;color:var(--color-text-tertiary);line-height:1.4;}
+.ns-db-vid{background:#FAEEDA;border-color:#FAC775;}
+@media(prefers-color-scheme:dark){.ns-db-vid{background:#412402;border-color:#633806;}}
+.ns-db-cf{background:#E1F5EE;border-color:#9FE1CB;}
+@media(prefers-color-scheme:dark){.ns-db-cf{background:#04342C;border-color:#085041;}}
+.feedback-section{border-top:0.5px solid #D3D1C7;padding:10px 14px;background:#F1EFE8;}
+@media(prefers-color-scheme:dark){.feedback-section{border-top-color:#444441;background:#2C2C2A;}}
+.fb-title{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#5F5E5A;margin-bottom:6px;}
+@media(prefers-color-scheme:dark){.fb-title{color:#888780;}}
+.fb-row{display:flex;gap:8px;}
+.fb-item{flex:1;font-size:10px;color:var(--color-text-secondary);border:0.5px dashed #B4B2A9;border-radius:6px;padding:5px 8px;line-height:1.4;}
+@media(prefers-color-scheme:dark){.fb-item{border-color:#5F5E5A;}}
+.fb-item strong{color:var(--color-text-primary);font-weight:500;}
+</style>
+
+<div class="wrap">
+
+  <!-- RESEARCH AGENT -->
+  <div class="ra">
+    <div class="ra-badge">◈ Research Agent — Layer 0 · единственный источник сбора данных</div>
+    <div class="ra-title">Поиск, анализ, маршрутизация</div>
+    <div class="ra-desc">Сканирует заданные аккаунты, видео, каналы, рынок — ежедневно. Все сбор и поиск происходят здесь. Воркфлоу данные не ищут — они только принимают и обрабатывают.</div>
+    <div class="tags">
+      <span class="src-tag">Telegram channels</span>
+      <span class="src-tag">Instagram pages</span>
+      <span class="src-tag">LinkedIn founders</span>
+      <span class="src-tag">YouTube / TikTok competitors</span>
+      <span class="src-tag">Internal notes + voice</span>
+    </div>
+    <div class="ra-out" style="margin-top:10px;">
+      <div class="ra-out-item ra-out-a">
+        <div class="ra-out-label">→ Workflow A</div>
+        <div class="ra-out-text">video refs · competitor scripts · trending hooks · links</div>
+      </div>
+      <div class="ra-out-item ra-out-b">
+        <div class="ra-out-label">→ Workflow B</div>
+        <div class="ra-out-text">raw text signals · market insights · founder angles</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="split-label">↓&nbsp;&nbsp;&nbsp;&nbsp;передаёт данные в два независимых воркфлоу&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+  <div class="arrow-down">↙&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↘</div>
+
+  <div class="split-row">
+
+    <!-- WORKFLOW A: VIDEO -->
+    <div class="col col-vid">
+      <div class="col-header">Workflow A — Video</div>
+
+      <div class="intake-step">
+        <div class="intake-badge">↓ receives from Research Agent</div>
+        <div class="step-name">Step 1 — Develop Hooks</div>
+        <div class="step-slug">/video-hooks</div>
+        <div class="step-desc">Принимает видео-данные от RA. 1 тема → 5 углов → лучший → хук написан.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Step 2 · Script</div>
+        <div class="step-name">Content Scripter</div>
+        <div class="step-slug">/content-scripter</div>
+        <div class="step-desc">Скрипт по proven-паттернам. Факт-чек перед съёмкой.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="human">👤 Human step</div>
+        <div class="step-num">Step 3 · Film</div>
+        <div class="step-name">Film Today</div>
+        <div class="step-slug">/film-today</div>
+        <div class="step-desc">Ранжированные карточки съёмки. Человек снимает.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="human">👤 Human step</div>
+        <div class="step-num">Step 4 · Publish</div>
+        <div class="step-name">Post Content</div>
+        <div class="step-slug">/post-content</div>
+        <div class="step-desc">Расписание: IG, TikTok, YouTube, LinkedIn. Публикация вручную.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Step 5 · Measure</div>
+        <div class="step-name">Content Analyst</div>
+        <div class="step-slug">/content-analyst</div>
+        <div class="step-desc">Статистика ежедневно. Top hooks + topics → feedback в RA.</div>
+      </div>
+    </div>
+
+    <!-- WORKFLOW B: CONTENT FARM -->
+    <div class="col col-cf">
+      <div class="col-header">Workflow B — Content Farm</div>
+
+      <div class="intake-step">
+        <div class="intake-badge">↓ receives from Research Agent</div>
+        <div class="step-name">Phase 1 — Intake + Structure</div>
+        <div class="step-desc">Принимает raw data от RA. Дедупликация, нормализация, структурная source note.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Phase 2 · Extract</div>
+        <div class="step-name">Insight Extraction</div>
+        <div class="step-desc">AI извлекает: тему, угол, emotional trigger, fit аудитории → Insight Card.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="gate">⬡ Gate A·B·C</div>
+        <div class="step-num">Phase 3 · Ideas</div>
+        <div class="step-name">Idea Generation</div>
+        <div class="step-desc">1 инсайт → 3–5 идей. Без ценности или эмоции — идея умирает здесь.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Phase 4 · Brief</div>
+        <div class="step-name">Content Brief</div>
+        <div class="step-desc">Аудитория, платформа, хук, CTA, тон, длина — полный бриф.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Phase 5 · Draft</div>
+        <div class="step-name">Draft Generation</div>
+        <div class="step-desc">AI пишет первый черновик. LinkedIn = journey arc. IG = hook→tension→payoff.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="step-num">Phase 6 · Edit</div>
+        <div class="step-name">AI Editing Layer</div>
+        <div class="step-desc">Специализированный AI-редактор: тайтен, хук, ясность. Голос сохраняется.</div>
+      </div>
+      <div class="sarr">↓</div>
+
+      <div class="step">
+        <div class="gate">⬡ Gate D·E</div>
+        <div class="human">👤 Human step</div>
+        <div class="step-num">Phase 7 · Review</div>
+        <div class="step-name">Human Review</div>
+        <div class="step-desc">Approve / rewrite / delete / re-brief. Звучит как основатель?</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="merge-label">↓&nbsp;&nbsp;&nbsp;оба воркфлоу → Notion&nbsp;&nbsp;&nbsp;↓</div>
+
+  <div class="notion-hub">
+    <div class="notion-header">
+      <span style="font-size:14px;">◻</span>
+      <span class="notion-title">Notion — Content Operating Hub</span>
+      <span class="notion-sub">publishing is manual · system prepares only</span>
+    </div>
+    <div class="notion-body">
+      <div class="notion-section">
+        <div class="ns-badge ns-badge-vid"><span class="ns-dot-vid"></span>Workflow A · Video</div>
+        <div class="ns-db ns-db-vid"><div class="ns-db-title">Scripts Queue</div><div class="ns-db-fields">hook · script text · platform · priority · status</div></div>
+        <div class="ns-db ns-db-vid"><div class="ns-db-title">Filming Cards</div><div class="ns-db-fields">ranked order · linked script · shoot date · filmed?</div></div>
+        <div class="ns-db ns-db-vid"><div class="ns-db-title">Publish Calendar</div><div class="ns-db-fields">platform · publish date · caption · status</div></div>
+        <div class="ns-db ns-db-vid"><div class="ns-db-title">Performance Analytics</div><div class="ns-db-fields">views · saves · hook type · top topics → RA</div></div>
+      </div>
+      <div class="notion-section">
+        <div class="ns-badge ns-badge-cf"><span class="ns-dot-cf"></span>Workflow B · Content Farm</div>
+        <div class="ns-db ns-db-cf"><div class="ns-db-title">Sources DB</div><div class="ns-db-fields">platform · source type · raw text · status</div></div>
+        <div class="ns-db ns-db-cf"><div class="ns-db-title">Insights DB</div><div class="ns-db-fields">topic · angle · audience · narrative type · reuse score</div></div>
+        <div class="ns-db ns-db-cf"><div class="ns-db-title">Ideas DB</div><div class="ns-db-fields">title · platform · hook · desired reaction · status</div></div>
+        <div class="ns-db ns-db-cf"><div class="ns-db-title">Briefs + Drafts DB</div><div class="ns-db-fields">key points · CTA · draft text · AI edited · version</div></div>
+        <div class="ns-db ns-db-cf"><div class="ns-db-title">Content Calendar</div><div class="ns-db-fields">final text · platform · pillar · publish date · approval</div></div>
+      </div>
+    </div>
+    <div class="feedback-section">
+      <div class="fb-title">↑ feedback loops → Research Agent</div>
+      <div class="fb-row">
+        <div class="fb-item"><strong>Video:</strong> top hooks + topics → RA adjusts search params</div>
+        <div class="fb-item"><strong>Content farm:</strong> best-performing themes → boost in idea generation</div>
+      </div>
+    </div>
+  </div>
+
+</div>

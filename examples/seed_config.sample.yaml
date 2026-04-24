@@ -1,0 +1,9 @@
+audience_segments:
+  - name: developer_investor
+    route_to: workflow_b
+    seed_profiles:
+      - platform: instagram
+        handle: artur_mkhitaryan_
+content_theme_sources:
+  - name: boutique_hotels
+    route_to: both

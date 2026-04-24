@@ -1,0 +1,63 @@
+DRAFTS_DB_SCHEMA = {
+    "Title": "title",
+    "Draft text RU": "rich_text",
+    "Draft text EN": "rich_text",
+    "Platform": "select",
+    "Audience portrait": "select",
+    "Voice register": "select",
+    "Version": "number",
+    "Working language": "select",
+    "Publish language": "select",
+    "Workflow stage": "select",
+    "Review decision": "select",
+    "Review Notes": "rich_text",
+    "AI edited": "checkbox",
+    "7-point test passed": "checkbox",
+    "Factual safety": "select",
+    "Linked brief": "relation",
+    "Linked calendar": "relation",
+    "Archived": "checkbox",
+}
+
+CONTENT_CALENDAR_SCHEMA = {
+    "Platform": "select",
+    "Platform lane": "select",
+    "Language mode": "select",
+    "Working language": "select",
+    "Publish language": "select",
+    "Audience portrait": "select",
+    "Voice register used": "select",
+    "Pillar": "select",
+    "Funnel role": "select",
+    "Hook": "rich_text",
+    "Final text RU": "rich_text",
+    "Final text EN": "rich_text",
+    "Publish date target": "date",
+    "Approval status": "select",
+    "Repurpose status": "select",
+}
+
+DISCOVERY_QUEUE_SCHEMA = {
+    "Handle": "title",
+    "Platform": "select",
+    "Segment": "select",
+    "Score": "number",
+    "Why relevant": "rich_text",
+    "Approved": "select",
+    "Added to monitoring": "checkbox",
+}
+
+MONITORING_RUN_SCHEMA = {
+    "Run ID": "title",
+    "Connector": "select",
+    "Source name": "rich_text",
+    "Started at": "date",
+    "Finished at": "date",
+    "Fetched count": "number",
+    "Failed count": "number",
+    "Last success at": "date",
+    "Error type": "select",
+    "Retry count": "number",
+    "Staleness hours": "number",
+    "Run status": "select",
+}

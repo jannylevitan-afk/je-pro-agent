@@ -1,0 +1,7 @@
+facts:
+  - claim: "Clear Real Estate uses the phrase Zero bullshit."
+    fact_type: brand
+    verification_status: verified_public
+    evidence: "public brand materials"
+    freshness_window: evergreen
+    allowed_usage: public
