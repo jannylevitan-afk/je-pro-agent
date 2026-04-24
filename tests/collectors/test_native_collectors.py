@@ -89,6 +89,18 @@ TIKTOK_HTML = """
 """
 
 
+WEB_HTML = """
+<html>
+  <head>
+    <meta property="og:title" content="Bali Hotel Outlook 2026" />
+    <meta property="og:description" content="Boutique hotel inventory is outperforming generic stock because occupancy, ADR, and positioning are moving together." />
+    <meta property="og:url" content="https://www.realinfo.id/market-reports/bali-hotel-outlook-2026" />
+    <meta property="article:published_time" content="2026-04-24T07:35:00Z" />
+  </head>
+</html>
+"""
+
+
 def test_resolve_target_url_builds_public_platform_urls() -> None:
     assert (
         resolve_target_url(
@@ -122,6 +134,18 @@ def test_resolve_target_url_builds_public_platform_urls() -> None:
             )
         )
         == "https://www.youtube.com/feeds/videos.xml?channel_id=UC1234567890"
+    )
+    assert (
+        resolve_target_url(
+            NativeSourceTarget(
+                platform="web",
+                handle="realinfo-bali-2026",
+                source_url="https://www.realinfo.id/market-reports/bali-hotel-outlook-2026",
+                audience_segment="developer_investor",
+                content_theme="boutique_hotels",
+            )
+        )
+        == "https://www.realinfo.id/market-reports/bali-hotel-outlook-2026"
     )
 
 
@@ -174,6 +198,13 @@ def test_collect_native_source_items_parses_youtube_feed() -> None:
         ("instagram", "https://www.instagram.com/reel/C123/", INSTAGRAM_HTML, "instagram_reel", "both"),
         ("linkedin", "https://www.linkedin.com/posts/founder-deal-logic-123/", LINKEDIN_HTML, "linkedin_post", "workflow_b"),
         ("tiktok", "https://www.tiktok.com/@jepro/video/777", TIKTOK_HTML, "tiktok_video", "both"),
+        (
+            "web",
+            "https://www.realinfo.id/market-reports/bali-hotel-outlook-2026",
+            WEB_HTML,
+            "web_report",
+            "workflow_b",
+        ),
     ],
 )
 def test_collect_native_source_items_parses_html_meta_platforms(

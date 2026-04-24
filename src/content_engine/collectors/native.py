@@ -9,7 +9,7 @@ from hashlib import sha256
 from html import unescape
 from html.parser import HTMLParser
 from typing import Any, Literal
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 from content_engine.models.source_item import SourceItem
@@ -18,6 +18,7 @@ from content_engine.services.ingestion import build_dedupe_key
 
 Fetcher = Callable[[str, float], str]
 NativePlatform = Literal["telegram", "instagram", "linkedin", "youtube", "tiktok"]
+NativePlatform = Literal["telegram", "instagram", "linkedin", "youtube", "tiktok", "web"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +72,14 @@ def collect_native_source_items(
 
 
 def resolve_target_url(target: NativeSourceTarget) -> str:
+    if target.platform == "web":
+        if target.source_url:
+            return target.source_url
+        normalized = target.handle.strip()
+        if normalized.startswith("https://"):
+            return normalized
+        raise ValueError("Web targets require an https source_url")
+
     if target.source_url:
         return target.source_url
 
@@ -353,7 +362,16 @@ class _MetadataParser(HTMLParser):
 
 
 def _default_fetcher(url: str, timeout_seconds: float) -> str:
-    with urlopen(url, timeout=timeout_seconds) as response:
+    request = Request(
+        url,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            )
+        },
+    )
+    with urlopen(request, timeout=timeout_seconds) as response:
         return response.read().decode("utf-8")
 
 
@@ -437,6 +455,12 @@ def _infer_html_source_type(platform: NativePlatform, source_url: str, media_url
         return "linkedin_post"
     if platform == "tiktok":
         return "tiktok_video"
+    if platform == "web":
+        if any(token in normalized_url for token in ("report", "reports", "outlook", "insight")):
+            return "web_report"
+        if any(token in normalized_url for token in ("news", "article", "blog")):
+            return "web_article"
+        return "web_page"
     return f"{platform}_post"
 
 
