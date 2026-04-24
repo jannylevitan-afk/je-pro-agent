@@ -114,3 +114,32 @@ VIDEO_PERFORMANCE_SCHEMA = {
     "Performance tier": "select",
     "Fed back to RA": "checkbox",
 }
+
+CONTENT_PERFORMANCE_SCHEMA = {
+    "Linked content item": "relation",
+    "Platform": "select",
+    "Reach": "number",
+    "Impressions": "number",
+    "Saves": "number",
+    "Shares": "number",
+    "Comments": "number",
+    "Profile visits": "number",
+    "DMs received": "number",
+    "Inquiry type": "select",
+    "Likes": "number",
+    "Engagement rate": "number",
+    "CTR": "number",
+    "Attribution model": "select",
+    "Deal influenced": "checkbox",
+    "Performance tier": "select",
+}
+
+RESEARCH_FEEDBACK_SIGNAL_SCHEMA = {
+    "Signal scope": "select",
+    "Dimension value": "rich_text",
+    "Signal type": "select",
+    "Performance tier": "select",
+    "Score": "number",
+    "Reason": "rich_text",
+    "Applied": "checkbox",
+}
