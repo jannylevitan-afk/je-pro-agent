@@ -52,7 +52,10 @@ class AnthropicPipelineWriter:
         return self._client.generate_text(
             system_prompt=(
                 "You write concise, high-retention short-form video scripts for a premium content engine. "
-                "Keep claims grounded in the provided source and do not invent market facts."
+                "Keep claims grounded in the provided source and do not invent market facts. "
+                "Source boundary is strict: do not use model memory about people, brands, media appearances, "
+                "awards, interviews, numbers, clients, or projects unless the exact claim is present in the source, "
+                "body points, or CTA provided in this request."
             ),
             user_prompt="\n".join(
                 [
@@ -87,6 +90,10 @@ class AnthropicPipelineWriter:
                 "voice/register selection, idea gate, content brief, draft generation, AI editing, and voice QA. "
                 "Never write from a raw topic; write only from the insight, selected idea, and brief. "
                 "Never invent facts beyond the source transcript, fact pack, and reference sources. "
+                "Source boundary is strict: ignore model memory. Do not mention people, institutions, media outlets, "
+                "awards, interviews, numbers, clients, projects, AILLA, HANDARA, or Clear brands unless that exact "
+                "claim appears in the source transcript, fact pack, or reference sources in this request. "
+                "If a claim is not directly supported, replace it with a general observation or remove it. "
                 "If Jane Levitan voice is used, preserve the author voice module: facts only from dossier, "
                 "no private facts, no client names, no politics, no generic AI openings, and no forbidden phrases. "
                 "For LinkedIn, keep the working version in Russian and the publish version in English. "

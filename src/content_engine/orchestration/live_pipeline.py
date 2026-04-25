@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol, cast
 
@@ -557,9 +558,49 @@ def _matching_fact_pack(item: SourceItem, verified_facts: set[str]) -> list[str]
     matched = [
         fact
         for fact in sorted(verified_facts)
-        if any(token in transcript_lower for token in fact.lower().split() if len(token) > 4)
+        if _fact_matches_source_text(fact, transcript_lower)
     ]
     return matched[:3]
+
+
+_GENERIC_FACT_MATCH_TOKENS = {
+    "a",
+    "and",
+    "are",
+    "based",
+    "bali",
+    "brand",
+    "carry",
+    "clear",
+    "development",
+    "estate",
+    "higher",
+    "internal",
+    "land",
+    "project",
+    "public",
+    "real",
+    "risk",
+    "source",
+    "than",
+    "the",
+    "under",
+    "villa",
+    "with",
+}
+
+
+def _fact_matches_source_text(fact: str, transcript_lower: str) -> bool:
+    tokens = [
+        token
+        for token in re.findall(r"[a-z0-9А-Яа-яёЁ$%-]+", fact.lower())
+        if len(token) > 3 and token not in _GENERIC_FACT_MATCH_TOKENS
+    ]
+    if not tokens:
+        return False
+    if len(tokens) == 1:
+        return tokens[0] in transcript_lower
+    return sum(1 for token in tokens if token in transcript_lower) >= 2
 
 
 def _reference_sources(item: SourceItem, decision: WorkflowBDecision) -> list[str]:

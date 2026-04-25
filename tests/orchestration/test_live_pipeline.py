@@ -1,6 +1,7 @@
 from content_engine.knowledge.kmd import MarkdownKnowledgeStore
 from content_engine.orchestration.live_pipeline import (
     LivePipelineTargets,
+    _matching_fact_pack,
     process_source_item,
     run_collector_cycle,
     run_live_pipeline,
@@ -57,6 +58,21 @@ def test_process_source_item_routes_text_item_into_workflow_b(source_item) -> No
     assert len(result.brief_page_ids) == 2
     assert len(result.draft_page_ids) == 2
     assert len(result.event_page_ids) == 2
+
+
+def test_matching_fact_pack_ignores_generic_villa_bali_overlap(source_item) -> None:
+    item = source_item.model_copy(
+        update={
+            "transcript_text": "This Bali villa looks beautiful, but the source does not mention AILLA.",
+        }
+    )
+
+    facts = {
+        "AILLA Villa is the flagship experience-development project in Bali.",
+        "Front-loaded payment schemes in Bali real estate carry higher buyer risk than milestone-based structures.",
+    }
+
+    assert _matching_fact_pack(item, facts) == []
 
 
 def test_process_source_item_routes_video_item_into_both_workflows(video_source_item) -> None:
