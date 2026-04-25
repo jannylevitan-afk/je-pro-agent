@@ -75,6 +75,64 @@ def test_marketing_cases_get_market_critical_linkedin_rigor() -> None:
     assert linkedin.cta_type == "comment"
 
 
+def test_founder_journey_stays_in_instagram_lifestyle_lane() -> None:
+    decisions = expand_workflow_b_decisions(
+        make_source_item(
+            content_theme="founder_journey",
+            audience_segment="dreamer_woman",
+        )
+    )
+
+    assert [decision.platform_lane for decision in decisions] == ["instagram_lifestyle"]
+    assert decisions[0].funnel_role == "affinity"
+    assert decisions[0].source_rigor == "standard"
+    assert "real life" in decisions[0].emotional_hook
+
+
+def test_expert_pain_bali_routes_to_professional_instagram_and_b2b_linkedin() -> None:
+    decisions = expand_workflow_b_decisions(
+        make_source_item(content_theme="expert_pain_bali")
+    )
+
+    assert [decision.platform_lane for decision in decisions] == [
+        "instagram_professional",
+        "linkedin_b2b",
+    ]
+    assert {decision.source_rigor for decision in decisions} == {"expert"}
+    assert all(decision.funnel_role == "authority" for decision in decisions)
+
+
+def test_bali_travel_does_not_create_lifestyle_linkedin_content() -> None:
+    decisions = expand_workflow_b_decisions(
+        make_source_item(
+            content_theme="bali_travel",
+            audience_segment="lifestyle_expat",
+        )
+    )
+
+    assert [decision.platform_lane for decision in decisions] == ["instagram_lifestyle"]
+    assert decisions[0].tone == "register_2"
+
+
+def test_market_and_legal_topics_require_market_critical_rigor() -> None:
+    for theme in ("land_and_legal", "market_reports"):
+        decisions = expand_workflow_b_decisions(make_source_item(content_theme=theme))
+
+        assert [decision.platform_lane for decision in decisions] == [
+            "instagram_professional",
+            "linkedin_b2b",
+        ]
+        assert all(decision.source_rigor == "market-critical" for decision in decisions)
+
+
+def test_theme_aliases_are_normalized_before_decision_expansion() -> None:
+    decisions = expand_workflow_b_decisions(
+        make_source_item(content_theme="личная_жизнь_предпринимателя")
+    )
+
+    assert [decision.platform_lane for decision in decisions] == ["instagram_lifestyle"]
+
+
 def test_infer_narrative_type_prefers_bts_for_visual_material() -> None:
     item = make_source_item(
         content_theme="wellness_architecture",
@@ -83,6 +141,12 @@ def test_infer_narrative_type_prefers_bts_for_visual_material() -> None:
     )
 
     assert infer_narrative_type(item) == "behind the scenes"
+
+
+def test_infer_narrative_type_uses_strategy_theme_defaults() -> None:
+    assert infer_narrative_type(make_source_item(content_theme="founder_journey")) == "founder struggle"
+    assert infer_narrative_type(make_source_item(content_theme="bali_travel")) == "invitation/community"
+    assert infer_narrative_type(make_source_item(content_theme="land_and_legal")) == "market observation"
 
 
 def test_infer_useful_lesson_trims_first_sentence() -> None:

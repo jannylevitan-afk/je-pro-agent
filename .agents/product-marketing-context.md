@@ -13,6 +13,7 @@
 - Build AILLA desirability through both emotional and rational content.
 - Grow Instagram across two lanes without making it feel like two separate accounts.
 - Position LinkedIn as English-language B2B authority for Bali real estate and development.
+- Treat the women/lifestyle audience as valuable in itself, not as a hidden conversion funnel.
 
 ## Platform Strategy
 
@@ -22,6 +23,7 @@
   - Lifestyle lane
   - Professional lane
 - Balance is measured across a 2-4 week plan, not by alternating every post.
+- The account should feel like a lifestyle-led personal brand with serious business inside it, not a dry business account with lifestyle inserts.
 - Default language is Russian.
 - English is allowed only for internationally targeted professional posts.
 - One asset should use one primary language.
@@ -55,6 +57,7 @@
 - Strong hooks, no cliche openings, no summary endings.
 - Personal content should feel lived, not sentimental.
 - Professional content should feel expert, not dry.
+- Pushback is allowed when a content angle feels generic, unsupported, or off-voice; final editorial choice stays human.
 
 ## Writing Rules
 
@@ -72,6 +75,7 @@
 ## Priority Expert Topics
 
 - Rental yield
+- Rental yield over flipping as the default expert narrative
 - Market red flags: front-loaded payments, dumping, overlaunching
 - Deal structure and legal nuance
 - Developer and broker partnership logic

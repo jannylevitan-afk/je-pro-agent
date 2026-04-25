@@ -54,6 +54,46 @@ def test_build_insight_card_uses_seed_hints() -> None:
     assert insight.reuse_score == 4
 
 
+def test_build_insight_card_uses_strategy_theme_hints() -> None:
+    item = make_source_item().model_copy(
+        update={
+            "content_theme": "founder_journey",
+            "audience_segment": "dreamer_woman",
+        }
+    )
+    note = normalize_source_item(item)
+
+    insight = build_insight_card(
+        note,
+        emotional_trigger="family and ambition tension",
+        useful_lesson="The founder story carries trust when it feels lived.",
+        narrative_type="founder struggle",
+        reuse_score=4,
+    )
+
+    assert insight.content_theme == "founder_journey"
+    assert insight.content_pillar == "lifestyle_journey"
+    assert insight.priority == 2
+
+
+def test_build_insight_card_normalizes_strategy_theme_aliases() -> None:
+    item = make_source_item().model_copy(
+        update={"content_theme": "личная_жизнь_предпринимателя"}
+    )
+    note = normalize_source_item(item)
+
+    insight = build_insight_card(
+        note,
+        emotional_trigger="identity pull",
+        useful_lesson="Business is easier to trust when the life behind it is visible.",
+        narrative_type="founder struggle",
+        reuse_score=3,
+    )
+
+    assert insight.content_theme == "founder_journey"
+    assert insight.content_pillar == "lifestyle_journey"
+
+
 def test_build_idea_candidate_inherits_audience_and_pillar_from_insight() -> None:
     note = normalize_source_item(make_source_item())
     insight = build_insight_card(

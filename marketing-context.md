@@ -15,6 +15,7 @@ Use this file as the local operating context for content-production and related 
   - Professional lane
   - roughly 50/50 over a 2-4 week plan
   - Russian by default
+  - lifestyle-led personal brand with serious business inside it, not a business account with lifestyle inserts
 - LinkedIn:
   - English only
   - B2B authority lane
@@ -40,8 +41,10 @@ Use this file as the local operating context for content-production and related 
 
 - Market analysis must use real sources.
 - Lifestyle content must still feel intentional and brand-aligned.
+- Women/lifestyle audience is valuable in itself, not a disguised sales funnel.
 - Professional content must be concrete, visual when possible, and decision-useful.
-- AILLA, rental yield, market red flags, and partnership logic are recurring themes.
+- AILLA, rental yield over flipping, market red flags, and partnership logic are recurring themes.
+- Push back when an angle is generic, unsupported, or off-voice; final editorial choice stays human.
 
 ## Output Standard
 
