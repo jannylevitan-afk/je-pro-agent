@@ -98,7 +98,8 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
     assert "LinkedIn is international B2B only" in str(client.calls[0]["system_prompt"])
     assert "Instagram professional is expert" in str(client.calls[0]["system_prompt"])
     assert "Insight first, draft second" in str(client.calls[0]["user_prompt"])
-    assert "Start draft_text_ru with the source-specific Hook line" in str(client.calls[0]["user_prompt"])
+    assert "Start draft_text_ru with one unique source-specific opening sentence" in str(client.calls[0]["user_prompt"])
+    assert "Do not return Hook, CTA, Traceability, or QA sections" in str(client.calls[0]["user_prompt"])
     assert "Copyright safety" in str(client.calls[0]["user_prompt"])
     assert "paraphrase the source meaning" in str(client.calls[0]["user_prompt"])
 

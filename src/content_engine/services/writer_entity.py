@@ -41,6 +41,14 @@ from content_engine.models.writer_entity import (
 
 
 JANE_FORBIDDEN_PHRASES = [
+    "Сегодня поговорим о",
+    "В этом посте я расскажу",
+    "Давайте разберёмся",
+    "Хочу поделиться",
+    "Наверное, вы знаете",
+    "Очень важно понимать",
+    "В современном мире",
+    "Сейчас многие",
     "В современном быстро меняющемся мире",
     "Давайте погрузимся",
     "Давайте нырнём глубже",
@@ -104,6 +112,8 @@ PRIVATE_RISK_PATTERNS = (
     r"секретн(?:ые|ая|ое|ый)\s+(?:детал|услов|сделк|договор|информац)",
 )
 CLIENT_MARKERS = ("client name", "имя клиента", "клиент по имени", "closed deal with")
+WORKFLOW_B_OPENING_MIN_SCORE = 20
+WORKFLOW_B_FORBIDDEN_OPENING_STARTS = tuple(phrase.lower() for phrase in JANE_FORBIDDEN_PHRASES[:8])
 
 
 def build_jane_levitan_voice_object() -> AuthorVoiceObject:
@@ -531,7 +541,7 @@ def edit_writer_draft(
     cta = _remove_forbidden(draft.cta, author_voice, removed_phrases)
 
     body = _tighten_spacing(body)
-    changes = ["Checked hook strength", "Removed generic AI phrasing", "Checked fact and privacy boundaries"]
+    changes = ["Checked opening sentence strength", "Removed generic AI phrasing", "Checked fact and privacy boundaries"]
     if removed_phrases:
         changes.append("Removed forbidden phrases")
     if not body.endswith((".", "?", "!")):
@@ -540,7 +550,7 @@ def edit_writer_draft(
     factual_score = 9 if brief.required_facts or not _looks_like_fact_claim(body) else 7
     diagnosis = EditorDiagnosis(
         main_issue="Draft needed standard Writer Entity tightening and voice-safety checks.",
-        hook_score=8 if len(hook.split()) >= 4 else 6,
+        hook_score=8 if _opening_sentence_score(hook) >= WORKFLOW_B_OPENING_MIN_SCORE else 6,
         clarity_score=8,
         emotional_score=8 if brief.emotional_trigger else 6,
         voice_preservation_score=8,
@@ -577,7 +587,7 @@ def run_voice_qa(
     full_text = " ".join([edited.hook, edited.body, edited.cta])
     if not insight.angle:
         issues.append("missing_clear_insight")
-    if len(edited.hook.split()) < 4:
+    if _opening_sentence_score(edited.hook) < WORKFLOW_B_OPENING_MIN_SCORE:
         issues.append("weak_hook")
     if not insight.emotional_trigger:
         issues.append("missing_emotional_trigger")
@@ -751,6 +761,11 @@ def build_final_content_asset(
     cta: str | None = None,
 ) -> FinalContentAsset:
     edited = writer_output.edited_final
+    resolved_hook = hook if hook is not None else edited.hook
+    if final_text is None:
+        resolved_final_text = _compose_final_text(resolved_hook, edited.body)
+    else:
+        resolved_final_text = _ensure_final_text_opening(final_text, resolved_hook)
     return FinalContentAsset(
         content_id=content_id,
         title=title,
@@ -758,8 +773,8 @@ def build_final_content_asset(
         pillar=pillar,
         format=content_format,
         approval_status=approval_status,
-        hook=hook if hook is not None else edited.hook,
-        final_text=final_text if final_text is not None else edited.body,
+        hook=resolved_hook,
+        final_text=resolved_final_text,
         cta=cta if cta is not None else edited.cta,
         traceability=FinalContentTraceability(
             source_ids=source_ids,
@@ -788,27 +803,8 @@ def format_final_content_asset_markdown(asset: FinalContentAsset) -> str:
             f"**Format:** {asset.format}",
             f"**Approval Status:** {asset.approval_status}",
             "",
-            "### Hook",
-            asset.hook,
-            "",
             "### Final Text",
             asset.final_text,
-            "",
-            "### CTA",
-            asset.cta,
-            "",
-            "### Traceability",
-            f"- Source IDs: {', '.join(asset.traceability.source_ids) or '-'}",
-            f"- Insight ID: {asset.traceability.insight_id}",
-            f"- Idea ID: {asset.traceability.idea_id}",
-            f"- Brief ID: {asset.traceability.brief_id}",
-            f"- Draft ID: {asset.traceability.draft_id}",
-            f"- Edit Version ID: {asset.traceability.edit_version_id}",
-            "",
-            "### QA",
-            f"- Passed: {asset.qa.passed}",
-            f"- Issues: {'; '.join(asset.qa.issues) or '-'}",
-            f"- Human Review Required: {asset.qa.human_review_required}",
         ]
     )
 
@@ -1269,34 +1265,184 @@ def _boutique_hook_subject(context: str) -> tuple[str, str]:
 
 def _russian_hook_direction(theme: str, subject: str, *, goal: str, voice_register: str) -> str:
     if theme == "wellness_design" and (goal == "authority" or voice_register in {"register_3", "register_4", "register_6"}):
-        return f"Wellness в архитектуре — это не декор. Это продуктовая логика: {subject}."
+        return _guard_opening_sentence(f"Wellness в архитектуре перестал быть красивым бонусом: {subject}.")
     if theme == "boutique_hospitality" and (goal == "authority" or voice_register in {"register_3", "register_4", "register_6"}):
-        return f"Бутик-отель выигрывает не картинкой. Он выигрывает операционной логикой: {subject}."
+        return _guard_opening_sentence(f"Бутик-отель выигрывает не картинкой, а логикой: {subject}.")
 
     hooks = {
-        "legal_structure": f"На Бали самый дорогой риск часто прячется не в цене. Проверь слой: {subject}.",
-        "land_structure": f"Земля на Бали выглядит простой, пока не вскрывается слой: {subject}.",
-        "wellness_design": f"Wellness-проект продаёт не спа-зону. Он продаёт: {subject}.",
-        "boutique_hospitality": f"Бутик-отель выигрывает не красотой. Он выигрывает через: {subject}.",
-        "bali_travel": f"Бали легко снять красиво. Сложнее поймать: {subject}.",
-        "founder_life": f"Жизнь предпринимателя ломается не от амбиций. Она ломается, когда исчезает: {subject}.",
-        "market_structure": f"На Бали важна не первая цена. Важнее источник сигнала: {subject}.",
+        "legal_structure": f"На Бали дорогой риск часто прячется в слое: {subject}.",
+        "land_structure": f"Земля на Бали кажется простой до слоя: {subject}.",
+        "wellness_design": f"Wellness-проект продаёт не спа, а состояние: {subject}.",
+        "boutique_hospitality": f"Бутик-отель выигрывает не красотой, а причиной: {subject}.",
+        "bali_travel": f"Бали легко снять красиво, сложнее поймать: {subject}.",
+        "founder_life": f"Жизнь предпринимателя ломается, когда исчезает: {subject}.",
+        "market_structure": f"На Бали важна не цена, а слой проверки: {subject}.",
     }
-    return hooks.get(theme, f"В этом source важна не картинка, а {subject}.")
+    return _guard_opening_sentence(hooks.get(theme, f"За красивой поверхностью прячется решение: {subject}."))
 
 
 def _linkedin_hook_direction(theme: str, subject: str) -> str:
     article = "an" if subject[:1].lower() in {"a", "e", "i", "o", "u"} else "a"
     hooks = {
-        "legal_structure": f"In Bali, the expensive risk is rarely the price. It is the {subject} behind it.",
-        "land_structure": f"Bali land looks simple until the {subject} starts asking expensive questions.",
-        "wellness_design": f"Wellness is moving from a design feature to a signal of {subject}.",
+        "legal_structure": f"In Bali, expensive risk hides inside the {subject}.",
+        "land_structure": f"Bali land looks simple until the {subject} appears.",
+        "wellness_design": f"Wellness is becoming a sharper signal of {subject}.",
         "boutique_hospitality": f"Boutique hospitality wins when beauty becomes {article} {subject}.",
-        "bali_travel": f"Bali is easy to film beautifully and harder to read through {subject}.",
-        "founder_life": f"A founder's life breaks when {subject} has to look effortless.",
-        "market_structure": f"The real Bali signal is not the headline price. It is the {subject}.",
+        "bali_travel": f"Bali is easy to film and harder to read through {subject}.",
+        "founder_life": f"A founder's life breaks when {subject} looks effortless.",
+        "market_structure": f"The real Bali signal sits inside the {subject}.",
     }
-    return hooks.get(theme, f"The real signal is not the surface story. It is the {subject}.")
+    return _guard_opening_sentence(hooks.get(theme, f"The real signal sits behind the {subject}."))
+
+
+def _compose_final_text(opening_sentence: str, body: str) -> str:
+    opening = _clean_final_text(opening_sentence)
+    cleaned_body = _clean_final_text(body)
+    if not opening:
+        return cleaned_body
+    if not cleaned_body:
+        return opening
+    if cleaned_body.lower().startswith(opening.lower()):
+        return cleaned_body
+    return f"{opening}\n\n{cleaned_body}"
+
+
+def _ensure_final_text_opening(final_text: str, fallback_opening: str) -> str:
+    cleaned = _clean_final_text(final_text)
+    first_line = _first_nonempty_line(cleaned)
+    if first_line and _opening_sentence_score(first_line) >= WORKFLOW_B_OPENING_MIN_SCORE:
+        return cleaned
+    return _compose_final_text(fallback_opening, cleaned)
+
+
+def _first_nonempty_line(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped:
+            return stripped
+    return ""
+
+
+def _clean_final_text(text: str) -> str:
+    lines = [line.rstrip() for line in str(text).splitlines()]
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines).strip()
+
+
+def _guard_opening_sentence(candidate: str) -> str:
+    normalized = _normalize_space(candidate)
+    if _opening_sentence_score(normalized) >= WORKFLOW_B_OPENING_MIN_SCORE:
+        return normalized
+    if _looks_english(normalized):
+        return "The real signal hides behind the surface story."
+    return "За красивой поверхностью прячется конкретный риск."
+
+
+def _opening_sentence_score(opening: str) -> int:
+    normalized = _normalize_space(opening)
+    lower = normalized.lower()
+    word_count = len(_opening_words(normalized))
+    clarity = 5 if 5 <= word_count <= 14 else 2
+    if any(lower.startswith(phrase) for phrase in WORKFLOW_B_FORBIDDEN_OPENING_STARTS):
+        clarity = 1
+    specificity = 5 if _has_specific_opening_signal(lower) else 3
+    tension = 5 if _has_tension_signal(lower) else 3
+    relevance = 5 if not _looks_generic_opening(lower) else 2
+    continuation_pull = 5 if _has_continuation_pull(lower) else 3
+    return clarity + specificity + tension + relevance + continuation_pull
+
+
+def _opening_words(text: str) -> list[str]:
+    return re.findall(r"[A-Za-zА-Яа-яЁё0-9$%-]+", text)
+
+
+def _has_specific_opening_signal(lower: str) -> bool:
+    return any(
+        marker in lower
+        for marker in (
+            "бали",
+            "вил",
+            "зем",
+            "риск",
+            "слой",
+            "wellness",
+            "бутик",
+            "отель",
+            "founder",
+            "предприним",
+            "architecture",
+            "hospitality",
+            "legal",
+            "land",
+            "operator",
+            "market",
+            "signal",
+            "spa",
+        )
+    )
+
+
+def _has_tension_signal(lower: str) -> bool:
+    return any(
+        marker in lower
+        for marker in (
+            "не ",
+            "пряч",
+            "лома",
+            "риск",
+            "дорог",
+            "сложнее",
+            "кажется",
+            "until",
+            "hides",
+            "risk",
+            "rarely",
+            "harder",
+            "breaks",
+            "not ",
+            "behind",
+        )
+    )
+
+
+def _has_continuation_pull(lower: str) -> bool:
+    return any(
+        marker in lower
+        for marker in (
+            "пряч",
+            "слой",
+            "лома",
+            "провер",
+            "сложнее",
+            "behind",
+            "inside",
+            "until",
+            "harder",
+            "hides",
+            "signal",
+        )
+    )
+
+
+def _looks_generic_opening(lower: str) -> bool:
+    generic_markers = (
+        "в современном",
+        "сегодня поговорим",
+        "давайте",
+        "хочу поделиться",
+        "очень важно",
+        "everyone knows",
+        "in today's world",
+        "let's talk",
+    )
+    return any(marker in lower for marker in generic_markers)
+
+
+def _looks_english(text: str) -> bool:
+    return bool(re.search(r"[A-Za-z]", text)) and not bool(re.search(r"[А-Яа-яЁё]", text))
 
 
 def _contains_any(text: str, markers: tuple[str, ...]) -> bool:

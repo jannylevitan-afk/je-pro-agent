@@ -63,13 +63,17 @@ def test_process_source_item_routes_text_item_into_workflow_b(source_item) -> No
     final_asset = first_draft["Final Content Asset"]["rich_text"][0]["text"]["content"]
     assert "## Final Content Asset" in final_asset
     assert "**Content ID:** content_draft_itm_001_instagram_professional" in final_asset
-    assert "### Traceability" in final_asset
-    assert "- Source IDs: itm_001" in final_asset
-    assert "- Insight ID: insight_page_1" in final_asset
-    assert "- Idea ID: idea_page_1" in final_asset
-    assert "- Brief ID: brief_itm_001_instagram_professional" in final_asset
-    assert "- Draft ID: draft_itm_001_instagram_professional" in final_asset
-    assert "- Edit Version ID: draft_itm_001_instagram_professional_edit_v1" in final_asset
+    assert "### Final Text" in final_asset
+    assert "### Hook" not in final_asset
+    assert "### CTA" not in final_asset
+    assert "### Traceability" not in final_asset
+    assert "### QA" not in final_asset
+    assert "- Source IDs: itm_001" not in final_asset
+    assert "- Insight ID: insight_page_1" not in final_asset
+    assert "- Idea ID: idea_page_1" not in final_asset
+    assert "- Brief ID: brief_itm_001_instagram_professional" not in final_asset
+    assert "- Draft ID: draft_itm_001_instagram_professional" not in final_asset
+    assert "- Edit Version ID: draft_itm_001_instagram_professional_edit_v1" not in final_asset
     assert "Video Hooks" not in final_asset
 
 
@@ -382,3 +386,11 @@ def test_process_source_item_uses_injected_writer_for_script_and_draft(
     assert "Anthropic Russian draft" in instagram_final_asset
     assert "Anthropic English draft" in linkedin_final_asset
     assert "Anthropic Russian draft" not in linkedin_final_asset
+    assert "### Hook" not in instagram_final_asset
+    assert "### CTA" not in instagram_final_asset
+    assert "### Traceability" not in instagram_final_asset
+    assert "### QA" not in instagram_final_asset
+    assert "### Hook" not in linkedin_final_asset
+    assert "### CTA" not in linkedin_final_asset
+    assert "### Traceability" not in linkedin_final_asset
+    assert "### QA" not in linkedin_final_asset

@@ -303,22 +303,59 @@ def test_workflow_b_final_content_asset_matches_review_contract() -> None:
     assert "**Platform:** linkedin" in markdown
     assert "**Pillar:** expertise" in markdown
     assert "**Format:** thought_leadership_post" in markdown
-    assert "### Hook" in markdown
-    assert result.edited_final.hook in markdown
+    assert "### Hook" not in markdown
     assert "### Final Text" in markdown
+    assert asset.final_text.startswith(result.edited_final.hook)
+    assert result.edited_final.hook in markdown
     assert result.edited_final.body in markdown
-    assert "### CTA" in markdown
-    assert result.edited_final.cta in markdown
-    assert "- Source IDs: source_001" in markdown
-    assert "- Insight ID: insight_001" in markdown
-    assert "- Idea ID: idea_01" in markdown
-    assert "- Brief ID: brief_001" in markdown
-    assert "- Draft ID: draft_001" in markdown
-    assert "- Edit Version ID: draft_001_edit_v1" in markdown
-    assert "- Passed: True" in markdown
-    assert "- Human Review Required: True" in markdown
+    assert "### CTA" not in markdown
+    assert "### Traceability" not in markdown
+    assert "### QA" not in markdown
+    assert "- Source IDs: source_001" not in markdown
+    assert "- Insight ID: insight_001" not in markdown
+    assert "- Idea ID: idea_01" not in markdown
+    assert "- Brief ID: brief_001" not in markdown
+    assert "- Draft ID: draft_001" not in markdown
+    assert "- Edit Version ID: draft_001_edit_v1" not in markdown
+    assert "- Passed: True" not in markdown
+    assert "- Human Review Required: True" not in markdown
     assert "Video Hooks" not in markdown
     assert "Hook Options" not in markdown
+
+
+def test_workflow_b_opening_sentence_follows_quality_rules() -> None:
+    result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="Про боли экспертное",
+            source_material=(
+                "Market report says Bali buyers often trust the first pretty villa story "
+                "before checking legal structure, operator quality, and resale path."
+            ),
+            target_audience="developer_investor",
+            platform="instagram",
+            goal="authority",
+            tone_of_voice="аналитический",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers Bali legal structure and operator quality."],
+        reference_sources=["https://example.com/market"],
+    )
+
+    opening = result.edited_final.hook
+    forbidden_starts = (
+        "Сегодня поговорим о",
+        "В этом посте я расскажу",
+        "Давайте разберёмся",
+        "Хочу поделиться",
+        "Наверное, вы знаете",
+        "Очень важно понимать",
+        "В современном мире",
+        "Сейчас многие",
+    )
+
+    assert 5 <= len(opening.split()) <= 14
+    assert not any(opening.startswith(phrase) for phrase in forbidden_starts)
+    assert any(marker in opening.lower() for marker in ("бали", "риск", "цен", "слой", "провер"))
 
 
 def test_instagram_final_text_hides_internal_strategy_labels() -> None:

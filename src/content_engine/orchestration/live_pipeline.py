@@ -735,21 +735,18 @@ def _draft_text_en(item: SourceItem, insight: Any, decision: WorkflowBDecision) 
 
 def _writer_entity_draft_text_ru(writer_entity_output: Any) -> str:
     edited = writer_entity_output.edited_final
-    parts = [edited.hook, edited.body, edited.cta]
-    return "\n\n".join(part for part in parts if str(part).strip())
+    return _compose_text_with_opening(edited.hook, edited.body)
 
 
 def _writer_entity_draft_text_en(writer_entity_output: Any, decision: WorkflowBDecision) -> str | None:
     if decision.platform_lane != "linkedin_b2b":
         return None
     insight = writer_entity_output.insight_card
-    cta = "What do you check first before trusting a market opportunity?"
     return (
         f"{writer_entity_output.content_brief.hook_direction}\n\n"
         f"{insight.angle}\n\n"
         f"The tension is simple: {insight.hidden_tension}\n\n"
-        f"{insight.promise}\n\n"
-        f"{cta}"
+        f"{insight.promise}"
     )
 
 
@@ -765,7 +762,22 @@ def _final_asset_text(
         return draft_text_en
     if writer_used:
         return draft_text_ru
-    return writer_entity_output.edited_final.body
+    return _compose_text_with_opening(
+        writer_entity_output.edited_final.hook,
+        writer_entity_output.edited_final.body,
+    )
+
+
+def _compose_text_with_opening(opening: str, body: str) -> str:
+    opening = str(opening).strip()
+    body = str(body).strip()
+    if not opening:
+        return body
+    if not body:
+        return opening
+    if body.lower().startswith(opening.lower()):
+        return body
+    return f"{opening}\n\n{body}"
 
 
 def _writer_entity_option_texts(options: list[Any]) -> list[str]:

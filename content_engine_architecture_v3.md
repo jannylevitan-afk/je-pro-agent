@@ -589,6 +589,67 @@ Workflow B не пишет посты напрямую из темы. Любой
 }
 ```
 
+### Workflow B Opening Sentence Rules
+
+В Workflow B нет отдельного output-столбца `Hook`. Writer Entity генерирует `opening_sentence` как первую строку `Final Text`.
+
+**Input для opening sentence:**
+
+```json
+{
+  "topic": "тема поста",
+  "audience": "целевая аудитория",
+  "platform": "Instagram | Threads | LinkedIn | TikTok | Telegram | YouTube",
+  "angle": "главный угол подачи",
+  "emotional_trigger": "страх | желание | узнавание | боль | любопытство | конфликт | польза | ошибка",
+  "content_goal": "educate | sell | engage | provoke | inspire | explain",
+  "tone": "экспертный | дерзкий | простой | эмоциональный | аналитический | сленговый",
+  "language": "язык результата"
+}
+```
+
+**Главное правило:** opening sentence короткий, уникальный для source, встроен в начало `Final Text` и не выводится отдельным блоком.
+
+**Качество opening sentence:**
+- 5–14 слов.
+- Понятен без контекста.
+- Не начинается с вежливого вступления.
+- Содержит один сильный смысловой удар.
+- Бьёт в проблему, желание, ошибку, конфликт, страх, выгоду или узнавание аудитории.
+- Не раскрывает весь пост, а создаёт причину читать следующую строку.
+- Конкретный, не абстрактный.
+- Звучит как живая речь, не как рекламный баннер.
+- Соответствует платформе, тону и языку результата.
+
+**Запрещённые старты:**
+- `Сегодня поговорим о...`
+- `В этом посте я расскажу...`
+- `Давайте разберёмся...`
+- `Хочу поделиться...`
+- `Наверное, вы знаете...`
+- `Очень важно понимать...`
+- `В современном мире...`
+- `Сейчас многие...`
+
+Также запрещены: длинное вступление, общие мотивационные фразы, кликбейт без содержания, сложные термины в первой строке, канцелярит, фразы без конфликта, пользы или узнавания.
+
+**Выбор hook_type внутри Writer Entity:**
+
+```text
+if emotional_trigger == "боль": use Pain Hook
+if emotional_trigger == "ошибка": use Mistake Hook
+if emotional_trigger == "любопытство": use Curiosity Hook
+if emotional_trigger == "конфликт": use Contrarian Hook
+if emotional_trigger == "польза": use Benefit Hook
+if emotional_trigger == "узнавание": use Identity Hook
+if emotional_trigger == "страх": use Warning Hook
+if tone == "дерзкий" or tone == "прямой": use Direct Truth Hook
+```
+
+**Quality Filter:** Writer Entity отклоняет opening sentence, если он длиннее 14 слов, звучит как вступление, не вызывает вопрос, слишком общий, не связан с аудиторией, обещает то, чего нет в тексте, звучит как дешёвый кликбейт или подходит к любому посту.
+
+**Score System:** каждый candidate оценивается по 5 критериям от 1 до 5: `clarity`, `specificity`, `tension`, `relevance`, `continuation_pull`. Минимальный score: `20/25`. Если score ниже 20, opening sentence перегенерируется.
+
 ### Step-by-step Writer Entity
 
 | Stage | Name | Gate / Output |
@@ -599,9 +660,9 @@ Workflow B не пишет посты напрямую из темы. Любой
 | 3 | Voice / Register Selection | generic register или Jane register 1–9, rhythm, opening, ending, emoji policy |
 | 4 | Idea Generation | 1 insight → 3–5 идей; слабые идеи убиваются здесь |
 | 5 | Idea Gate | проходит только идея с инсайтом, эмоцией, пользой, tension/promise, platform fit, voice fit, no invented facts |
-| 6 | Content Brief Builder | audience, platform, goal, core message, hook direction, emotional trigger, structure, tone, voice register, CTA, facts, avoid |
-| 7 | Draft Generation | platform-native first draft: LinkedIn journey arc, Instagram hook→tension→payoff, Telegram direct thought, Shorts retention logic |
-| 8 | AI Editing Layer | усиливает hook, clarity, rhythm, specificity, ending, CTA alignment, voice preservation, fact safety |
+| 6 | Content Brief Builder | audience, platform, goal, core message, opening sentence direction, emotional trigger, structure, tone, voice register, facts, avoid |
+| 7 | Draft Generation | platform-native first draft; первая строка = unique opening sentence внутри `Final Text`, дальше LinkedIn journey arc / Instagram tension→payoff / Telegram direct thought |
+| 8 | AI Editing Layer | усиливает opening sentence, clarity, rhythm, specificity, ending, voice preservation, fact safety |
 | 9 | Voice & Quality QA | generic QA + Jane 7-point QA; high-risk outputs require human review |
 
 ### Writer Entity Output Contract
@@ -637,7 +698,7 @@ Workflow B не пишет посты напрямую из темы. Любой
 
 Writer Entity внутри Workflow B не пишет video hooks и не генерирует сценарии для Workflow A. Video-native материал может быть связан с тем же upstream source note, но его обработка идёт отдельным путём Workflow A: intake → hook mining → script → filming card.
 
-Workflow B использует только текстовый content hook как opening для поста, привязанный к source note, insight card и portrait/audience pain. Это не video hook.
+Workflow B использует только opening sentence внутри `Final Text`, привязанный к source note, insight card и portrait/audience pain. Это не отдельный output hook и не video hook.
 
 Если нужен video-native блок, он живёт в Workflow A:
 
@@ -1128,6 +1189,7 @@ AI-агент генерирует черновик строго по брифу
 
 **Правила черновика:**
 - Platform-specific (LinkedIn = journey arc / Instagram = hook→tension→payoff / Telegram = direct thought piece)
+- Первая строка всегда `opening_sentence` по Workflow B Opening Sentence Rules; отдельный `Hook` не выводится.
 - Audience-specific — написано под конкретный портрет, не под "всех"
 - Aligned with brand voice — голос Джейн из CD2, не generic AI
 - Emotionally alive — emotional trigger из insight card активирован
@@ -1138,6 +1200,7 @@ AI-агент генерирует черновик строго по брифу
 
 LinkedIn pattern: `goal → obstacle → process → lesson → reflection → invite community`
 Instagram pattern: `hook → tension → story → aesthetic/emotional payoff → engagement prompt`
+В реализации Workflow B этот `hook` является первой строкой `Final Text`, а не отдельным полем.
 
 **Выход:** `first draft text (ru master)` и, для LinkedIn, `publish version (en)`
 
@@ -1158,7 +1221,7 @@ Instagram pattern: `hook → tension → story → aesthetic/emotional payoff �
 
 Редактор также:
 - Тайтенит текст, укорачивает
-- Усиливает хук и вступительные строки
+- Усиливает opening sentence и вступительные строки
 - Улучшает ритм (короткие + средние предложения вперемежку)
 - Проверяет эмодзи: разрешены только в регистрах 1, 2, 7 — максимум 1–2
 - Проставляет factual safety outcome: `clean` / `needs_human_confirmation` / `blocked`
@@ -1217,30 +1280,11 @@ engagement data → mapped to audience portrait + topic + format
 **Format:**
 **Approval Status:**
 
-### Hook
-...
-
 ### Final Text
 ...
-
-### CTA
-...
-
-### Traceability
-- Source IDs:
-- Insight ID:
-- Idea ID:
-- Brief ID:
-- Draft ID:
-- Edit Version ID:
-
-### QA
-- Passed:
-- Issues:
-- Human Review Required:
 ```
 
-Правило разделения: `Hook` здесь — opening текстового поста из Content Brief, а не video hook из Workflow A.
+Правило: `Final Text` начинается с уникального source-specific opening sentence. `Hook`, `CTA`, `Traceability` и `QA` не выводятся отдельными блоками в финальном asset. Traceability и QA остаются внутренними системными полями/логами, чтобы не терять доказательность и безопасность.
 
 ---
 
@@ -1294,10 +1338,10 @@ n8n следит за Notion Drafts DB через polling каждые 1–2 м�
 ```
 Review decision → "approved"
   ↓
-n8n читает: title, platform, audience, hook, final_text
+n8n читает: title, platform, audience, final_text
   ↓
 n8n создаёт запись в Notion Content Calendar:
-  - копирует text, platform, audience, pillar, hook
+  - копирует text, platform, audience, pillar
   - status = "scheduled"
   - publish_date = пустое (Джейн ставит сама)
   ↓
@@ -1369,7 +1413,7 @@ n8n помечает запись:
 | Draft text | Text | Полный текст |
 | Draft text RU | Text | каноническая рабочая версия |
 | Draft text EN | Text | publish version для LinkedIn, если нужна |
-| Final Content Asset | Text | review-ready markdown: metadata, hook, final text, CTA, traceability, QA |
+| Final Content Asset | Text | review-ready markdown: metadata + final text; opening sentence уже внутри Final Text, traceability/QA остаются внутренними системными полями |
 | Platform | Select | Instagram / LinkedIn / Telegram |
 | Audience portrait | Select | из CD1 |
 | Voice register | Select | Регистр 1–9 из CD2 |
