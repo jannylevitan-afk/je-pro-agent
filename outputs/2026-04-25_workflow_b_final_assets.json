@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-04-25T12:50:59+00:00",
+  "writer": "AnthropicPipelineWriter (claude-sonnet-4-6)",
+  "source_items": 5,
+  "draft_assets": 9,
+  "routes": {
+    "workflow_b": 4,
+    "both": 1
+  },
+  "clean_final_asset_format": true,
+  "rows": [
+    {
+      "draft_id": "draft_wf_b_founder_anna_001_instagram_lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "publish_language": "ru",
+      "audience": "dreamer_woman",
+      "voice": "register_7",
+      "final_text": "Бизнес рушится не тогда, когда кончаются деньги — а когда исчезают собственные желания.\n\nНе те, что записаны в стратегии. Свои. Живые.\n\nОсновательница держит в руках сразу всё: амбиции, семью, образ, темп. И где-то в этом балансе очень легко потерять себя — не драматично, а тихо. Просто в какой-то момент замечаешь, что живёшь по расписанию, которое сама же и составила, но оно уже не твоё.\n\nНастоящая сила — не в том, чтобы выглядеть так, будто всё легко. А в том, чтобы оставаться собой внутри всего этого.\n\nАмбиция и нежность — не противоположности. Это одна жизнь.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_expert_bali_001_instagram_professional",
+      "platform_lane": "instagram_professional",
+      "publish_language": "ru",
+      "audience": "developer_investor",
+      "voice": "register_3",
+      "final_text": "На Бали важна не цена, а слой проверки: правовая структура.\n\nПривлекательный вход в сделку — это ещё не сделка. Это момент, когда большинство покупателей перестают задавать вопросы.\n\nПрежде чем доверять цифрам, стоит проверить четыре слоя:\n\n— Правовая структура владения: кто реально контролирует актив и на каком основании.\n— Статус земли: категория, назначение, ограничения — они определяют, что можно строить и продавать.\n— Качество оператора: бутиковая концепция работает только при дисциплинированном управлении и повторяемом гостевом опыте.\n— Путь выхода: как и кому вы продадите актив через три-пять лет.\n\nПолированная история виллы становится дорогостоящей ошибкой именно тогда, когда покупатель проверяет цену раньше, чем правовую реальность.\n\nСохраните этот пост перед следующим разговором о балийской недвижимости.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_expert_bali_001_linkedin_b2b",
+      "platform_lane": "linkedin_b2b",
+      "publish_language": "en",
+      "audience": "developer_investor",
+      "voice": "register_4",
+      "final_text": "The real Bali signal sits inside the legal structure — not inside the render or the yield projection.\n\nExperienced market participants consistently identify the same pattern: an attractive entry point regularly conceals an expensive mistake. The buyer focuses on price and moves forward. Legal structure, land status, operator quality, and resale path stay off the checklist until the moment correction becomes difficult.\n\nBali real estate operates differently from most markets. Ownership form determines not only legal clarity but actual liquidity. The operator shapes more than occupancy — operator discipline creates the repeatable guest experience that drives boutique asset performance. Without that discipline, a polished concept becomes a management liability.\n\nFour questions worth asking before committing capital:\n— What is the legal structure of the deal and the land status?\n— Who is the operator, and what does their actual operational track record show?\n— What does the exit path look like at year three to five?\n— What happens to the asset if operational performance falls short of the projection?\n\nThe market does not penalize caution. It penalizes trust placed in a surface-level story.\n\nIf you are evaluating a Bali asset or comparing opportunities across several projects, I am available to work through the deal structure and identify where risk is concentrated.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_bali_travel_001_instagram_lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "publish_language": "ru",
+      "audience": "lifestyle_expat",
+      "voice": "register_2",
+      "final_text": "Бали легко снять красиво, сложнее поймать: вечерний Убуд.\n\nТот момент, когда рис уже убрали, свет стал медовым, и ты понимаешь — сюда хочется возвращаться не за видом, а за ритмом. Не за списком мест, а за тем, как здесь устроен ужин: медленно, с запахом дыма и без спешки.\n\nБали держит не достопримечательностями. Он держит повторяемостью — одним и тем же светом в одно и то же время, одним и тем же ощущением, что ты на месте.\n\nЭто сложно объяснить тем, кто не был. Легко — тем, кто уже знает.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_wellness_arch_001_instagram_lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "publish_language": "ru",
+      "audience": "architect_designer",
+      "voice": "register_2",
+      "final_text": "Wellness-проект продаёт не спа, а состояние: ощущение восстановления. Это не про отделку и не про атмосферный свет — это про маршрут, по которому движется тело, и про то, как оно себя чувствует на каждом шаге. Вода, тишина, материал под рукой, пауза между зонами — всё это работает как пространственная логика, а не как декорация. Когда архитектор выстраивает именно это, проект перестаёт быть красивой картинкой и становится аргументом: физическим, коммерческим, запоминающимся. То, что выглядит как вкус, оказывается дифференциатором.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_wellness_arch_001_instagram_professional",
+      "platform_lane": "instagram_professional",
+      "publish_language": "ru",
+      "audience": "architect_designer",
+      "voice": "register_6",
+      "final_text": "Wellness в архитектуре перестал быть красивым бонусом: теперь это логика восстановления, встроенная в пространство.\n\nНе отделка в стиле спа. Не нейтральные тона. А маршрут, по которому движется тело. Материал, который меняет температуру восприятия. Тишина, которую слышно физически.\n\nРазница между проектом, который выглядит спокойным, и проектом, который меняет состояние человека внутри — это уже не эстетика. Это архитектурное решение.\n\nВода, акустика, тактильность поверхностей, сценарий движения, точки восстановления — всё это работает как система. Когда система выстроена, пространство перестаёт быть фоном и становится инструментом.\n\nДля премиального проекта это не дополнительная опция. Это то, что отличает решение от картинки.\n\nСохраните этот фрейм для следующей сессии планирования.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_wellness_arch_001_linkedin_b2b",
+      "platform_lane": "linkedin_b2b",
+      "publish_language": "en",
+      "audience": "architect_designer",
+      "voice": "register_6",
+      "final_text": "Wellness is becoming a sharper signal of restorative feeling — and that shift is rewriting what premium design actually delivers.\n\nThe decorative spa vocabulary — natural stone, muted light, wooden surfaces — has been replicated widely enough to lose its edge. Clients still respond to it visually, but they are increasingly evaluating spaces by something harder to name: how the body feels inside them.\n\nThis is the tension worth sitting with. What reads as design taste is quietly becoming a business differentiator. The projects that hold value are not simply the ones that look peaceful. They are the ones built around spatial logic: the route through the space, acoustic behaviour, material texture that registers tactilely rather than visually, water as an active element, and transitions between zones that shift body state rather than just separate functions.\n\nFor architects and designers, this reframe has a practical edge. A client who cannot articulate why a space feels restorative will still choose it over one that only looks the part. The brief may arrive as an aesthetic preference. The actual decision is often physiological.\n\nWellness architecture is moving from a stylistic category into a design competency — one structured around water, quiet, materials, recovery, and body state. Firms that develop this as a system, not a mood board, are building a differentiator that is genuinely difficult to replicate.\n\nWhere does this logic currently sit in how you position your practice?",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_boutique_hotels_001_instagram_professional",
+      "platform_lane": "instagram_professional",
+      "publish_language": "ru",
+      "audience": "developer_investor",
+      "voice": "register_3",
+      "final_text": "Бутик-отель выигрывает не картинкой — он выигрывает логикой, которую не видно на рендере.\n\nКрасивый фасад не держит RevPAR. Удерживает его точка зрения оператора: почему гость вернётся, что он запомнит, какой ритуал сделает объект незаменимым.\n\nРынок платит за структуру раньше, чем за эстетику. Это значит: прежде чем доверять проекту, стоит проверить не мудборд, а операционную дисциплину — есть ли у команды повторяемый гостевой опыт, коммерческая логика возврата и внятная причина существования объекта.\n\nДизайн становится стратегией только тогда, когда он создаёт память, которую гость хочет воспроизвести. Без этого — это просто дорогой декор с амортизацией.\n\nПеред следующей сделкой спросите: что здесь повторяется? Если ответа нет — риск выше, чем кажется по цифрам.",
+      "clean_asset": true
+    },
+    {
+      "draft_id": "draft_wf_b_boutique_hotels_001_linkedin_b2b",
+      "platform_lane": "linkedin_b2b",
+      "publish_language": "en",
+      "audience": "developer_investor",
+      "voice": "register_3",
+      "final_text": "Boutique hospitality wins when beauty becomes an operator reality, not a render concept.\n\nThe boutique hotel market is frequently misread. Developers and investors see aesthetics — materials, light, atmosphere — and treat them as strategy. They are not. Aesthetics without operational logic is expensive decoration with a short commercial lifespan.\n\nA real asset is built differently. Three factors determine whether a project functions as a business or as an art object:\n\nPoint of view. The property needs a clear reason to exist — not \"we are charming and well-designed,\" but a specific promise to the guest that cannot be replicated next door.\n\nOperator discipline. Repeatable guest experience is not accidental. It is a system: hiring standards, service protocols, quality control across seasons. Without it, even a strong product deteriorates within two cycles.\n\nA reason to return. If a guest cannot articulate why they would come back specifically here, the project runs on one-time traffic. That is a weak revenue position and weak downside protection.\n\nDesign becomes strategy only when it produces repeatable guest memory and commercial logic. Everything else is marketing noise that performs well at launch and underdelivers on yield over the medium term.\n\nBefore trusting an opportunity, examine the structure, not the visuals. Does the project have a point of view? Does it have an operating system? Does it have a return mechanism?\n\nIf any of those three answers is vague, the risk is already priced in — just not transparently.",
+      "clean_asset": true
+    }
+  ]
+}
