@@ -23,17 +23,21 @@ class RuntimeSettings:
     request_timeout_seconds: float = 30.0
     source_feed_url: str | None = None
     kmd_root: str = "knowledge/kmd"
+    n8n_webhook_url: str | None = None
 
     def __post_init__(self) -> None:
         notion_api_key = self.notion_api_key.strip()
         anthropic_api_key = self.anthropic_api_key.strip()
         notion_parent_page_url = self.notion_parent_page_url.strip() if self.notion_parent_page_url else None
         notion_parent_page_id = self.notion_parent_page_id.strip() if self.notion_parent_page_id else None
+        n8n_webhook_url = self.n8n_webhook_url.strip() if self.n8n_webhook_url else None
 
         if not notion_api_key:
             raise ValueError("notion_api_key must not be empty")
         if not anthropic_api_key:
             raise ValueError("anthropic_api_key must not be empty")
+        if n8n_webhook_url is not None and not n8n_webhook_url.startswith(("http://", "https://")):
+            raise ValueError("n8n_webhook_url must start with http:// or https://")
 
         if notion_parent_page_id is None and notion_parent_page_url is None:
             raise ValueError("Either notion_parent_page_id or notion_parent_page_url must be provided")
@@ -50,6 +54,7 @@ class RuntimeSettings:
         object.__setattr__(self, "notion_parent_page_id", resolved_page_id)
         object.__setattr__(self, "anthropic_model", self.anthropic_model.strip() or "claude-sonnet-4-20250514")
         object.__setattr__(self, "kmd_root", kmd_root)
+        object.__setattr__(self, "n8n_webhook_url", n8n_webhook_url)
 
 
 def load_runtime_settings(
@@ -72,6 +77,7 @@ def load_runtime_settings(
         request_timeout_seconds=float(merged.get("CONTENT_ENGINE_REQUEST_TIMEOUT_SECONDS", "30.0")),
         source_feed_url=merged.get("CONTENT_ENGINE_SOURCE_FEED_URL"),
         kmd_root=merged.get("CONTENT_ENGINE_KMD_ROOT", "knowledge/kmd"),
+        n8n_webhook_url=merged.get("N8N_WEBHOOK_URL"),
     )
 
 

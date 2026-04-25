@@ -16,14 +16,17 @@ from content_engine.models.workflow_a import VideoPlatform
 from content_engine.models.workflow_b import BriefRecord
 from content_engine.notion.sync import (
     NotionClientLike,
-    create_filming_card,
     create_idea,
     create_insight,
     create_orchestration_event,
-    create_script,
     upsert_brief,
     upsert_draft,
     upsert_source,
+)
+from content_engine.orchestration.video_gate import (
+    VideoGateOrchestrationResult,
+    VideoNotionTargets,
+    orchestrate_script_ready,
 )
 from content_engine.services.approval import submit_for_review
 from content_engine.services.draft import build_draft_bundle
@@ -60,6 +63,8 @@ class LivePipelineItemResult:
     event_page_ids: list[str]
     script_page_id: str | None
     filming_card_page_id: str | None
+    video_n8n_envelope: dict[str, Any] | None = None
+    video_telegram_notification: dict[str, Any] | None = None
     knowledge_file_paths: list[str] = field(default_factory=list)
 
 
@@ -150,15 +155,21 @@ def process_source_item(
 
     script_page_id: str | None = None
     filming_card_page_id: str | None = None
+    video_n8n_envelope: dict[str, Any] | None = None
+    video_telegram_notification: dict[str, Any] | None = None
     knowledge_file_paths: list[str] = []
     if route in {"workflow_a", "both"}:
         knowledge_file_paths.extend(_write_workflow_material(knowledge_store, item, "workflow_a"))
-        script_page_id, filming_card_page_id = _run_workflow_a(
+        video_gate_result = _run_workflow_a(
             client=client,
             targets=targets,
             item=item,
             writer=writer,
         )
+        script_page_id = video_gate_result.script_page_id
+        filming_card_page_id = video_gate_result.filming_card_page_id
+        video_n8n_envelope = video_gate_result.n8n_envelope
+        video_telegram_notification = video_gate_result.telegram_notification
 
     insight_page_id: str | None = None
     idea_page_ids: list[str] = []
@@ -193,6 +204,8 @@ def process_source_item(
         event_page_ids=event_page_ids,
         script_page_id=script_page_id,
         filming_card_page_id=filming_card_page_id,
+        video_n8n_envelope=video_n8n_envelope,
+        video_telegram_notification=video_telegram_notification,
         knowledge_file_paths=knowledge_file_paths,
     )
 
@@ -212,7 +225,7 @@ def _run_workflow_a(
     targets: LivePipelineTargets,
     item: SourceItem,
     writer: WorkflowWriter | None,
-) -> tuple[str, str]:
+) -> VideoGateOrchestrationResult:
     platform = _select_video_platform(item)
     hooks = develop_video_hooks(item, platform=platform)
     best_hook = select_best_hook(hooks)
@@ -242,9 +255,16 @@ def _run_workflow_a(
         )
     card = build_filming_card(script, filming_priority=1)
 
-    script_response = create_script(client, targets.scripts_database_id, script)
-    card_response = create_filming_card(client, targets.filming_cards_database_id, card)
-    return _page_id(script_response), _page_id(card_response)
+    return orchestrate_script_ready(
+        client=client,
+        targets=VideoNotionTargets(
+            scripts_database_id=targets.scripts_database_id,
+            filming_cards_database_id=targets.filming_cards_database_id,
+        ),
+        script=script,
+        hook=best_hook,
+        filming_card=card,
+    )
 
 
 def _run_workflow_b(

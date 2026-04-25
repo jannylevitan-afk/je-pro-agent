@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Protocol
 
 from content_engine.collectors.http_json import fetch_source_items_from_json_feed
 from content_engine.knowledge.kmd import KnowledgeStore, MarkdownKnowledgeStore
 from content_engine.llm import AnthropicClient, AnthropicClientConfig, AnthropicPipelineWriter
 from content_engine.models.source_item import SourceItem
+from content_engine.n8n import N8NWebhookClient, N8NWebhookClientConfig
 from content_engine.notion import (
     NotionClient,
     NotionClientConfig,
@@ -42,6 +44,11 @@ class StaticSourceCollector:
         return list(self.items)
 
 
+class N8NClientLike(Protocol):
+    def send(self, payload: dict[str, Any]) -> dict[str, Any]:
+        ...
+
+
 def build_notion_client(settings: RuntimeSettings) -> NotionClient:
     return NotionClient(
         NotionClientConfig(
@@ -67,6 +74,17 @@ def build_pipeline_writer(settings: RuntimeSettings) -> AnthropicPipelineWriter:
     return AnthropicPipelineWriter(client, model=resolved_model)
 
 
+def build_n8n_webhook_client(settings: RuntimeSettings) -> N8NWebhookClient:
+    if not settings.n8n_webhook_url:
+        raise ValueError("N8N_WEBHOOK_URL must be configured before sending n8n events")
+    return N8NWebhookClient(
+        N8NWebhookClientConfig(
+            webhook_url=settings.n8n_webhook_url,
+            timeout_seconds=settings.request_timeout_seconds,
+        )
+    )
+
+
 def build_source_collector(settings: RuntimeSettings) -> HTTPJsonSourceCollector:
     if not settings.source_feed_url:
         raise ValueError("CONTENT_ENGINE_SOURCE_FEED_URL must be configured for HTTP collection")
@@ -85,6 +103,7 @@ def run_configured_live_pipeline(
     notion_client: NotionClient | None = None,
     writer: WorkflowWriter | None = None,
     knowledge_store: KnowledgeStore | None = None,
+    n8n_client: N8NClientLike | None = None,
 ) -> list[LivePipelineItemResult]:
     client = notion_client or build_notion_client(settings)
     _verify_notion_page_access(client, settings.notion_parent_page_id)
@@ -93,7 +112,7 @@ def run_configured_live_pipeline(
         client=client,
         parent_page_id=settings.notion_parent_page_id,
     )
-    return run_collector_cycle(
+    results = run_collector_cycle(
         collector=collector,
         client=client,
         targets=targets,
@@ -102,6 +121,32 @@ def run_configured_live_pipeline(
         writer=pipeline_writer,
         knowledge_store=knowledge_store or MarkdownKnowledgeStore(Path(settings.kmd_root)),
     )
+    resolved_n8n_client = n8n_client
+    if resolved_n8n_client is None and settings.n8n_webhook_url:
+        resolved_n8n_client = build_n8n_webhook_client(settings)
+    if resolved_n8n_client is not None:
+        dispatch_video_gate_payloads(results, resolved_n8n_client)
+    return results
+
+
+def dispatch_video_gate_payloads(
+    results: list[LivePipelineItemResult],
+    n8n_client: N8NClientLike,
+) -> int:
+    dispatched = 0
+    for result in results:
+        if result.video_n8n_envelope is None:
+            continue
+        n8n_client.send(
+            {
+                "event": "workflow_a_script_ready",
+                "source_item_id": result.source_item_id,
+                "n8n_envelope": result.video_n8n_envelope,
+                "telegram_notification": result.video_telegram_notification,
+            }
+        )
+        dispatched += 1
+    return dispatched
 
 
 def resolve_anthropic_model(client: AnthropicClient, requested_model: str) -> str:

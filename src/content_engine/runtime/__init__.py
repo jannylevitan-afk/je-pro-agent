@@ -6,9 +6,11 @@ from content_engine.runtime.dry_run import (
 from content_engine.runtime.live_run import (
     HTTPJsonSourceCollector,
     StaticSourceCollector,
+    build_n8n_webhook_client,
     build_notion_client,
     build_pipeline_writer,
     build_source_collector,
+    dispatch_video_gate_payloads,
     resolve_anthropic_model,
     run_configured_live_pipeline,
 )
@@ -26,9 +28,11 @@ __all__ = [
     "LocalSearchAgentDryRunReport",
     "StaticSourceCollector",
     "RuntimeSettings",
+    "build_n8n_webhook_client",
     "build_notion_client",
     "build_pipeline_writer",
     "build_source_collector",
+    "dispatch_video_gate_payloads",
     "load_runtime_settings",
     "resolve_anthropic_model",
     "run_local_pipeline_dry_run",

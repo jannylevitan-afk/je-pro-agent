@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from content_engine.models.approval import ApprovalResult, CalendarItem, DraftRecord, OrchestrationEvent
+from content_engine.models.workflow_a import FilmingCard, VideoHook, VideoPublishItem, VideoScript
 from content_engine.models.workflow_b import BriefRecord
 
 
@@ -43,6 +44,84 @@ def build_telegram_notification_payload(envelope: Payload) -> Payload:
         "route": route,
         "draft_id": draft["draft_id"],
         "message": message,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Workflow A — Video Pipeline
+# ---------------------------------------------------------------------------
+
+def build_video_script_envelope(script: VideoScript, hook: VideoHook) -> Payload:
+    return {
+        "workflow": "video_pipeline",
+        "route": "script_ready",
+        "script": _serialize_script(script),
+        "hook": _serialize_hook(hook),
+    }
+
+
+def build_video_filming_notification(envelope: Payload) -> Payload:
+    script = envelope["script"]
+    return {
+        "channel": "telegram",
+        "route": "script_ready",
+        "script_id": script["script_id"],
+        "message": f"New script ready to film: {script['title']} [{script['platform']}] — priority {script['filming_priority']}",
+    }
+
+
+def build_video_published_envelope(item: VideoPublishItem) -> Payload:
+    return {
+        "workflow": "video_pipeline",
+        "route": "video_published",
+        "publish_item": _serialize_publish_item(item),
+    }
+
+
+def build_video_published_notification(envelope: Payload) -> Payload:
+    item = envelope["publish_item"]
+    publish_date = item.get("publish_date") or "unscheduled date"
+    return {
+        "channel": "telegram",
+        "route": "video_published",
+        "publish_item_id": item["publish_item_id"],
+        "message": f"Video published: {item['platform']} on {publish_date}",
+    }
+
+
+def _serialize_script(script: VideoScript) -> Payload:
+    return {
+        "script_id": script.script_id,
+        "source_item_id": script.source_item_id,
+        "title": script.title,
+        "platform": script.platform,
+        "hook_text": script.hook_text,
+        "script_text": script.script_text,
+        "cta": script.cta,
+        "filming_priority": script.filming_priority,
+        "status": script.status,
+    }
+
+
+def _serialize_hook(hook: VideoHook) -> Payload:
+    return {
+        "hook_id": hook.hook_id,
+        "hook_type": hook.hook_type,
+        "hook_text": hook.hook_text,
+        "platform": hook.platform,
+        "score": hook.score,
+        "angle": hook.angle,
+    }
+
+
+def _serialize_publish_item(item: VideoPublishItem) -> Payload:
+    return {
+        "publish_item_id": item.publish_item_id,
+        "linked_script_id": item.linked_script_id,
+        "platform": item.platform,
+        "caption": item.caption,
+        "publish_date": item.publish_date,
+        "status": item.status,
     }
 
 

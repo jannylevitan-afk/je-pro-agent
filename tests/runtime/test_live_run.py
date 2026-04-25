@@ -3,6 +3,7 @@ import pytest
 from content_engine.knowledge.kmd import MarkdownKnowledgeStore
 from content_engine.runtime.live_run import (
     StaticSourceCollector,
+    dispatch_video_gate_payloads,
     resolve_anthropic_model,
     run_configured_live_pipeline,
 )
@@ -83,6 +84,15 @@ class StubModelDiscoveryClient:
         return {"data": [{"id": model_id} for model_id in self.model_ids]}
 
 
+class StubN8NClient:
+    def __init__(self) -> None:
+        self.sent_payloads: list[dict] = []
+
+    def send(self, payload: dict) -> dict:
+        self.sent_payloads.append(payload)
+        return {"ok": True}
+
+
 def test_run_configured_live_pipeline_bootstraps_processes_items_and_writes_kmd(tmp_path, video_source_item) -> None:
     client = StubRuntimeClient(
         search_results=[{"results": []}] * 8,
@@ -138,6 +148,125 @@ def test_run_configured_live_pipeline_bootstraps_processes_items_and_writes_kmd(
     assert len(results[0].knowledge_file_paths) == 2
     assert client.database_create_calls[0][1] == "Content Engine Sources"
     assert client.page_create_calls[1][1]["Script text"]["rich_text"][0]["text"]["content"] == "Anthropic video script"
+
+
+def test_run_configured_live_pipeline_dispatches_video_gate_when_client_is_supplied(
+    tmp_path,
+    video_source_item,
+) -> None:
+    client = StubRuntimeClient(
+        search_results=[{"results": []}] * 8,
+        database_create_results=[
+            {"id": "db_sources"},
+            {"id": "db_insights"},
+            {"id": "db_ideas"},
+            {"id": "db_briefs"},
+            {"id": "db_drafts"},
+            {"id": "db_events"},
+            {"id": "db_scripts"},
+            {"id": "db_filming"},
+        ],
+        page_query_results=[
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+        ],
+        page_create_results=[
+            {"id": "src_page_1"},
+            {"id": "script_page_1"},
+            {"id": "filming_page_1"},
+            {"id": "insight_page_1"},
+            {"id": "idea_page_1"},
+            {"id": "brief_page_1"},
+            {"id": "draft_page_1"},
+            {"id": "event_page_1"},
+            {"id": "idea_page_2"},
+            {"id": "brief_page_2"},
+            {"id": "draft_page_2"},
+            {"id": "event_page_2"},
+        ],
+    )
+    settings = RuntimeSettings(
+        notion_api_key="notion-token",
+        notion_parent_page_id="34b2a925815780b8bd08d56c7e1293cf",
+        anthropic_api_key="anthropic-token",
+    )
+    n8n_client = StubN8NClient()
+
+    run_configured_live_pipeline(
+        settings=settings,
+        notion_client=client,
+        writer=FakeWriter(),
+        collector=StaticSourceCollector([video_source_item]),
+        verified_facts={"Boutique hotel ROI beats mass-market in Bali."},
+        submitted_at="2026-04-24T10:00:00Z",
+        knowledge_store=MarkdownKnowledgeStore(tmp_path),
+        n8n_client=n8n_client,
+    )
+
+    assert len(n8n_client.sent_payloads) == 1
+    assert n8n_client.sent_payloads[0]["event"] == "workflow_a_script_ready"
+
+
+def test_dispatch_video_gate_payloads_sends_video_events(tmp_path, video_source_item) -> None:
+    client = StubRuntimeClient(
+        search_results=[{"results": []}] * 8,
+        database_create_results=[
+            {"id": "db_sources"},
+            {"id": "db_insights"},
+            {"id": "db_ideas"},
+            {"id": "db_briefs"},
+            {"id": "db_drafts"},
+            {"id": "db_events"},
+            {"id": "db_scripts"},
+            {"id": "db_filming"},
+        ],
+        page_query_results=[
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+        ],
+        page_create_results=[
+            {"id": "src_page_1"},
+            {"id": "script_page_1"},
+            {"id": "filming_page_1"},
+            {"id": "insight_page_1"},
+            {"id": "idea_page_1"},
+            {"id": "brief_page_1"},
+            {"id": "draft_page_1"},
+            {"id": "event_page_1"},
+            {"id": "idea_page_2"},
+            {"id": "brief_page_2"},
+            {"id": "draft_page_2"},
+            {"id": "event_page_2"},
+        ],
+    )
+    settings = RuntimeSettings(
+        notion_api_key="notion-token",
+        notion_parent_page_id="34b2a925815780b8bd08d56c7e1293cf",
+        anthropic_api_key="anthropic-token",
+    )
+    results = run_configured_live_pipeline(
+        settings=settings,
+        notion_client=client,
+        writer=FakeWriter(),
+        collector=StaticSourceCollector([video_source_item]),
+        verified_facts={"Boutique hotel ROI beats mass-market in Bali."},
+        submitted_at="2026-04-24T10:00:00Z",
+        knowledge_store=MarkdownKnowledgeStore(tmp_path),
+    )
+    n8n_client = StubN8NClient()
+
+    dispatched = dispatch_video_gate_payloads(results, n8n_client)
+
+    assert dispatched == 1
+    assert n8n_client.sent_payloads[0]["event"] == "workflow_a_script_ready"
+    assert n8n_client.sent_payloads[0]["n8n_envelope"]["route"] == "script_ready"
+    assert n8n_client.sent_payloads[0]["telegram_notification"]["channel"] == "telegram"
 
 
 def test_resolve_anthropic_model_uses_requested_when_available() -> None:
