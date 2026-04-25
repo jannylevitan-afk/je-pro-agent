@@ -377,3 +377,5 @@ def test_process_source_item_uses_injected_writer_for_script_and_draft(
     assert client.create_calls[1][1]["Script text"]["rich_text"][0]["text"]["content"] == "Anthropic video script"
     assert client.create_calls[6][1]["Draft text RU"]["rich_text"][0]["text"]["content"] == "Anthropic Russian draft"
     assert client.create_calls[6][1]["Draft text EN"]["rich_text"][0]["text"]["content"] == "Anthropic English draft"
+    final_asset = client.create_calls[6][1]["Final Content Asset"]["rich_text"][0]["text"]["content"]
+    assert "Anthropic Russian draft" in final_asset
