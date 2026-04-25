@@ -49,6 +49,33 @@ def test_preflight_blocks_jane_without_fact_and_voice_context() -> None:
     assert preflight.next_action == "stop"
 
 
+def test_preflight_does_not_block_public_word_private_or_closed_in_normal_context() -> None:
+    task = make_task(
+        raw_topic="Broker education and Bali honeymoon villas",
+        source_material=(
+            "Риелтор закрыл первую сделку. "
+            "The travel source mentions a private villa and honeymoon itinerary."
+        ),
+    )
+
+    preflight = run_preflight(task, author_voice=build_jane_levitan_voice_object())
+
+    assert preflight.status == "ready"
+    assert "private_fact_request" not in preflight.risk_flags
+
+
+def test_preflight_blocks_actual_private_deal_details() -> None:
+    task = make_task(
+        raw_topic="Use private client details",
+        source_material="Use confidential internal only deal terms from a private client.",
+    )
+
+    preflight = run_preflight(task, author_voice=build_jane_levitan_voice_object())
+
+    assert preflight.status == "blocked"
+    assert "private_fact_request" in preflight.risk_flags
+
+
 def test_jane_register_selector_uses_market_analytics_register() -> None:
     task = make_task(raw_topic="Bali market report and rental yield risk")
     voice = build_jane_levitan_voice_object()

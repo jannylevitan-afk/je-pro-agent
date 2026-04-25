@@ -91,7 +91,15 @@ JANE_QA_RULES = [
 ]
 
 POLITICS_MARKERS = ("политик", "election", "president", "government", "парламент", "выбор")
-PRIVATE_MARKERS = ("private", "confidential", "закрыт", "приват", "секрет")
+PRIVATE_RISK_PATTERNS = (
+    r"\bprivate\s+(?:fact|facts|detail|details|client|deal|terms|revenue|investor|agreement)s?\b",
+    r"\bconfidential\b",
+    r"\binternal\s+only\b",
+    r"\bundisclosed\s+(?:deal|client|terms|revenue|agreement)s?\b",
+    r"приватн(?:ый|ые|ая|ое)\s+(?:факт|факты|детал|информац)",
+    r"закрыт(?:ые|ая|ое|ый)\s+(?:детал|услов|сделк|договор|информац)",
+    r"секретн(?:ые|ая|ое|ый)\s+(?:детал|услов|сделк|договор|информац)",
+)
 CLIENT_MARKERS = ("client name", "имя клиента", "клиент по имени", "closed deal with")
 
 
@@ -862,7 +870,7 @@ def _detect_preflight_risks(raw_topic: str, source_material: str) -> list[str]:
     flags = []
     if any(marker in text for marker in POLITICS_MARKERS):
         flags.append("politics")
-    if any(marker in text for marker in PRIVATE_MARKERS):
+    if any(re.search(pattern, text) for pattern in PRIVATE_RISK_PATTERNS):
         flags.append("private_fact_request")
     if any(marker in text for marker in CLIENT_MARKERS):
         flags.append("client_name_or_closed_deal")
