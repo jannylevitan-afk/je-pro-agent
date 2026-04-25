@@ -1,8 +1,6 @@
-from content_engine.models.workflow_a import VideoPublishItem, VideoScript
+from content_engine.models.workflow_a import VideoScript
 from content_engine.n8n.payloads import (
     build_video_filming_notification,
-    build_video_published_envelope,
-    build_video_published_notification,
     build_video_script_envelope,
 )
 
@@ -41,38 +39,3 @@ def test_build_video_filming_notification_includes_priority(video_hook) -> None:
     assert notification["route"] == "script_ready"
     assert "priority 1" in notification["message"]
     assert notification["script_id"] == "scr_hook_001_1"
-
-
-def test_build_video_published_envelope_sets_publish_route() -> None:
-    item = VideoPublishItem(
-        publish_item_id="pub_scr_hook_001_1",
-        linked_script_id="scr_hook_001_1",
-        platform="instagram",
-        caption="What looks cheap first is often the most expensive later.",
-        publish_date="2026-04-25",
-        status="published",
-    )
-    envelope = build_video_published_envelope(item)
-
-    assert envelope["workflow"] == "video_pipeline"
-    assert envelope["route"] == "video_published"
-    assert envelope["publish_item"]["status"] == "published"
-    assert envelope["publish_item"]["publish_date"] == "2026-04-25"
-
-
-def test_build_video_published_notification_includes_publish_date() -> None:
-    item = VideoPublishItem(
-        publish_item_id="pub_scr_hook_001_1",
-        linked_script_id="scr_hook_001_1",
-        platform="instagram",
-        caption="What looks cheap first is often the most expensive later.",
-        publish_date="2026-04-25",
-        status="published",
-    )
-    envelope = build_video_published_envelope(item)
-    notification = build_video_published_notification(envelope)
-
-    assert notification["channel"] == "telegram"
-    assert notification["route"] == "video_published"
-    assert notification["publish_item_id"] == "pub_scr_hook_001_1"
-    assert "2026-04-25" in notification["message"]

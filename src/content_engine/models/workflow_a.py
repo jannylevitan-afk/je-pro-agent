@@ -15,6 +15,23 @@ VideoScriptStatus = Literal["scripted", "filmed", "published"]
 VideoPublishStatus = Literal["ready", "published"]
 
 
+class VideoIntakeRecord(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_item_id: str
+    platform: VideoPlatform
+    source_url: str
+    title: str
+    caption_text: str
+    spoken_transcript: str
+    transcript_source: str
+    video_refs: list[str]
+    metrics: dict[str, int]
+    audience_segment: str
+    content_theme: str
+    published_at: str
+
+
 class VideoHook(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

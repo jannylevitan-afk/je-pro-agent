@@ -10,6 +10,7 @@ from content_engine.knowledge.research_dependencies import (
     resolve_research_dependencies,
 )
 from content_engine.models.source_item import SourceItem
+from content_engine.services.workflow_a import build_video_intake_record
 
 
 class KnowledgeStore(Protocol):
@@ -86,6 +87,7 @@ def render_kmd_material(item: SourceItem, *, workflow: WorkflowName) -> str:
             include_keys=True,
         ),
         "",
+        *_video_intake_section(item, workflow),
         "## Raw Text",
         item.transcript_text.strip(),
         "",
@@ -94,6 +96,27 @@ def render_kmd_material(item: SourceItem, *, workflow: WorkflowName) -> str:
         "",
     ]
     return "\n".join(sections)
+
+
+def _video_intake_section(item: SourceItem, workflow: WorkflowName) -> list[str]:
+    if workflow != "workflow_a" or not item.media_urls:
+        return []
+    intake = build_video_intake_record(item)
+    return [
+        "## Video Intake",
+        _bullet_list(
+            {
+                "title": intake.title,
+                "caption text": intake.caption_text,
+                "spoken transcript": _excerpt(intake.spoken_transcript),
+                "transcript source": intake.transcript_source,
+                "video refs": intake.video_refs,
+                "metrics": intake.metrics,
+            },
+            include_keys=True,
+        ),
+        "",
+    ]
 
 
 def _format_frontmatter(values: dict[str, object]) -> list[str]:

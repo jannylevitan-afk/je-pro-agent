@@ -105,6 +105,7 @@ def test_process_source_item_routes_video_item_into_both_workflows(video_source_
     assert result.route == "both"
     assert result.script_page_id == "script_page_1"
     assert result.filming_card_page_id == "filming_page_1"
+    assert client.create_calls[1][1]["Title"]["title"][0]["text"]["content"] == "What cheap villas hide"
     assert result.video_n8n_envelope["route"] == "script_ready"
     assert result.video_telegram_notification["channel"] == "telegram"
     assert "priority 1" in result.video_telegram_notification["message"]

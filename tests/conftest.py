@@ -45,7 +45,14 @@ def video_source_item() -> SourceItem:
         dedupe_key="instagram:reel_001",
         audience_segment="developer_investor",
         content_theme="boutique_hotels",
-        raw_payload={"caption": "Cheap villas are never actually cheap."},
+        raw_payload={
+            "video_title": "What cheap villas hide",
+            "caption_text": "Cheap villas are never actually cheap.",
+            "spoken_transcript": (
+                "Cheap villas are never actually cheap when legal, design, and management costs arrive."
+            ),
+            "transcript_source": "caption_or_transcript",
+        },
         transcript_text="Cheap villas are never actually cheap when legal, design, and management costs arrive.",
         media_urls=["https://cdn.example.com/reel.mp4"],
         engagement_signals={"views": 5200, "saves": 140},

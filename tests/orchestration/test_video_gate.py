@@ -1,12 +1,9 @@
 import pytest
 
-from content_engine.models.workflow_a import FilmingCard, VideoPublishItem, VideoScript
+from content_engine.models.workflow_a import FilmingCard, VideoScript
 from content_engine.orchestration.video_gate import (
-    VideoPublishNotionTargets,
-    VideoPublishOrchestrationResult,
     VideoGateOrchestrationResult,
     VideoNotionTargets,
-    orchestrate_video_published,
     orchestrate_script_ready,
 )
 from tests.notion.conftest import StubNotionClient
@@ -32,17 +29,6 @@ def make_filming_card() -> FilmingCard:
         linked_script_id="scr_hook_001_1",
         filming_priority=1,
         filmed=False,
-    )
-
-
-def make_publish_item() -> VideoPublishItem:
-    return VideoPublishItem(
-        publish_item_id="pub_scr_hook_001_1",
-        linked_script_id="scr_hook_001_1",
-        platform="instagram",
-        caption="What looks cheap first is often the most expensive later.",
-        publish_date="2026-04-25",
-        status="published",
     )
 
 
@@ -95,25 +81,3 @@ def test_orchestrate_script_ready_builds_n8n_envelope(video_hook) -> None:
 def test_video_notion_targets_rejects_empty_ids() -> None:
     with pytest.raises(ValueError, match="scripts_database_id"):
         VideoNotionTargets(scripts_database_id="", filming_cards_database_id="db_filming")
-
-
-def test_orchestrate_video_published_creates_notion_entry_and_payload() -> None:
-    client = StubNotionClient(create_results=[{"id": "page_publish_001"}])
-    targets = VideoPublishNotionTargets(publish_calendar_database_id="db_video_calendar")
-
-    result = orchestrate_video_published(
-        client=client,
-        targets=targets,
-        publish_item=make_publish_item(),
-    )
-
-    assert isinstance(result, VideoPublishOrchestrationResult)
-    assert result.publish_page_id == "page_publish_001"
-    assert result.n8n_envelope["route"] == "video_published"
-    assert result.telegram_notification["route"] == "video_published"
-    assert "Video published" in result.telegram_notification["message"]
-
-
-def test_video_publish_targets_rejects_empty_ids() -> None:
-    with pytest.raises(ValueError, match="publish_calendar_database_id"):
-        VideoPublishNotionTargets(publish_calendar_database_id="")

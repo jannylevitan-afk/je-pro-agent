@@ -13,10 +13,13 @@ Turn public video signals into a normalized source item that can feed the Video 
 
 - video refs
 - source links
+- video title
 - captions or transcript text
+- spoken transcript when the public source/API provides it
 - metadata
 - comments when available through public context
 - visual hints and hook signals
+- public metrics relevant to routing, especially views, likes, comments, saves, shares
 
 ## Output Contract
 
@@ -27,6 +30,10 @@ Turn public video signals into a normalized source item that can feed the Video 
 - transcript text
 - media URLs
 - engagement signals
+- `raw_payload.video_title`
+- `raw_payload.caption_text`
+- `raw_payload.spoken_transcript`
+- `raw_payload.transcript_source`
 
 ## Rules
 
@@ -37,4 +44,6 @@ Turn public video signals into a normalized source item that can feed the Video 
 ## Current Project Mapping
 
 - Native parsing: `src/content_engine/collectors/native.py`
+- Structured intake: `src/content_engine/services/workflow_a.py::build_video_intake_record`
+- KMD handoff: `src/content_engine/knowledge/kmd.py`
 - Workflow A handoff: `src/content_engine/orchestration/live_pipeline.py`

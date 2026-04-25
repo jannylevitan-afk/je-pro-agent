@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from content_engine.models.approval import ApprovalResult, CalendarItem, DraftRecord, OrchestrationEvent
-from content_engine.models.workflow_a import FilmingCard, VideoHook, VideoPublishItem, VideoScript
+from content_engine.models.workflow_a import VideoHook, VideoScript
 from content_engine.models.workflow_b import BriefRecord
 
 
@@ -70,25 +70,6 @@ def build_video_filming_notification(envelope: Payload) -> Payload:
     }
 
 
-def build_video_published_envelope(item: VideoPublishItem) -> Payload:
-    return {
-        "workflow": "video_pipeline",
-        "route": "video_published",
-        "publish_item": _serialize_publish_item(item),
-    }
-
-
-def build_video_published_notification(envelope: Payload) -> Payload:
-    item = envelope["publish_item"]
-    publish_date = item.get("publish_date") or "unscheduled date"
-    return {
-        "channel": "telegram",
-        "route": "video_published",
-        "publish_item_id": item["publish_item_id"],
-        "message": f"Video published: {item['platform']} on {publish_date}",
-    }
-
-
 def _serialize_script(script: VideoScript) -> Payload:
     return {
         "script_id": script.script_id,
@@ -112,18 +93,6 @@ def _serialize_hook(hook: VideoHook) -> Payload:
         "score": hook.score,
         "angle": hook.angle,
     }
-
-
-def _serialize_publish_item(item: VideoPublishItem) -> Payload:
-    return {
-        "publish_item_id": item.publish_item_id,
-        "linked_script_id": item.linked_script_id,
-        "platform": item.platform,
-        "caption": item.caption,
-        "publish_date": item.publish_date,
-        "status": item.status,
-    }
-
 
 def _resolve_route(result: ApprovalResult) -> str:
     decision = result.updated_draft.review_decision

@@ -34,6 +34,7 @@ from content_engine.services.editing import run_editorial_gate
 from content_engine.services.routing import route_signal
 from content_engine.services.workflow_a import (
     build_filming_card,
+    build_video_intake_record,
     build_video_script,
     develop_video_hooks,
     select_best_hook,
@@ -227,11 +228,13 @@ def _run_workflow_a(
     writer: WorkflowWriter | None,
 ) -> VideoGateOrchestrationResult:
     platform = _select_video_platform(item)
+    intake = build_video_intake_record(item)
     hooks = develop_video_hooks(item, platform=platform)
     best_hook = select_best_hook(hooks)
-    title = _build_video_title(item)
+    title = intake.title or _build_video_title(item)
     body_points = [
-        infer_useful_lesson(item),
+        _video_script_source_line(intake.spoken_transcript or infer_useful_lesson(item)),
+        _video_metric_line(intake.metrics),
         "The real risk usually hides in legal structure, operations, and price illusion.",
         "Good video content should show the market logic before it shows the object.",
     ]
@@ -454,6 +457,19 @@ def _select_video_platform(item: SourceItem) -> VideoPlatform:
 
 def _build_video_title(item: SourceItem) -> str:
     return f"{item.content_theme.replace('_', ' ').title()} signal for {item.audience_segment}"
+
+
+def _video_script_source_line(transcript: str) -> str:
+    normalized = " ".join(transcript.split()).strip()
+    if len(normalized) <= 220:
+        return normalized
+    return normalized[:219].rstrip() + "..."
+
+
+def _video_metric_line(metrics: dict[str, int]) -> str:
+    if not metrics:
+        return "No public video metrics were available at collection time."
+    return "Public video metrics: " + ", ".join(f"{key}={value}" for key, value in sorted(metrics.items()))
 
 
 def _reuse_score(item: SourceItem) -> int:

@@ -1,6 +1,7 @@
 from content_engine.models.source_item import SourceItem
 from content_engine.services.workflow_a import (
     build_filming_card,
+    build_video_intake_record,
     build_video_publish_item,
     build_video_script,
     develop_video_hooks,
@@ -21,7 +22,14 @@ def make_video_source_item() -> SourceItem:
         dedupe_key="instagram:1",
         audience_segment="developer_investor",
         content_theme="boutique_hotels",
-        raw_payload={"caption": "Cheap villas are never actually cheap."},
+        raw_payload={
+            "video_title": "What cheap villas hide",
+            "caption_text": "Cheap villas are never actually cheap.",
+            "spoken_transcript": (
+                "Cheap villas are never actually cheap when legal, design, and management costs arrive."
+            ),
+            "transcript_source": "caption_or_transcript",
+        },
         transcript_text="Cheap villas are never actually cheap when legal, design, and management costs arrive.",
         media_urls=["https://cdn.example.com/reel.mp4"],
         engagement_signals={"views": 5200, "saves": 140},
@@ -30,6 +38,21 @@ def make_video_source_item() -> SourceItem:
         routing_confidence=0.94,
         processing_state="collected",
     )
+
+
+def test_build_video_intake_record_extracts_title_transcript_refs_and_metrics() -> None:
+    intake = build_video_intake_record(make_video_source_item())
+
+    assert intake.title == "What cheap villas hide"
+    assert intake.caption_text == "Cheap villas are never actually cheap."
+    assert "management costs arrive" in intake.spoken_transcript
+    assert intake.transcript_source == "caption_or_transcript"
+    assert intake.video_refs == [
+        "https://instagram.com/reel/1",
+        "https://cdn.example.com/reel.mp4",
+    ]
+    assert intake.metrics == {"views": 5200, "saves": 140}
+    assert intake.content_theme == "boutique_hotels"
 
 
 def test_develop_video_hooks_returns_five_candidates() -> None:
@@ -95,4 +118,3 @@ def test_build_video_publish_item_marks_item_ready() -> None:
 
     assert publish_item.linked_script_id == script.script_id
     assert publish_item.status == "ready"
-

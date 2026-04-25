@@ -16,3 +16,15 @@ def test_markdown_knowledge_store_writes_workflow_source_material(tmp_path, sour
     assert "## Search Dependencies" in body
     assert "## Source Note" in body
     assert "## Writer Context" in body
+
+
+def test_markdown_knowledge_store_includes_video_intake_for_workflow_a(tmp_path, video_source_item) -> None:
+    store = MarkdownKnowledgeStore(tmp_path)
+
+    path = store.write_source_material(video_source_item, workflow="workflow_a")
+
+    body = path.read_text(encoding="utf-8")
+    assert "## Video Intake" in body
+    assert "title: What cheap villas hide" in body
+    assert "spoken transcript: Cheap villas are never actually cheap" in body
+    assert "views=5200" in body

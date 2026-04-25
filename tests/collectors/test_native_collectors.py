@@ -40,6 +40,9 @@ YOUTUBE_RSS = """
     <media:group>
       <media:description>Cheap villas are never actually cheap when legal, design, and management costs arrive.</media:description>
       <media:thumbnail url="https://i.ytimg.com/vi/abc123/hqdefault.jpg" />
+      <media:community>
+        <media:statistics views="4875" />
+      </media:community>
     </media:group>
   </entry>
 </feed>
@@ -56,7 +59,16 @@ INSTAGRAM_HTML = """
     <meta property="og:image" content="https://cdn.example.com/cover.jpg" />
     <meta property="article:published_time" content="2026-04-24T07:45:00Z" />
     <script type="application/ld+json">
-      {"interactionStatistic":[{"userInteractionCount":5200}]}
+      {
+        "name": "Deal logic in Bali",
+        "caption": "Cheap villas are never actually cheap.",
+        "transcript": "Speaker says: cheap villas are never actually cheap after legal, design, and management costs.",
+        "interactionStatistic": [
+          {"interactionType":"https://schema.org/WatchAction","userInteractionCount":5200},
+          {"interactionType":"https://schema.org/LikeAction","userInteractionCount":410},
+          {"interactionType":"https://schema.org/CommentAction","userInteractionCount":38}
+        ]
+      }
     </script>
   </head>
 </html>
@@ -226,6 +238,10 @@ def test_collect_native_source_items_parses_youtube_feed() -> None:
     assert len(items) == 1
     assert items[0].source_type == "youtube_video"
     assert items[0].media_urls == ["https://i.ytimg.com/vi/abc123/hqdefault.jpg"]
+    assert items[0].raw_payload["video_title"] == "What cheap villas hide"
+    assert items[0].raw_payload["caption_text"].startswith("Cheap villas are never actually cheap")
+    assert items[0].raw_payload["transcript_source"] == "caption_or_description"
+    assert items[0].engagement_signals["views"] == 4875
     assert items[0].routing_decision == "both"
     assert items[0].routing_reason == "video signal with textual depth"
 
@@ -270,6 +286,11 @@ def test_collect_native_source_items_parses_html_meta_platforms(
     assert items[0].source_type == expected_source_type
     assert items[0].routing_decision == expected_route
     assert items[0].transcript_text
+    if platform == "instagram":
+        assert items[0].raw_payload["video_title"] == "Deal logic in Bali"
+        assert items[0].raw_payload["caption_text"] == "Cheap villas are never actually cheap."
+        assert "Speaker says" in items[0].raw_payload["spoken_transcript"]
+        assert items[0].engagement_signals == {"views": 5200, "likes": 410, "comments": 38}
 
 
 def test_native_source_collector_dispatches_multiple_platform_targets() -> None:

@@ -24,6 +24,7 @@ The current architecture document lives at:
 - Research Agent collects and tags source items; workflows only process prepared inputs.
 - Source discovery expands from the approved seed pool in `examples/seed_config.sample.yaml`.
 - Workflow A/B can write `.kmd.md` material files through `CONTENT_ENGINE_KMD_ROOT`.
+- Workflow A video intake preserves video title, caption/transcript, source refs, and public metrics before scripting.
 - Workflow A returns `script_ready` n8n/Telegram payloads after creating Script + Filming Card records.
 - Optional n8n webhook dispatch is enabled with `N8N_WEBHOOK_URL`.
 - Notion publishing is manual; the system prepares queues, briefs, drafts, and review events.

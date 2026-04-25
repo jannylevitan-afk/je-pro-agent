@@ -226,6 +226,7 @@ def _parse_youtube_feed(
         )
         thumbnail = entry.find("media:group/media:thumbnail", namespaces)
         media_urls = [thumbnail.get("url")] if thumbnail is not None and thumbnail.get("url") else []
+        engagement_signals = _extract_youtube_engagement_signals(entry, namespaces)
 
         transcript_text = ". ".join(part for part in [title, description] if part).strip()
         content_hash = _content_hash(transcript_text, media_urls)
@@ -251,12 +252,14 @@ def _parse_youtube_feed(
             raw_payload={
                 "platform": "youtube",
                 "target_url": target_url,
-                "title": title,
-                "description": description,
+                "video_title": title,
+                "caption_text": description,
+                "spoken_transcript": description,
+                "transcript_source": "caption_or_description",
             },
             transcript_text=transcript_text,
             media_urls=media_urls,
-            engagement_signals={},
+            engagement_signals=engagement_signals,
             routing_decision=route,
             routing_reason=reason,
             routing_confidence=confidence,
@@ -278,7 +281,15 @@ def _parse_html_meta_page(
     source_url = parser.meta.get("og:url") or target_url
     title = parser.meta.get("og:title", "").strip()
     description = parser.meta.get("og:description", "").strip()
-    transcript_text = ". ".join(part for part in [title, description] if part).strip()
+    video_title = _extract_json_text(parser.json_ld, ("name", "headline"), fallback=title)
+    caption_text = _extract_json_text(parser.json_ld, ("caption", "description"), fallback=description)
+    spoken_transcript = _extract_json_text(
+        parser.json_ld,
+        ("transcript", "transcriptText", "videoTranscript"),
+        fallback=caption_text,
+    )
+    transcript_source = "explicit_transcript" if spoken_transcript != caption_text else "caption_or_description"
+    transcript_text = ". ".join(part for part in [video_title, spoken_transcript] if part).strip()
     if not transcript_text:
         raise ValueError(f"Could not extract transcript text from {target.platform} page")
 
@@ -322,6 +333,10 @@ def _parse_html_meta_page(
         raw_payload={
             "platform": target.platform,
             "target_url": target_url,
+            "video_title": video_title,
+            "caption_text": caption_text,
+            "spoken_transcript": spoken_transcript,
+            "transcript_source": transcript_source,
             "meta": parser.meta,
             "json_ld": parser.json_ld,
         },
@@ -385,6 +400,10 @@ def _build_instagram_profile_item(
         raw_payload={
             "platform": "instagram",
             "target_url": target_url,
+            "video_title": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
+            "caption_text": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
+            "spoken_transcript": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
+            "transcript_source": "caption_or_description",
             "apify_profile": profile_payload,
         },
         transcript_text=transcript_text,
@@ -563,6 +582,24 @@ def _content_hash(transcript_text: str, media_urls: list[str]) -> str:
     return sha256(payload.encode("utf-8")).hexdigest()[:16]
 
 
+def _extract_youtube_engagement_signals(
+    entry: ElementTree.Element,
+    namespaces: dict[str, str],
+) -> dict[str, int]:
+    signals: dict[str, int] = {}
+    statistics = entry.find("media:group/media:community/media:statistics", namespaces)
+    if statistics is not None:
+        views = statistics.get("views")
+        if views is not None:
+            signals["views"] = _parse_metric_value(views)
+    star_rating = entry.find("media:group/media:community/media:starRating", namespaces)
+    if star_rating is not None:
+        count = star_rating.get("count")
+        if count is not None:
+            signals["ratings"] = _parse_metric_value(count)
+    return signals
+
+
 def _infer_route(source_type: str, transcript_text: str, media_urls: list[str]) -> tuple[str, str, float]:
     words = len(transcript_text.split())
     has_video_signal = bool(media_urls) or any(token in source_type for token in ("video", "reel", "tiktok"))
@@ -613,15 +650,41 @@ def _infer_html_source_type(platform: NativePlatform, source_url: str, media_url
     return f"{platform}_post"
 
 
+def _extract_json_text(json_ld: dict[str, Any], keys: tuple[str, ...], *, fallback: str = "") -> str:
+    for key in keys:
+        value = json_ld.get(key)
+        if isinstance(value, str) and value.strip():
+            return _normalize_text_fragment(value)
+    return _normalize_text_fragment(fallback)
+
+
 def _extract_interaction_signals(json_ld: dict[str, Any]) -> dict[str, int]:
     interaction = json_ld.get("interactionStatistic")
+    signals: dict[str, int] = {}
     if isinstance(interaction, list):
         for item in interaction:
             if isinstance(item, dict) and "userInteractionCount" in item:
-                return {"interactions": int(item["userInteractionCount"])}
+                metric_name = _interaction_metric_name(item)
+                signals[metric_name] = _parse_metric_value(str(item["userInteractionCount"]))
+        return signals
     if isinstance(interaction, dict) and "userInteractionCount" in interaction:
-        return {"interactions": int(interaction["userInteractionCount"])}
+        return {
+            _interaction_metric_name(interaction): _parse_metric_value(str(interaction["userInteractionCount"]))
+        }
     return {}
+
+
+def _interaction_metric_name(item: dict[str, Any]) -> str:
+    interaction_type = str(item.get("interactionType", "")).lower()
+    if "watchaction" in interaction_type or "viewaction" in interaction_type:
+        return "views"
+    if "likeaction" in interaction_type:
+        return "likes"
+    if "commentaction" in interaction_type:
+        return "comments"
+    if "shareaction" in interaction_type:
+        return "shares"
+    return "interactions"
 
 
 def _find_first(text: str, pattern: str) -> str | None:
