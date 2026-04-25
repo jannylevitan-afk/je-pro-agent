@@ -404,7 +404,13 @@ def _run_workflow_b(
             draft_id=draft_id,
             edit_version_id=edit_version_id,
             hook=writer_entity_output.edited_final.hook,
-            final_text=_final_asset_text(writer_entity_output, draft_text_ru, writer_used=writer is not None),
+            final_text=_final_asset_text(
+                writer_entity_output,
+                draft_text_ru=draft_text_ru,
+                draft_text_en=draft_text_en,
+                decision=decision,
+                writer_used=writer is not None,
+            ),
             cta=writer_entity_output.edited_final.cta,
         )
         draft_record = DraftRecord(
@@ -747,7 +753,16 @@ def _writer_entity_draft_text_en(writer_entity_output: Any, decision: WorkflowBD
     )
 
 
-def _final_asset_text(writer_entity_output: Any, draft_text_ru: str, *, writer_used: bool) -> str:
+def _final_asset_text(
+    writer_entity_output: Any,
+    *,
+    draft_text_ru: str,
+    draft_text_en: str | None,
+    decision: WorkflowBDecision,
+    writer_used: bool,
+) -> str:
+    if decision.platform_lane == "linkedin_b2b" and draft_text_en:
+        return draft_text_en
     if writer_used:
         return draft_text_ru
     return writer_entity_output.edited_final.body
