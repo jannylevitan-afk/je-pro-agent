@@ -24,6 +24,13 @@ DRAFTS_DB_SCHEMA = {
     "Linked brief": "rich_text",
     "Linked calendar": "rich_text",
     "Archived": "checkbox",
+    "Writer preflight status": "select",
+    "Writer risk flags": "rich_text",
+    "Writer selected idea": "rich_text",
+    "Hook options": "rich_text",
+    "CTA options": "rich_text",
+    "Writer QA Report": "rich_text",
+    "Writer human review required": "checkbox",
 }
 
 BRIEFS_DB_SCHEMA = {

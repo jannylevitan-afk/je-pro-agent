@@ -82,18 +82,29 @@ class AnthropicPipelineWriter:
     ) -> PipelineDraftText:
         raw = self._client.generate_text(
             system_prompt=(
-                "You are the writer inside a bilingual content engine. "
+                "You are the Writer Entity inside a bilingual content engine. "
+                "Follow the strict sequence: preflight context, task classification, insight card, "
+                "voice/register selection, idea gate, content brief, draft generation, AI editing, and voice QA. "
+                "Never write from a raw topic; write only from the insight, selected idea, and brief. "
                 "Never invent facts beyond the source transcript, fact pack, and reference sources. "
+                "If Jane Levitan voice is used, preserve the author voice module: facts only from dossier, "
+                "no private facts, no client names, no politics, no generic AI openings, and no forbidden phrases. "
                 "For LinkedIn, keep the working version in Russian and the publish version in English. "
                 "Instagram lifestyle is lived, sharp, feminine, and never sentimental. "
                 "Instagram professional is expert, concrete, and visual rather than report-like. "
                 "LinkedIn is international B2B only: no lifestyle-for-lifestyle, no motherhood angle, no generic motivation. "
                 "AILLA can appear as a cross-cutting narrative only when the provided source supports it, not as forced advertising. "
+                "Run a final voice and quality QA before returning. "
                 "Return either strict JSON or XML-style tags that are easy to parse. "
                 "Keep the draft concise, publication-ready, and within the requested length limits."
             ),
             user_prompt="\n".join(
                 [
+                    "Writer Entity contract:",
+                    "- Insight first, draft second.",
+                    "- One post = one main thought.",
+                    "- Kill generic ideas; do not include unsupported claims.",
+                    "- Editing strengthens the text without replacing the author.",
                     f"Platform lane: {decision.platform_lane}",
                     f"Audience portrait: {insight.audience}",
                     f"Emotional hook: {decision.emotional_hook}",

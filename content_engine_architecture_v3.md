@@ -545,6 +545,112 @@ Measure → top hook patterns + topics → Research Agent adjusts search params
 
 ---
 
+## Writer Entity — обязательный writing workflow
+
+Workflow B не пишет посты напрямую из темы. Любой пост, тема, video hook, content brief или draft проходит через `Writer Entity`.
+
+Принцип:
+
+```text
+Пост не пишется из темы.
+Пост пишется из инсайта.
+
+Голос не имитируется "по стилю".
+Голос собирается из фактов, регистров, запретов, ритма и границ автора.
+```
+
+### Writer Entity = Universal Writing Engine + Author Voice Module
+
+| Слой | За что отвечает |
+|---|---|
+| Universal Writing Engine | task classification, insight extraction, idea generation, idea gate, brief, draft, editing, platform adaptation, QA |
+| Author Voice Module | факты автора, регистры, табу, forbidden phrases, privacy boundaries, rhythm, lexicon, platform rules |
+
+Для Jane Levitan используется `Voice_Jane_Levitan_Agent`. Если для текста от имени Jane нет Fact Dossier или Voice Profile, финальный текст не генерируется.
+
+### Required Writer Input
+
+```json
+{
+  "raw_topic": "тема или сырой запрос",
+  "source_material": "source note, transcript, тезисы, ссылка или описание идеи",
+  "target_audience": "кто читает",
+  "platform": "LinkedIn | Instagram | Telegram | TikTok | YouTube Shorts",
+  "goal": "sales | authority | engagement | nurture | education | personal_brand",
+  "tone_of_voice": "expert | sharp | personal | analytical | emotional | manifesto",
+  "length": "short | medium | long",
+  "cta_type": "comment | save | share | DM | click | no_CTA",
+  "author_profile": "generic | jane_levitan | custom",
+  "available_context": {
+    "fact_dossier": true,
+    "voice_profile": true,
+    "source_material": true
+  }
+}
+```
+
+### Step-by-step Writer Entity
+
+| Stage | Name | Gate / Output |
+|---|---|---|
+| 0 | Preflight / Fact / Privacy Gate | `ready / needs_context / blocked`; проверяет тему, source material, audience, platform, goal, Jane dossier/voice/profile/privacy |
+| 1 | Task Classification | content type, platform, audience, goal, voice mode, risk level, fact verification required |
+| 2 | Insight Extraction | topic, angle, emotional trigger, audience fit, hidden tension, promise, risk |
+| 3 | Voice / Register Selection | generic register или Jane register 1–9, rhythm, opening, ending, emoji policy |
+| 4 | Idea Generation | 1 insight → 3–5 идей; слабые идеи убиваются здесь |
+| 5 | Idea Gate | проходит только идея с инсайтом, эмоцией, пользой, tension/promise, platform fit, voice fit, no invented facts |
+| 6 | Content Brief Builder | audience, platform, goal, core message, hook direction, emotional trigger, structure, tone, voice register, CTA, facts, avoid |
+| 7 | Draft Generation | platform-native first draft: LinkedIn journey arc, Instagram hook→tension→payoff, Telegram direct thought, Shorts retention logic |
+| 8 | AI Editing Layer | усиливает hook, clarity, rhythm, specificity, ending, CTA alignment, voice preservation, fact safety |
+| 9 | Voice & Quality QA | generic QA + Jane 7-point QA; high-risk outputs require human review |
+
+### Writer Entity Output Contract
+
+```json
+{
+  "preflight": {},
+  "task_classification": {},
+  "insight_card": {},
+  "ideas": [],
+  "selected_idea": {},
+  "content_brief": {},
+  "draft": {},
+  "edited_final": {},
+  "hook_options": [],
+  "cta_options": [],
+  "qa_report": {}
+}
+```
+
+### Jane Levitan Voice Module — hard rules
+
+- Facts only from Fact Dossier, source note, or verified public/internal facts.
+- Voice only from Voice Profile and selected register.
+- Never invent numbers, dates, names, clients, deals, legal details.
+- Politics is forbidden.
+- Private facts are never used.
+- Russian texts address the reader as `ты`.
+- No fake AI phrasing, generic motivational endings, hashtag blocks, or generic 3-point sermons.
+- Human review is required for financial numbers, deals, clients, legal/regulatory implications, LinkedIn authority positioning, investor/developer content, brand-sensitive content, or confidence below 8/10.
+
+### Separate Video Hooks + Topics Module
+
+Для video-native материала Writer Entity может не писать полный сценарий, а генерировать:
+
+```json
+{
+  "top_hooks": [],
+  "topics": [],
+  "best_hook": {},
+  "best_topic": {},
+  "hook_quality_gate": []
+}
+```
+
+Hook quality gate проверяет: specificity, curiosity/tension, audience clarity, real payoff, deliverability, emotional sharpness, voice fit, forbidden phrase safety.
+
+---
+
 ## КОНТЕКСТНЫЕ ДОКУМЕНТЫ WORKFLOW B
 
 Три документа загружаются в контекст AI-агента перед каждой задачей генерации или редактуры. Они определяют **для кого** пишется контент, **как** он звучит и **на каких фактах** он имеет право строиться.

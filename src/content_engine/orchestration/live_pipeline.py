@@ -43,9 +43,9 @@ from content_engine.services.workflow_b import (
     build_content_brief,
     build_idea_candidate,
     build_insight_card,
-    gate_idea_candidate,
     normalize_source_item,
 )
+from content_engine.services.writer_entity import run_writer_entity_for_workflow_b
 from content_engine.orchestration.targets import LivePipelineTargets
 
 
@@ -295,25 +295,26 @@ def _run_workflow_b(
     event_page_ids: list[str] = []
 
     for decision in expand_workflow_b_decisions(item):
+        reference_sources = _reference_sources(item, decision)
+        writer_entity_output = run_writer_entity_for_workflow_b(
+            item=item,
+            legacy_insight=insight,
+            decision=decision,
+            verified_facts=verified_facts,
+            reference_sources=reference_sources,
+        )
         idea = build_idea_candidate(
             insight=insight,
             platform=decision.platform,
             platform_lane=decision.platform_lane,
             language_mode="ru",
             funnel_role=decision.funnel_role,
-            working_title=_build_working_title(item, decision),
-            emotional_hook=decision.emotional_hook,
-            desired_reaction=decision.desired_reaction,
-            suggested_format=_suggested_format(decision),
+            working_title=writer_entity_output.selected_idea.title,
+            emotional_hook=writer_entity_output.selected_idea.emotional_trigger,
+            desired_reaction=writer_entity_output.content_brief.cta,
+            suggested_format=writer_entity_output.selected_idea.format_suggestion,
         )
-        gate_passed, failed_gates = gate_idea_candidate(
-            {
-                "audience_fit": True,
-                "value_emotion": insight.reuse_score >= 2,
-                "engagement_trigger": bool(decision.desired_reaction),
-                "platform_lane_fit": True,
-            }
-        )
+        gate_passed = writer_entity_output.selected_idea.idea_id in writer_entity_output.idea_gate.passed
         idea_response = create_idea(
             client,
             targets.ideas_database_id,
@@ -325,17 +326,16 @@ def _run_workflow_b(
         if not gate_passed:
             continue
 
-        reference_sources = _reference_sources(item, decision)
         brief = build_content_brief(
             insight=insight,
             platform=decision.platform,
             platform_lane=decision.platform_lane,
             funnel_role=decision.funnel_role,
             purpose=_purpose(decision),
-            hook=_hook_line(item, decision),
-            key_points=_key_points(item),
+            hook=writer_entity_output.content_brief.hook_direction,
+            key_points=_writer_entity_key_points(writer_entity_output, item),
             cta_type=decision.cta_type,
-            tone=decision.tone,
+            tone=writer_entity_output.voice_selection.primary_register,
             length_target="medium",
             engagement_objective=decision.engagement_objective,
             fact_pack=_matching_fact_pack(item, verified_facts),
@@ -357,8 +357,8 @@ def _run_workflow_b(
         brief_response = upsert_brief(client, targets.briefs_database_id, brief_record)
         brief_page_ids.append(_page_id(brief_response))
 
-        draft_text_ru = _draft_text_ru(item, insight, decision)
-        draft_text_en = _draft_text_en(item, insight, decision)
+        draft_text_ru = _writer_entity_draft_text_ru(writer_entity_output)
+        draft_text_en = _writer_entity_draft_text_en(writer_entity_output, decision)
         if writer is not None:
             writer_output = writer.write_workflow_b_draft(
                 item=item,
@@ -401,6 +401,13 @@ def _run_workflow_b(
             seven_point_test_passed=editing_result.seven_point_passed,
             factual_safety=editing_result.factual_safety,
             linked_brief_id=brief_record.brief_id,
+            writer_preflight_status=writer_entity_output.preflight.status,
+            writer_risk_flags=writer_entity_output.preflight.risk_flags,
+            writer_selected_idea=writer_entity_output.selected_idea.title,
+            writer_hook_options=_writer_entity_option_texts(writer_entity_output.hook_options),
+            writer_cta_options=_writer_entity_option_texts(writer_entity_output.cta_options),
+            writer_qa_report=_writer_entity_qa_summary(writer_entity_output),
+            writer_human_review_required=writer_entity_output.qa_report.requires_human_review,
         )
         if draft_record.factual_safety == "blocked":
             draft_response = upsert_draft(client, targets.drafts_database_id, draft_record)
@@ -533,6 +540,18 @@ def _key_points(item: SourceItem) -> list[str]:
     ]
 
 
+def _writer_entity_key_points(writer_entity_output: Any, item: SourceItem) -> list[str]:
+    points = [
+        writer_entity_output.selected_idea.core_message,
+        writer_entity_output.insight_card.hidden_tension,
+        writer_entity_output.insight_card.promise,
+    ]
+    normalized = [" ".join(point.split()).strip() for point in points if str(point).strip()]
+    if len(normalized) >= 3:
+        return normalized[:3]
+    return _key_points(item)
+
+
 def _matching_fact_pack(item: SourceItem, verified_facts: set[str]) -> list[str]:
     transcript_lower = item.transcript_text.lower()
     matched = [
@@ -598,6 +617,43 @@ def _draft_text_en(item: SourceItem, insight: Any, decision: WorkflowBDecision) 
         f"{lesson}.\n"
         "For developers and investors, this is not a taste question. It is a structure, positioning, and yield question.\n"
         "What gets underestimated first in projects like this?"
+    )
+
+
+def _writer_entity_draft_text_ru(writer_entity_output: Any) -> str:
+    edited = writer_entity_output.edited_final
+    parts = [edited.hook, edited.body, edited.cta]
+    return "\n\n".join(part for part in parts if str(part).strip())
+
+
+def _writer_entity_draft_text_en(writer_entity_output: Any, decision: WorkflowBDecision) -> str | None:
+    if decision.platform_lane != "linkedin_b2b":
+        return None
+    insight = writer_entity_output.insight_card
+    cta = "What do you check first before trusting a market opportunity?"
+    return (
+        f"{writer_entity_output.content_brief.hook_direction}\n\n"
+        f"{insight.angle}\n\n"
+        f"The tension is simple: {insight.hidden_tension}\n\n"
+        f"{insight.promise}\n\n"
+        f"{cta}"
+    )
+
+
+def _writer_entity_option_texts(options: list[Any]) -> list[str]:
+    return [f"{option.option_id}: {option.text}" for option in options]
+
+
+def _writer_entity_qa_summary(writer_entity_output: Any) -> str:
+    report = writer_entity_output.qa_report
+    return "\n".join(
+        [
+            f"passed: {report.passed}",
+            f"final_risk_level: {report.final_risk_level}",
+            f"human_review_required: {report.requires_human_review}",
+            f"issues: {', '.join(report.issues) if report.issues else '-'}",
+            f"fixes_applied: {', '.join(report.fixes_applied) if report.fixes_applied else '-'}",
+        ]
     )
 
 

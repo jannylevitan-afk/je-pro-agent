@@ -91,8 +91,11 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
     assert draft.draft_text_ru == "Русский драфт."
     assert draft.draft_text_en == "English draft."
     assert client.calls[0]["max_tokens"] == 1400
+    assert "Writer Entity" in str(client.calls[0]["system_prompt"])
+    assert "Never write from a raw topic" in str(client.calls[0]["system_prompt"])
     assert "LinkedIn is international B2B only" in str(client.calls[0]["system_prompt"])
     assert "Instagram professional is expert" in str(client.calls[0]["system_prompt"])
+    assert "Insight first, draft second" in str(client.calls[0]["user_prompt"])
 
 
 def test_write_video_script_returns_text_from_anthropic(video_source_item) -> None:

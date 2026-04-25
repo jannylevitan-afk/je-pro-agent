@@ -48,6 +48,13 @@ class DraftRecord(DraftBundle):
     review_requested_at: str | None = None
     approval_decided_at: str | None = None
     archived: bool = False
+    writer_preflight_status: str | None = None
+    writer_risk_flags: list[str] = Field(default_factory=list)
+    writer_selected_idea: str | None = None
+    writer_hook_options: list[str] = Field(default_factory=list)
+    writer_cta_options: list[str] = Field(default_factory=list)
+    writer_qa_report: str | None = None
+    writer_human_review_required: bool = False
 
 
 class ReviewAction(BaseModel):

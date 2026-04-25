@@ -39,6 +39,13 @@ def build_draft_properties(draft: DraftRecord) -> PropertyPayload:
         "Linked brief": _reference_id(draft.linked_brief_id),
         "Linked calendar": _reference_id(draft.linked_calendar_id),
         "Archived": _checkbox(draft.archived),
+        "Writer preflight status": _select(draft.writer_preflight_status),
+        "Writer risk flags": _rich_text(_join_lines(draft.writer_risk_flags)),
+        "Writer selected idea": _rich_text(draft.writer_selected_idea),
+        "Hook options": _rich_text(_join_lines(draft.writer_hook_options)),
+        "CTA options": _rich_text(_join_lines(draft.writer_cta_options)),
+        "Writer QA Report": _rich_text(draft.writer_qa_report),
+        "Writer human review required": _checkbox(draft.writer_human_review_required),
     }
 
 
@@ -220,6 +227,10 @@ def _date(value: str | None) -> PropertyPayload:
     if value is None or value == "":
         return {"date": None}
     return {"date": {"start": value}}
+
+
+def _join_lines(values: list[str]) -> str | None:
+    return "\n".join(values) if values else None
 
 
 def _relation(value: str | None) -> PropertyPayload:
