@@ -14,7 +14,7 @@ from content_engine.models.workflow_a import (
 _VIDEO_PLATFORMS: set[str] = {"instagram", "tiktok", "youtube", "linkedin"}
 
 HOOK_BLUEPRINTS: list[tuple[HookType, str]] = [
-    ("market_warning", "What looks cheap first is often the most expensive later."),
+    ("market_warning", "Source-specific market warning from the collected source."),
     ("story_moment", "A buyer thinks price is the risk. It usually is not."),
     ("tactical_tip", "Check these three things before you trust a villa price tag."),
     ("data_stat_callout", "The listing price is rarely the full Bali cost."),
@@ -153,11 +153,146 @@ def _score_hook(item: SourceItem, hook_type: str) -> int:
 
 
 def _build_hook_text(item: SourceItem, hook_type: str, default_line: str) -> str:
+    theme = _video_hook_theme_key(item)
+    subject = _video_hook_subject(item)
+    if hook_type == "market_warning":
+        return _video_market_warning_hook(theme, subject)
+    if hook_type == "story_moment":
+        return _video_story_moment_hook(theme, subject)
     if hook_type == "bts_fragment":
         return f"Behind the scenes: {item.transcript_text.split('.')[0].strip()}."
     if hook_type == "tactical_tip":
-        return "Before you trust the listing price, check legal risk, design quality, and management reality."
+        return _video_tactical_tip_hook(theme, subject)
+    if hook_type == "data_stat_callout":
+        return _video_data_hook(theme, subject)
     return default_line
+
+
+def _video_market_warning_hook(theme: str, subject: str) -> str:
+    hooks = {
+        "legal_structure": f"In Bali, the real risk is not the price. It is the {subject} under it.",
+        "land_structure": f"Bali land looks simple until the {subject} starts asking expensive questions.",
+        "wellness_design": f"Wellness is not a moodboard anymore. It is a signal of {subject}.",
+        "boutique_hospitality": f"A boutique hotel does not win on beauty. It wins on the {subject}.",
+        "bali_travel": f"Bali is easy to film beautifully and hard to understand through {subject}.",
+        "founder_life": f"The expensive mistake is building a life that only looks right from the outside.",
+        "market_structure": f"In Bali, the headline price is not the signal. The {subject} is.",
+    }
+    return hooks.get(theme, f"The real story is not the surface. It is the {subject}.")
+
+
+def _video_story_moment_hook(theme: str, subject: str) -> str:
+    hooks = {
+        "legal_structure": f"Someone sees a beautiful villa. We look for the {subject}.",
+        "land_structure": f"The land looks calm until the {subject} enters the conversation.",
+        "wellness_design": f"The room feels expensive because the {subject} was designed first.",
+        "boutique_hospitality": f"The guest remembers the {subject}, not the expensive furniture.",
+        "bali_travel": f"The postcard moment is easy. The {subject} is harder to fake.",
+        "founder_life": f"A founder can protect ambition and family, but not by performing perfection.",
+        "market_structure": f"A buyer sees the listing. An operator checks the {subject}.",
+    }
+    return hooks.get(theme, f"Everyone sees the content. We look for the {subject}.")
+
+
+def _video_tactical_tip_hook(theme: str, subject: str) -> str:
+    hooks = {
+        "legal_structure": f"Before you trust the villa, check the {subject} first.",
+        "land_structure": f"Before you trust the land story, check the {subject}.",
+        "wellness_design": f"Before you add a spa, ask what {subject} the project actually creates.",
+        "boutique_hospitality": f"Before you design the lobby, define the {subject}.",
+        "bali_travel": f"Before you save the Bali spot, ask what {subject} it actually gives.",
+        "founder_life": f"Before you copy a founder's lifestyle, ask what family and ambition are costing.",
+        "market_structure": f"Before you trust the price, check the {subject}.",
+    }
+    return hooks.get(theme, f"Before you trust the idea, check the {subject}.")
+
+
+def _video_data_hook(theme: str, subject: str) -> str:
+    hooks = {
+        "legal_structure": f"One missing {subject} can change the whole deal.",
+        "land_structure": f"The {subject} can change the value faster than the view.",
+        "wellness_design": f"The {subject} is becoming a business signal, not decoration.",
+        "boutique_hospitality": f"The {subject} is where boutique hotels separate from pretty rooms.",
+        "bali_travel": f"The {subject} is what separates useful Bali content from a postcard.",
+        "founder_life": f"The metric nobody sees is the emotional cost of performing a perfect life.",
+        "market_structure": f"The {subject} matters more than the first number on the listing.",
+    }
+    return hooks.get(theme, f"The {subject} is the signal most people skip.")
+
+
+def _video_hook_theme_key(item: SourceItem) -> str:
+    context = _source_context(item)
+    if _contains_any(context, ("legal", "law", "lawyer", "zoning", "permit", "regulat", "юрид", "закон", "разреш")):
+        return "legal_structure"
+    if _contains_any(context, ("land", "зем", "leasehold", "freehold")):
+        return "land_structure"
+    if _contains_any(context, ("wellness", "spa", "biophilic", "restorative", "wellbeing")):
+        return "wellness_design"
+    if _contains_any(context, ("boutique", "hotel", "hospitality", "resort", "bensley", "guest")):
+        return "boutique_hospitality"
+    if _contains_any(context, ("travel", "itinerary", "beach", "restaurant", "balibible", "trip", "путеше")):
+        return "bali_travel"
+    if _contains_any(context, ("family", "child", "mother", "founder", "ambition", "entrepreneur", "сем", "реб", "мама", "амбици")):
+        return "founder_life"
+    if _contains_any(context, ("trend", "report", "market", "yield", "price", "villa", "operator", "resale", "property", "investor", "рын", "цен", "вилл")):
+        return "market_structure"
+    return "source_specific"
+
+
+def _video_hook_subject(item: SourceItem) -> str:
+    context = _source_context(item)
+    subjects = [
+        (("zoning", "permit", "разреш"), "zoning and permit layer"),
+        (("legal", "law", "lawyer", "юрид", "закон"), "legal structure"),
+        (("operator", "management", "operations", "оператор"), "operator reality"),
+        (("resale", "liquidity", "exit", "ликвид"), "liquidity and exit path"),
+        (("yield", "roi", "return", "доход"), "yield logic"),
+        (("land", "зем", "leasehold", "freehold"), "land structure"),
+        (("family", "child", "mother", "сем", "реб", "мама"), "family rituals"),
+        (("ambition", "founder", "entrepreneur", "амбици"), "ambition without a perfect image"),
+        (("wellness", "spa", "biophilic"), "restorative feeling"),
+        (("boutique", "hotel", "hospitality", "resort"), "reason to return"),
+        (("travel", "itinerary", "trip", "beach", "путеше"), "honest experience of place"),
+        (("trend", "report", "market", "рын"), "market signal"),
+    ]
+    for markers, subject in subjects:
+        if _contains_any(context, markers):
+            return subject
+    return _fallback_subject(item)
+
+
+def _source_context(item: SourceItem) -> str:
+    raw_values = " ".join(str(value) for value in item.raw_payload.values() if isinstance(value, (str, int, float)))
+    return _normalize_space(
+        " ".join(
+            [
+                item.source_name,
+                item.source_type,
+                item.content_theme,
+                item.audience_segment,
+                item.transcript_text,
+                raw_values,
+            ]
+        )
+    ).lower()
+
+
+def _fallback_subject(item: SourceItem) -> str:
+    theme = item.content_theme.replace("_", " ").strip()
+    if theme:
+        return f"{theme} signal"
+    first_sentence = item.transcript_text.split(".")[0].strip()
+    if first_sentence:
+        return first_sentence[:80]
+    return "source signal"
+
+
+def _normalize_space(text: str) -> str:
+    return " ".join(text.split()).strip()
+
+
+def _contains_any(text: str, markers: tuple[str, ...]) -> bool:
+    return any(marker in text for marker in markers)
 
 
 def _infer_video_platform(item: SourceItem) -> VideoPlatform:

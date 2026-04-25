@@ -98,6 +98,7 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
     assert "LinkedIn is international B2B only" in str(client.calls[0]["system_prompt"])
     assert "Instagram professional is expert" in str(client.calls[0]["system_prompt"])
     assert "Insight first, draft second" in str(client.calls[0]["user_prompt"])
+    assert "Start draft_text_ru with the source-specific Hook line" in str(client.calls[0]["user_prompt"])
 
 
 def test_write_video_script_returns_text_from_anthropic(video_source_item) -> None:
@@ -107,7 +108,7 @@ def test_write_video_script_returns_text_from_anthropic(video_source_item) -> No
     script_text = writer.write_video_script(
         item=video_source_item,
         title="Boutique Hotels Signal",
-        hook="What looks cheap first is often the most expensive later.",
+        hook="A boutique hotel does not win on beauty. It wins on the reason to return.",
         body_points=["Point 1", "Point 2"],
         cta="Save this before your next review.",
     )
@@ -115,6 +116,7 @@ def test_write_video_script_returns_text_from_anthropic(video_source_item) -> No
     assert script_text == "Hook\nPoint 1\nPoint 2\nCTA"
     assert client.calls[0]["max_tokens"] == 700
     assert "Source boundary is strict" in str(client.calls[0]["system_prompt"])
+    assert "Start the script with the required hook exactly" in str(client.calls[0]["user_prompt"])
 
 
 def test_write_workflow_b_draft_parses_multiline_tagged_payload(source_item) -> None:

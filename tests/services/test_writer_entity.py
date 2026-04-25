@@ -112,6 +112,89 @@ def test_writer_entity_workflow_returns_full_step_by_step_contract() -> None:
     assert result.qa_report.requires_human_review is True
 
 
+def test_writer_entity_uses_source_specific_hook_direction_per_source() -> None:
+    family_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="Личная жизнь предпринимателя",
+            source_material=(
+                "Founder story about keeping ambition alive while raising a child, "
+                "protecting family rituals, and refusing to turn life into a perfect Instagram postcard."
+            ),
+            target_audience="dreamer_woman",
+            platform="instagram",
+            goal="affinity",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers founder family life and ambition tension."],
+        reference_sources=["https://example.com/founder-life"],
+    )
+    market_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="Bali villa market risk",
+            source_material=(
+                "Market source says underpriced Bali villas can hide zoning, legal structure, "
+                "permit, operator, and resale risk."
+            ),
+            target_audience="developer_investor",
+            platform="instagram",
+            goal="authority",
+            tone_of_voice="analytical",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers Bali villa legal structure and operator risk."],
+        reference_sources=["https://example.com/bali-market"],
+    )
+
+    family_hook = family_result.content_brief.hook_direction
+    market_hook = market_result.content_brief.hook_direction
+
+    assert family_hook != market_hook
+    assert family_hook != "Дешёвая картинка часто оказывается самой дорогой ошибкой."
+    assert market_hook != "Дешёвая картинка часто оказывается самой дорогой ошибкой."
+    assert any(marker in family_hook.lower() for marker in ("сем", "жизн", "амбици"))
+    assert any(marker in market_hook.lower() for marker in ("бали", "структур", "риск", "цен"))
+
+
+def test_writer_entity_uses_lane_specific_hook_direction_for_same_source() -> None:
+    source_material = (
+        "A wellness architecture source explains spa flow, biophilic design, and restorative feeling "
+        "inside premium hospitality."
+    )
+    lifestyle_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="wellness architecture",
+            source_material=source_material,
+            target_audience="architect_designer",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers wellness architecture and restorative feeling."],
+        reference_sources=["https://example.com/wellness"],
+        preferred_register="register_2",
+    )
+    professional_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="wellness architecture",
+            source_material=source_material,
+            target_audience="architect_designer",
+            platform="instagram",
+            goal="authority",
+            tone_of_voice="analytical",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers wellness architecture and restorative feeling."],
+        reference_sources=["https://example.com/wellness"],
+        preferred_register="register_6",
+    )
+
+    assert lifestyle_result.content_brief.hook_direction != professional_result.content_brief.hook_direction
+    assert "ощущ" in lifestyle_result.content_brief.hook_direction.lower()
+    assert any(marker in professional_result.content_brief.hook_direction.lower() for marker in ("логик", "архитект", "продукт"))
+
+
 def test_video_hooks_topics_generator_applies_quality_gate() -> None:
     output = generate_video_hooks_topics(
         video_source="A villa looks affordable until the legal and operating structure is checked.",

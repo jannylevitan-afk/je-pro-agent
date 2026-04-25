@@ -70,6 +70,64 @@ def test_select_best_hook_returns_highest_score() -> None:
     assert best_hook.score == max(hook.score for hook in hooks)
 
 
+def test_develop_video_hooks_uses_source_specific_best_hook() -> None:
+    founder_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_founder",
+            "source_name": "@founderlife",
+            "source_url": "https://instagram.com/reel/founder",
+            "external_item_id": "founder",
+            "content_hash": "hash_vid_founder",
+            "dedupe_key": "instagram:founder",
+            "audience_segment": "dreamer_woman",
+            "content_theme": "founder_life",
+            "raw_payload": {
+                "video_title": "Founder life with family",
+                "caption_text": "Ambition and family are not two separate lives.",
+                "spoken_transcript": (
+                    "A founder talks about family rituals, a child, ambition, and the cost of living for the perfect picture."
+                ),
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": (
+                "A founder talks about family rituals, a child, ambition, and the cost of living for the perfect picture."
+            ),
+        }
+    )
+    market_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_market",
+            "source_name": "@balimarket",
+            "source_url": "https://instagram.com/reel/market",
+            "external_item_id": "market",
+            "content_hash": "hash_vid_market",
+            "dedupe_key": "instagram:market",
+            "audience_segment": "developer_investor",
+            "content_theme": "bali_market",
+            "raw_payload": {
+                "video_title": "Bali villa legal risk",
+                "caption_text": "The price is not the whole risk.",
+                "spoken_transcript": (
+                    "A market source explains zoning, legal structure, operator weakness, and resale risk in Bali villas."
+                ),
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": (
+                "A market source explains zoning, legal structure, operator weakness, and resale risk in Bali villas."
+            ),
+        }
+    )
+
+    founder_hook = select_best_hook(develop_video_hooks(founder_item, platform="instagram")).hook_text
+    market_hook = select_best_hook(develop_video_hooks(market_item, platform="instagram")).hook_text
+
+    assert founder_hook != market_hook
+    assert founder_hook != "What looks cheap first is often the most expensive later."
+    assert market_hook != "What looks cheap first is often the most expensive later."
+    assert any(marker in founder_hook.lower() for marker in ("life", "family", "ambition"))
+    assert any(marker in market_hook.lower() for marker in ("bali", "structure", "risk", "price"))
+
+
 def test_build_video_script_creates_scripted_queue_item() -> None:
     best_hook = select_best_hook(develop_video_hooks(make_video_source_item(), platform="instagram"))
 

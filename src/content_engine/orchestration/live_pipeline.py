@@ -525,11 +525,51 @@ def _purpose(decision: WorkflowBDecision) -> str:
 
 
 def _hook_line(item: SourceItem, decision: WorkflowBDecision) -> str:
+    subject_ru, subject_en = _source_hook_subjects(item)
     if decision.platform_lane == "linkedin_b2b":
-        return "The cheapest line item in Bali is often the most expensive strategic mistake."
+        return f"The real Bali signal is not the headline. It is the {subject_en}."
     if decision.platform_lane == "instagram_lifestyle":
-        return "Some projects change your mood before they change your spreadsheet."
-    return "What looks cheap first is often the most expensive later."
+        return f"Сначала кажется, что это про красивую жизнь. На деле source говорит про: {subject_ru}."
+    return f"Сначала видно картинку. Но решение прячется в слое: {subject_ru}."
+
+
+def _source_hook_subjects(item: SourceItem) -> tuple[str, str]:
+    context = _source_hook_context(item)
+    subjects = [
+        (("zoning", "permit", "разреш"), "разрешения и зонинг", "zoning and permits"),
+        (("legal", "law", "lawyer", "юрид", "закон"), "правовая структура", "legal structure"),
+        (("operator", "management", "operations", "оператор"), "операторская реальность", "operator reality"),
+        (("resale", "liquidity", "exit", "ликвид"), "ликвидность и выход", "liquidity and exit path"),
+        (("yield", "roi", "return", "доход"), "доходность", "yield logic"),
+        (("land", "зем", "leasehold", "freehold"), "земельная структура", "land structure"),
+        (("family", "child", "mother", "сем", "реб", "мама"), "семейные ритуалы", "family rituals"),
+        (("ambition", "founder", "entrepreneur", "амбици"), "амбиция без идеальной картинки", "ambition without a perfect image"),
+        (("wellness", "spa", "biophilic"), "ощущение восстановления", "restorative feeling"),
+        (("boutique", "hotel", "hospitality", "resort"), "причина вернуться", "reason to return"),
+        (("travel", "itinerary", "trip", "beach", "путеше"), "честный опыт места", "honest experience of place"),
+        (("trend", "report", "market", "рын"), "рыночный сигнал", "market signal"),
+    ]
+    for markers, subject_ru, subject_en in subjects:
+        if any(marker in context for marker in markers):
+            return subject_ru, subject_en
+    fallback = item.content_theme.replace("_", " ").strip() or "source signal"
+    return fallback, fallback
+
+
+def _source_hook_context(item: SourceItem) -> str:
+    raw_values = " ".join(str(value) for value in item.raw_payload.values() if isinstance(value, (str, int, float)))
+    return " ".join(
+        " ".join(
+            [
+                item.source_name,
+                item.source_type,
+                item.content_theme,
+                item.audience_segment,
+                item.transcript_text,
+                raw_values,
+            ]
+        ).split()
+    ).lower()
 
 
 def _key_points(item: SourceItem) -> list[str]:

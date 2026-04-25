@@ -480,7 +480,14 @@ def build_writer_content_brief(
         platform=platform,
         goal=task.goal,
         core_message=selected_idea.core_message,
-        hook_direction=_hook_direction(insight, selected_idea, platform),
+        hook_direction=_hook_direction(
+            insight,
+            selected_idea,
+            platform,
+            task.source_material,
+            goal=task.goal,
+            voice_register=voice_selection.primary_register,
+        ),
         emotional_trigger=insight.emotional_trigger,
         structure=structure,
         tone_of_voice=task.tone_of_voice,
@@ -1051,12 +1058,107 @@ def _structure_for(platform: str) -> list[str]:
     return ["hook", "one idea", "payoff", "CTA"]
 
 
-def _hook_direction(insight: WriterInsightCard, selected_idea: ContentIdea, platform: str) -> str:
+def _hook_direction(
+    insight: WriterInsightCard,
+    selected_idea: ContentIdea,
+    platform: str,
+    source_material: str = "",
+    goal: str = "",
+    voice_register: str = "",
+) -> str:
+    context = _normalize_space(
+        " ".join(
+            [
+                insight.topic,
+                insight.angle,
+                insight.hidden_tension,
+                insight.promise,
+                selected_idea.title,
+                selected_idea.core_message,
+                source_material,
+            ]
+        )
+    ).lower()
+    theme = _hook_theme_key(context)
+    ru_subject, en_subject = _hook_subject_labels(context)
+
     if platform == "linkedin":
-        return "The cheapest line item is often the most expensive strategic mistake."
-    if platform == "instagram":
-        return "Дешёвая картинка часто оказывается самой дорогой ошибкой."
-    return selected_idea.title
+        return _linkedin_hook_direction(theme, en_subject)
+    return _russian_hook_direction(theme, ru_subject, goal=goal, voice_register=voice_register)
+
+
+def _hook_theme_key(context: str) -> str:
+    if _contains_any(context, ("legal", "law", "lawyer", "zoning", "permit", "regulat", "юрид", "закон", "разреш")):
+        return "legal_structure"
+    if _contains_any(context, ("land", "зем", "leasehold", "freehold")):
+        return "land_structure"
+    if _contains_any(context, ("wellness", "spa", "biophilic", "restorative", "wellbeing")):
+        return "wellness_design"
+    if _contains_any(context, ("boutique", "hotel", "hospitality", "resort", "bensley", "guest")):
+        return "boutique_hospitality"
+    if _contains_any(context, ("travel", "itinerary", "beach", "restaurant", "balibible", "trip", "путеше")):
+        return "bali_travel"
+    if _contains_any(context, ("family", "child", "mother", "founder", "ambition", "entrepreneur", "сем", "реб", "мама", "амбици")):
+        return "founder_life"
+    if _contains_any(context, ("trend", "report", "market", "yield", "price", "villa", "operator", "resale", "property", "investor", "рын", "цен", "вилл")):
+        return "market_structure"
+    return "source_specific"
+
+
+def _hook_subject_labels(context: str) -> tuple[str, str]:
+    subjects = [
+        (("zoning", "permit", "разреш"), "разрешения и зонинг", "zoning and permit layer"),
+        (("legal", "law", "lawyer", "юрид", "закон"), "правовая структура", "legal structure"),
+        (("operator", "management", "operations", "оператор"), "операторская реальность", "operator reality"),
+        (("resale", "liquidity", "exit", "ликвид"), "ликвидность и выход", "liquidity and exit path"),
+        (("yield", "roi", "return", "доход"), "доходность", "yield logic"),
+        (("land", "зем", "leasehold", "freehold"), "земельная структура", "land structure"),
+        (("family", "child", "mother", "сем", "реб", "мама"), "семейные ритуалы", "family rituals"),
+        (("ambition", "founder", "entrepreneur", "амбици"), "амбиция без идеальной картинки", "ambition without a perfect image"),
+        (("wellness", "spa", "biophilic"), "ощущение восстановления", "restorative feeling"),
+        (("boutique", "hotel", "hospitality", "resort"), "причина вернуться", "reason to return"),
+        (("travel", "itinerary", "trip", "beach", "путеше"), "честный опыт места", "honest experience of place"),
+        (("trend", "report", "market", "рын"), "рыночный сигнал", "market signal"),
+    ]
+    for markers, ru_subject, en_subject in subjects:
+        if _contains_any(context, markers):
+            return ru_subject, en_subject
+    return "решение за красивой поверхностью", "decision behind the surface"
+
+
+def _russian_hook_direction(theme: str, subject: str, *, goal: str, voice_register: str) -> str:
+    if theme == "wellness_design" and (goal == "authority" or voice_register in {"register_3", "register_4", "register_6"}):
+        return f"Wellness в архитектуре — это не декор. Это продуктовая логика: {subject}."
+    if theme == "boutique_hospitality" and (goal == "authority" or voice_register in {"register_3", "register_4", "register_6"}):
+        return f"Бутик-отель выигрывает не картинкой. Он выигрывает операционной логикой: {subject}."
+
+    hooks = {
+        "legal_structure": f"На Бали самый дорогой риск часто прячется не в цене. Проверь слой: {subject}.",
+        "land_structure": f"Земля на Бали выглядит простой, пока не вскрывается слой: {subject}.",
+        "wellness_design": f"Wellness-проект продаёт не спа-зону. Он продаёт: {subject}.",
+        "boutique_hospitality": f"Бутик-отель выигрывает не красотой. Он выигрывает через: {subject}.",
+        "bali_travel": f"Бали легко снять красиво. Сложнее поймать: {subject}.",
+        "founder_life": f"Жизнь предпринимателя ломается не от амбиций. Она ломается, когда исчезает: {subject}.",
+        "market_structure": f"На Бали важна не первая цена. Важнее источник сигнала: {subject}.",
+    }
+    return hooks.get(theme, f"В этом source важна не картинка, а {subject}.")
+
+
+def _linkedin_hook_direction(theme: str, subject: str) -> str:
+    hooks = {
+        "legal_structure": f"In Bali, the expensive risk is rarely the price. It is the {subject} behind it.",
+        "land_structure": f"Bali land looks simple until the {subject} starts asking expensive questions.",
+        "wellness_design": f"Wellness is moving from a design feature to a signal of {subject}.",
+        "boutique_hospitality": f"Boutique hospitality wins when beauty becomes a {subject}.",
+        "bali_travel": f"Bali is easy to film beautifully and harder to read through {subject}.",
+        "founder_life": f"A founder's life breaks when {subject} has to look effortless.",
+        "market_structure": f"The real Bali signal is not the headline price. It is the {subject}.",
+    }
+    return hooks.get(theme, f"The real signal is not the surface story. It is the {subject}.")
+
+
+def _contains_any(text: str, markers: tuple[str, ...]) -> bool:
+    return any(marker in text for marker in markers)
 
 
 def _cta_for(cta_type: str, platform: str, selected_idea: ContentIdea) -> str:
