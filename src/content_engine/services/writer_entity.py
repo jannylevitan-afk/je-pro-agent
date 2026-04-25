@@ -13,6 +13,9 @@ from content_engine.models.writer_entity import (
     EditedVersion,
     EditingLayerResult,
     EditorDiagnosis,
+    FinalContentAsset,
+    FinalContentQA,
+    FinalContentTraceability,
     IdeaGateResult,
     IdeaGenerationResult,
     InsightVerdict,
@@ -498,6 +501,7 @@ def build_writer_content_brief(
         forbidden_facts=(author_voice.private_facts_do_not_use if author_voice else []),
         avoid=_avoid_list(author_voice),
         examples_or_references=reference_sources,
+        source_excerpt=_source_excerpt(task.source_material),
     )
 
 
@@ -724,6 +728,88 @@ def run_writer_entity_for_workflow_b(
         allowed_facts=matched_facts[:5],
         reference_sources=reference_sources,
         preferred_register=decision.tone,
+    )
+
+
+def build_final_content_asset(
+    *,
+    writer_output: WriterEntityOutput,
+    content_id: str,
+    title: str,
+    platform: str,
+    pillar: str,
+    content_format: str,
+    approval_status: str,
+    source_ids: list[str],
+    insight_id: str,
+    idea_id: str,
+    brief_id: str,
+    draft_id: str,
+    edit_version_id: str,
+    hook: str | None = None,
+    final_text: str | None = None,
+    cta: str | None = None,
+) -> FinalContentAsset:
+    edited = writer_output.edited_final
+    return FinalContentAsset(
+        content_id=content_id,
+        title=title,
+        platform=platform,
+        pillar=pillar,
+        format=content_format,
+        approval_status=approval_status,
+        hook=hook if hook is not None else edited.hook,
+        final_text=final_text if final_text is not None else edited.body,
+        cta=cta if cta is not None else edited.cta,
+        traceability=FinalContentTraceability(
+            source_ids=source_ids,
+            insight_id=insight_id,
+            idea_id=idea_id,
+            brief_id=brief_id,
+            draft_id=draft_id,
+            edit_version_id=edit_version_id,
+        ),
+        qa=FinalContentQA(
+            passed=writer_output.qa_report.passed,
+            issues=writer_output.qa_report.issues,
+            human_review_required=writer_output.qa_report.requires_human_review,
+        ),
+    )
+
+
+def format_final_content_asset_markdown(asset: FinalContentAsset) -> str:
+    return "\n".join(
+        [
+            "## Final Content Asset",
+            f"**Content ID:** {asset.content_id}",
+            f"**Title:** {asset.title}",
+            f"**Platform:** {asset.platform}",
+            f"**Pillar:** {asset.pillar}",
+            f"**Format:** {asset.format}",
+            f"**Approval Status:** {asset.approval_status}",
+            "",
+            "### Hook",
+            asset.hook,
+            "",
+            "### Final Text",
+            asset.final_text,
+            "",
+            "### CTA",
+            asset.cta,
+            "",
+            "### Traceability",
+            f"- Source IDs: {', '.join(asset.traceability.source_ids) or '-'}",
+            f"- Insight ID: {asset.traceability.insight_id}",
+            f"- Idea ID: {asset.traceability.idea_id}",
+            f"- Brief ID: {asset.traceability.brief_id}",
+            f"- Draft ID: {asset.traceability.draft_id}",
+            f"- Edit Version ID: {asset.traceability.edit_version_id}",
+            "",
+            "### QA",
+            f"- Passed: {asset.qa.passed}",
+            f"- Issues: {'; '.join(asset.qa.issues) or '-'}",
+            f"- Human Review Required: {asset.qa.human_review_required}",
+        ]
     )
 
 
@@ -1200,11 +1286,12 @@ def _russian_hook_direction(theme: str, subject: str, *, goal: str, voice_regist
 
 
 def _linkedin_hook_direction(theme: str, subject: str) -> str:
+    article = "an" if subject[:1].lower() in {"a", "e", "i", "o", "u"} else "a"
     hooks = {
         "legal_structure": f"In Bali, the expensive risk is rarely the price. It is the {subject} behind it.",
         "land_structure": f"Bali land looks simple until the {subject} starts asking expensive questions.",
         "wellness_design": f"Wellness is moving from a design feature to a signal of {subject}.",
-        "boutique_hospitality": f"Boutique hospitality wins when beauty becomes a {subject}.",
+        "boutique_hospitality": f"Boutique hospitality wins when beauty becomes {article} {subject}.",
         "bali_travel": f"Bali is easy to film beautifully and harder to read through {subject}.",
         "founder_life": f"A founder's life breaks when {subject} has to look effortless.",
         "market_structure": f"The real Bali signal is not the headline price. It is the {subject}.",
@@ -1246,25 +1333,261 @@ def _avoid_list(author_voice: AuthorVoiceObject | None) -> list[str]:
     return avoid
 
 
+def _source_excerpt(source_material: str, limit: int = 260) -> str:
+    normalized = _normalize_space(source_material)
+    if len(normalized) <= limit:
+        return normalized
+    return normalized[: limit - 1].rstrip() + "…"
+
+
 def _draft_body(brief: WriterContentBrief) -> str:
+    theme = _brief_theme_key(brief)
     if brief.platform == "linkedin":
-        return (
-            f"{brief.core_message}\n\n"
-            f"The tension is simple: {brief.emotional_trigger}.\n\n"
-            "A beautiful project can still be a weak decision if the structure, operator logic, and positioning are not checked first.\n\n"
-            "The useful move is to slow down before the story becomes too attractive."
-        )
+        return _linkedin_body(brief, theme)
     if brief.platform == "instagram":
+        return _instagram_body(brief, theme)
+    return (
+        "Так вот.\n\n"
+        f"{_ru_theme_claim(theme)}\n\n"
+        "Если в source нет факта, ссылки или ясного вывода, лучше остановить текст здесь, чем делать красивую лапшу."
+    )
+
+
+def _brief_theme_key(brief: WriterContentBrief) -> str:
+    context = _normalize_space(
+        " ".join(
+            [
+                brief.hook_direction,
+                brief.core_message,
+                brief.emotional_trigger,
+                " ".join(brief.structure),
+                " ".join(brief.required_facts),
+                " ".join(brief.examples_or_references),
+                brief.source_excerpt or "",
+            ]
+        )
+    ).lower()
+    return _hook_theme_key(context)
+
+
+def _instagram_body(brief: WriterContentBrief, theme: str) -> str:
+    subject = _subject_from_hook(brief.hook_direction)
+    cue = _source_specific_cue(brief, theme)
+    if theme == "founder_life":
         return (
-            f"{brief.core_message}\n\n"
-            f"Здесь работает не мотивация, а напряжение: {brief.emotional_trigger}.\n\n"
-            "Сначала смотришь на красоту. Потом на структуру. Потом понимаешь, что именно структура решает, будет ли эта красота жить."
+            "Снаружи это может выглядеть как красивая жизнь предпринимателя.\n\n"
+            f"Но внутри всё держится на конкретной вещи: {subject}.\n\n"
+            f"В этой истории цепляет деталь: {cue}.\n\n"
+            "Бизнес, ребёнок, планы, картинка, где будто всё держится само. А потом ты понимаешь: амбиции не отменяют семью, усталость и свои желания.\n\n"
+            "Если эту часть вырезать, получится не сильная женщина, а аккуратно упакованная функция."
+        )
+    if theme in {"market_structure", "legal_structure", "land_structure"}:
+        return (
+            "Я бы здесь смотрела не на фасад.\n\n"
+            f"Сначала {subject}. Потом операторская логика. Потом ликвидность, если первая эмоция прошла.\n\n"
+            f"Конкретная зацепка здесь: {cue}.\n\n"
+            "Красивый объект может быть слабым решением, если за ним нет нормального ответа на простые вопросы.\n\n"
+            "Именно там обычно прячется дорогая ошибка."
+        )
+    if theme == "bali_travel":
+        return (
+            "Такие места работают не потому, что они просто красивые.\n\n"
+            f"Они дают маленький ритуал: {subject}, воздух, свет, ощущение, что ты на секунду попала в другую версию своей жизни.\n\n"
+            f"В исходной детали важно именно это: {cue}.\n\n"
+            "Для Бали это сильнее очередного списка мест.\n\n"
+            "Ты либо чувствуешь место телом, либо просто пролистываешь ещё одну картинку."
+        )
+    if theme == "wellness_design":
+        return (
+            "Wellness тут не про спа в углу.\n\n"
+            f"Это про {subject}: свет, тишина, вода, маршрут тела внутри дома.\n\n"
+            f"Здесь ценно не слово wellness, а конкретная подсказка: {cue}.\n\n"
+            "Для девелопера это уже не декор. Это продуктовая логика.\n\n"
+            "Если место не восстанавливает, оно просто красиво выглядит."
+        )
+    if theme == "boutique_hospitality":
+        return (
+            "Бутик-отель держится не на красивом лобби.\n\n"
+            f"Он держится на причине вернуться: {subject}, сценарии, детали, оператор, ощущение, что место не случайное.\n\n"
+            f"В этой находке главное: {cue}.\n\n"
+            "Когда этого нет, дизайн становится декорацией.\n\n"
+            "Когда это есть, объект начинает работать как история, а не как набор комнат."
         )
     return (
-        f"{brief.core_message}\n\n"
-        f"Главное напряжение: {brief.emotional_trigger}.\n\n"
-        "Если нет факта, источника или ясного вывода, текст лучше остановить, чем сделать красивую лапшу."
+        "Сначала видишь картинку.\n\n"
+        f"Потом появляется главный вопрос: {_ru_theme_claim(theme)}\n\n"
+        "И вот здесь контент становится полезным: не украшает source, а достаёт из него решение, которое читатель правда может применить."
     )
+
+
+def _linkedin_body(brief: WriterContentBrief, theme: str) -> str:
+    subject = _english_subject_from_hook(brief.hook_direction)
+    cue = _english_source_specific_cue(brief, theme)
+    if theme in {"market_structure", "legal_structure", "land_structure"}:
+        return (
+            "The first layer is usually attractive: price, design, location, projected upside.\n\n"
+            f"The second layer is where the decision becomes serious: {subject}, permits, operator logic, liquidity, and who carries the downside if the story does not perform.\n\n"
+            f"The useful source cue is this: {cue}.\n\n"
+            "For developers and investors, the useful move is to slow the narrative down before it becomes too easy to believe.\n\n"
+            "Good opportunities survive that check."
+        )
+    if theme == "boutique_hospitality":
+        return (
+            "A boutique hotel is not a smaller version of a large hotel.\n\n"
+            f"It needs a sharper reason to exist: {subject}, operating rhythm, repeatable guest memory, and a commercial logic behind the beauty.\n\n"
+            f"The useful source cue is this: {cue}.\n\n"
+            "The projects worth studying are the ones where design is not decoration. It is positioning.\n\n"
+            "That is where hospitality becomes an asset strategy, not just an aesthetic choice."
+        )
+    if theme == "wellness_design":
+        return (
+            "Wellness is becoming less of an amenity and more of a product thesis.\n\n"
+            "The question is not whether a project has a spa, greenery, or quiet corners. The question is whether the whole spatial logic helps people recover, stay longer, and remember the place.\n\n"
+            "For experience-led real estate, that changes the brief.\n\n"
+            "Design has to carry feeling and business logic at the same time."
+        )
+    if theme == "bali_travel":
+        return (
+            "Bali content often starts as scenery.\n\n"
+            "The stronger signal is what the place teaches about behavior: where people slow down, what they repeat, which rituals become worth sharing, and why a location turns into memory.\n\n"
+            "For hospitality and experience projects, that is not soft context.\n\n"
+            "It is demand intelligence."
+        )
+    if theme == "founder_life":
+        return (
+            "Founder stories are often packaged as momentum.\n\n"
+            "The more useful version shows the cost of that momentum: family choices, identity pressure, ambition, and the parts of life that cannot be optimized like a dashboard.\n\n"
+            "That tension is why the story works.\n\n"
+            "It is not inspiration. It is a better read of what building actually requires."
+        )
+    return (
+        "The surface signal is rarely enough.\n\n"
+        f"A useful content asset has to show what the source changes: {subject}, the decision, the risk, the audience belief, or the next question worth asking.\n\n"
+        "Without that layer, it becomes commentary.\n\n"
+        "With it, it becomes strategy."
+    )
+
+
+def _subject_from_hook(hook: str) -> str:
+    normalized = _normalize_space(hook)
+    if ":" in normalized:
+        return normalized.rsplit(":", 1)[-1].strip(" .") or "свои желания"
+    if "исчезает" in normalized:
+        return normalized.rsplit("исчезает", 1)[-1].strip(" :.") or "свои желания"
+    return "свои желания"
+
+
+def _english_subject_from_hook(hook: str) -> str:
+    normalized = _normalize_space(hook)
+    for marker in ("It is the ", "through ", "becomes a ", "becomes an ", "becomes "):
+        if marker in normalized:
+            return normalized.rsplit(marker, 1)[-1].strip(" .") or "decision layer"
+    return "the decision layer"
+
+
+def _source_specific_cue(brief: WriterContentBrief, theme: str) -> str:
+    text = (brief.source_excerpt or "").lower()
+    if theme == "founder_life":
+        cues = [
+            (("student", "учен", "realtor", "course", "client", "deal", "риелтор", "курс", "клиент", "сдел"), "уверенность перед клиентом не рождается из красивой картинки"),
+            (("dance", "бальн", "танц", "dream", "мечт"), "желание, которое долго откладывали, всё равно возвращается"),
+            (("brother", "sister", "family memory", "брат", "сестр", "константин", "эмили"), "семейная память сильнее идеальной упаковки"),
+            (("school", "education", "pregnancy", "child", "школ", "беремен", "реб"), "выбор для ребёнка становится частью выбора жизни"),
+            (("рассказывать о своей жизни", "personal brand", "идеальн"), "решение говорить о жизни без идеальной упаковки"),
+        ]
+        return _first_matching_cue(text, cues, "амбиция работает только тогда, когда внутри остаётся место живой жизни")
+    if theme in {"market_structure", "legal_structure", "land_structure"}:
+        cues = [
+            (("law", "legal", "lawyer", "permit", "zoning", "юрид", "закон", "разреш"), "правовой слой важнее первого впечатления"),
+            (("report", "data", "market", "benchmark", "рын", "отчет"), "рыночный сигнал нужно читать до эмоции покупки"),
+            (("operator", "management", "asset owner", "оператор", "управлен"), "операторская модель решает судьбу красивого объекта"),
+            (("yield", "roi", "return", "доход"), "доходность без структуры быстро становится фантазией"),
+        ]
+        return _first_matching_cue(text, cues, "проверять нужно не обещание, а слой решения под ним")
+    if theme == "bali_travel":
+        cues = [
+            (("ubud", "dinner", "restaurant", "ужин", "ресторан"), "место запоминается через вечерний ритуал"),
+            (("heritage", "village", "rice", "jungle", "наслед", "деревн", "джунг"), "живая среда сильнее туристической открытки"),
+            (("guide", "things to do", "destination", "маршрут", "гид"), "маршрут ценен, когда он даёт ощущение, а не список"),
+        ]
+        return _first_matching_cue(text, cues, "Бали работает через телесное ощущение места")
+    if theme == "wellness_design":
+        cues = [
+            (("hot spring", "spa", "thermal", "water"), "вода и ритуал восстановления становятся частью продукта"),
+            (("research", "report", "economy", "wellness"), "wellness уже читается как рынок, а не настроение"),
+            (("biophilic", "interior", "architecture", "design"), "материалы и маршрут тела создают ощущение восстановления"),
+        ]
+        return _first_matching_cue(text, cues, "пространство должно менять состояние человека")
+    if theme == "boutique_hospitality":
+        cues = [
+            (("bensley", "sustainab", "designer", "purpose"), "у проекта должна быть точка зрения, а не только стиль"),
+            (("management agreement", "asset owner", "operator", "управлен"), "управление может быть самым необратимым решением"),
+            (("dezeen", "architecture", "interiors"), "архитектурный сигнал помогает отличаться до продажи"),
+        ]
+        return _first_matching_cue(text, cues, "причина вернуться должна быть встроена в операционную модель")
+    return "из исходника нужно забрать не пересказ, а применимый вывод"
+
+
+def _english_source_specific_cue(brief: WriterContentBrief, theme: str) -> str:
+    text = (brief.source_excerpt or "").lower()
+    if theme == "founder_life":
+        cues = [
+            (("student", "realtor", "course", "client", "deal"), "client confidence is built through proof, not a polished image"),
+            (("dance", "dream", "desire"), "deferred desire eventually comes back into the founder story"),
+            (("brother", "sister", "family memory"), "family memory carries more weight than a polished narrative"),
+            (("school", "education", "pregnancy", "child"), "family decisions become part of the founder operating system"),
+        ]
+        return _first_matching_cue(text, cues, "ambition only works when real life still has room inside it")
+    if theme in {"market_structure", "legal_structure", "land_structure"}:
+        cues = [
+            (("law", "legal", "lawyer", "permit", "zoning"), "legal structure matters more than the first impression"),
+            (("report", "data", "market", "benchmark"), "market signals should be read before the buying emotion starts"),
+            (("operator", "management", "asset owner"), "the operating model decides whether the asset can perform"),
+            (("yield", "roi", "return"), "yield without structure becomes a story, not a strategy"),
+        ]
+        return _first_matching_cue(text, cues, "the decision layer matters more than the promise")
+    if theme == "bali_travel":
+        cues = [
+            (("ubud", "dinner", "restaurant"), "places become memorable through repeatable rituals"),
+            (("heritage", "village", "rice", "jungle"), "living context is stronger than a tourist postcard"),
+            (("guide", "things to do", "destination"), "a route matters when it creates a feeling, not a list"),
+        ]
+        return _first_matching_cue(text, cues, "Bali works through embodied memory, not scenery alone")
+    if theme == "wellness_design":
+        cues = [
+            (("hot spring", "spa", "thermal", "water"), "water and recovery rituals are becoming part of the product"),
+            (("research", "report", "economy", "wellness"), "wellness reads like a market signal, not a mood"),
+            (("biophilic", "interior", "architecture", "design"), "materials and spatial rhythm create restoration"),
+        ]
+        return _first_matching_cue(text, cues, "the space has to change the guest's state")
+    if theme == "boutique_hospitality":
+        cues = [
+            (("bensley", "sustainab", "designer", "purpose"), "a project needs a point of view, not only style"),
+            (("management agreement", "asset owner", "operator", "management discipline"), "management can be the least reversible decision"),
+            (("dezeen", "architecture", "interiors"), "architecture can become differentiation before sales"),
+        ]
+        return _first_matching_cue(text, cues, "the reason to return must be built into the operating model")
+    return "the source needs to become an applicable decision, not a summary"
+
+
+def _first_matching_cue(text: str, cues: list[tuple[tuple[str, ...], str]], fallback: str) -> str:
+    for markers, cue in cues:
+        if _contains_any(text, markers):
+            return cue
+    return fallback
+
+
+def _ru_theme_claim(theme: str) -> str:
+    claims = {
+        "founder_life": "что в этой истории держит жизнь, а не только образ сильной женщины?",
+        "market_structure": "где здесь структура, а где просто красивая упаковка?",
+        "legal_structure": "какой юридический слой может сломать красивую сделку?",
+        "land_structure": "что реально стоит за землёй, документами и правом пользоваться объектом?",
+        "bali_travel": "какое ощущение места человек захочет повторить?",
+        "wellness_design": "восстанавливает ли пространство человека или только выглядит дорого?",
+        "boutique_hospitality": "почему гость должен вернуться именно сюда?",
+    }
+    return claims.get(theme, "какой вывод из этого source можно забрать без выдуманных фактов?")
 
 
 def _remove_forbidden(

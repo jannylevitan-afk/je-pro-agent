@@ -547,7 +547,7 @@ Measure → top hook patterns + topics → Research Agent adjusts search params
 
 ## Writer Entity — обязательный writing workflow
 
-Workflow B не пишет посты напрямую из темы. Любой пост, тема, video hook, content brief или draft проходит через `Writer Entity`.
+Workflow B не пишет посты напрямую из темы. Любой текстовый пост, content brief или draft проходит через `Writer Entity`.
 
 Принцип:
 
@@ -633,9 +633,13 @@ Workflow B не пишет посты напрямую из темы. Любой
 - No fake AI phrasing, generic motivational endings, hashtag blocks, or generic 3-point sermons.
 - Human review is required for financial numbers, deals, clients, legal/regulatory implications, LinkedIn authority positioning, investor/developer content, brand-sensitive content, or confidence below 8/10.
 
-### Separate Video Hooks + Topics Module
+### Workflow Boundary — Video Hooks Are Not Workflow B
 
-Для video-native материала Writer Entity может не писать полный сценарий, а генерировать:
+Writer Entity внутри Workflow B не пишет video hooks и не генерирует сценарии для Workflow A. Video-native материал может быть связан с тем же upstream source note, но его обработка идёт отдельным путём Workflow A: intake → hook mining → script → filming card.
+
+Workflow B использует только текстовый content hook как opening для поста, привязанный к source note, insight card и portrait/audience pain. Это не video hook.
+
+Если нужен video-native блок, он живёт в Workflow A:
 
 ```json
 {
@@ -1200,6 +1204,44 @@ engagement data → mapped to audience portrait + topic + format
 → signal back to Research Agent
 ```
 
+#### Final Content Asset — выход Workflow B
+
+После Phase 6 система собирает review-ready объект. Это главный выход Workflow B для Notion Drafts DB и Review Queue:
+
+```markdown
+## Final Content Asset
+**Content ID:**
+**Title:**
+**Platform:**
+**Pillar:**
+**Format:**
+**Approval Status:**
+
+### Hook
+...
+
+### Final Text
+...
+
+### CTA
+...
+
+### Traceability
+- Source IDs:
+- Insight ID:
+- Idea ID:
+- Brief ID:
+- Draft ID:
+- Edit Version ID:
+
+### QA
+- Passed:
+- Issues:
+- Human Review Required:
+```
+
+Правило разделения: `Hook` здесь — opening текстового поста из Content Brief, а не video hook из Workflow A.
+
 ---
 
 ### Phase 7 — Техническая реализация Approval Gate
@@ -1327,6 +1369,7 @@ n8n помечает запись:
 | Draft text | Text | Полный текст |
 | Draft text RU | Text | каноническая рабочая версия |
 | Draft text EN | Text | publish version для LinkedIn, если нужна |
+| Final Content Asset | Text | review-ready markdown: metadata, hook, final text, CTA, traceability, QA |
 | Platform | Select | Instagram / LinkedIn / Telegram |
 | Audience portrait | Select | из CD1 |
 | Voice register | Select | Регистр 1–9 из CD2 |

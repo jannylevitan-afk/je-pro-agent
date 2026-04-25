@@ -46,7 +46,11 @@ from content_engine.services.workflow_b import (
     build_insight_card,
     normalize_source_item,
 )
-from content_engine.services.writer_entity import run_writer_entity_for_workflow_b
+from content_engine.services.writer_entity import (
+    build_final_content_asset,
+    format_final_content_asset_markdown,
+    run_writer_entity_for_workflow_b,
+)
 from content_engine.orchestration.targets import LivePipelineTargets
 
 
@@ -323,10 +327,13 @@ def _run_workflow_b(
             gate_passed=gate_passed,
             status="ready" if gate_passed else "rejected",
         )
-        idea_page_ids.append(_page_id(idea_response))
+        idea_page_id = _page_id(idea_response)
+        idea_page_ids.append(idea_page_id)
         if not gate_passed:
             continue
 
+        draft_id = _draft_id(item, decision)
+        edit_version_id = f"{draft_id}_edit_v1"
         brief = build_content_brief(
             insight=insight,
             platform=decision.platform,
@@ -382,8 +389,26 @@ def _run_workflow_b(
             fact_claims=brief.fact_pack,
             verified_facts=verified_facts,
         )
+        final_asset = build_final_content_asset(
+            writer_output=writer_entity_output,
+            content_id=f"content_{draft_id}",
+            title=draft_bundle.title,
+            platform=draft_bundle.platform,
+            pillar=insight.content_pillar,
+            content_format=_suggested_format(decision),
+            approval_status="pending",
+            source_ids=[item.item_id],
+            insight_id=insight_page_id,
+            idea_id=idea_page_id,
+            brief_id=brief_record.brief_id,
+            draft_id=draft_id,
+            edit_version_id=edit_version_id,
+            hook=writer_entity_output.edited_final.hook,
+            final_text=_final_asset_text(writer_entity_output, draft_text_ru, writer_used=writer is not None),
+            cta=writer_entity_output.edited_final.cta,
+        )
         draft_record = DraftRecord(
-            draft_id=_draft_id(item, decision),
+            draft_id=draft_id,
             title=draft_bundle.title,
             platform=draft_bundle.platform,
             platform_lane=draft_bundle.platform_lane,
@@ -409,6 +434,7 @@ def _run_workflow_b(
             writer_cta_options=_writer_entity_option_texts(writer_entity_output.cta_options),
             writer_qa_report=_writer_entity_qa_summary(writer_entity_output),
             writer_human_review_required=writer_entity_output.qa_report.requires_human_review,
+            final_content_asset=format_final_content_asset_markdown(final_asset),
         )
         if draft_record.factual_safety == "blocked":
             draft_response = upsert_draft(client, targets.drafts_database_id, draft_record)
@@ -719,6 +745,12 @@ def _writer_entity_draft_text_en(writer_entity_output: Any, decision: WorkflowBD
         f"{insight.promise}\n\n"
         f"{cta}"
     )
+
+
+def _final_asset_text(writer_entity_output: Any, draft_text_ru: str, *, writer_used: bool) -> str:
+    if writer_used:
+        return draft_text_ru
+    return writer_entity_output.edited_final.body
 
 
 def _writer_entity_option_texts(options: list[Any]) -> list[str]:

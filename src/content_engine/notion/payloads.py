@@ -46,6 +46,7 @@ def build_draft_properties(draft: DraftRecord) -> PropertyPayload:
         "CTA options": _rich_text(_join_lines(draft.writer_cta_options)),
         "Writer QA Report": _rich_text(draft.writer_qa_report),
         "Writer human review required": _checkbox(draft.writer_human_review_required),
+        "Final Content Asset": _rich_text(draft.final_content_asset),
     }
 
 

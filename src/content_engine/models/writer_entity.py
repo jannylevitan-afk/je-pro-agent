@@ -191,6 +191,7 @@ class WriterContentBrief(BaseModel):
     forbidden_facts: list[str] = Field(default_factory=list)
     avoid: list[str] = Field(default_factory=list)
     examples_or_references: list[str] = Field(default_factory=list)
+    source_excerpt: str | None = None
 
 
 class WriterDraft(BaseModel):
@@ -242,6 +243,41 @@ class QAReport(BaseModel):
     fixes_applied: list[str] = Field(default_factory=list)
     requires_human_review: bool
     final_risk_level: RiskLevel
+
+
+class FinalContentTraceability(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_ids: list[str] = Field(default_factory=list)
+    insight_id: str
+    idea_id: str
+    brief_id: str
+    draft_id: str
+    edit_version_id: str
+
+
+class FinalContentQA(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    passed: bool
+    issues: list[str] = Field(default_factory=list)
+    human_review_required: bool
+
+
+class FinalContentAsset(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    content_id: str
+    title: str
+    platform: str
+    pillar: str
+    format: str
+    approval_status: str
+    hook: str
+    final_text: str
+    cta: str
+    traceability: FinalContentTraceability
+    qa: FinalContentQA
 
 
 class TextOption(BaseModel):

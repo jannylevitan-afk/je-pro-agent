@@ -59,6 +59,19 @@ def test_process_source_item_routes_text_item_into_workflow_b(source_item) -> No
     assert len(result.draft_page_ids) == 2
     assert len(result.event_page_ids) == 2
 
+    first_draft = client.create_calls[4][1]
+    final_asset = first_draft["Final Content Asset"]["rich_text"][0]["text"]["content"]
+    assert "## Final Content Asset" in final_asset
+    assert "**Content ID:** content_draft_itm_001_instagram_professional" in final_asset
+    assert "### Traceability" in final_asset
+    assert "- Source IDs: itm_001" in final_asset
+    assert "- Insight ID: insight_page_1" in final_asset
+    assert "- Idea ID: idea_page_1" in final_asset
+    assert "- Brief ID: brief_itm_001_instagram_professional" in final_asset
+    assert "- Draft ID: draft_itm_001_instagram_professional" in final_asset
+    assert "- Edit Version ID: draft_itm_001_instagram_professional_edit_v1" in final_asset
+    assert "Video Hooks" not in final_asset
+
 
 def test_matching_fact_pack_ignores_generic_villa_bali_overlap(source_item) -> None:
     item = source_item.model_copy(

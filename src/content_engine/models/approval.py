@@ -55,6 +55,7 @@ class DraftRecord(DraftBundle):
     writer_cta_options: list[str] = Field(default_factory=list)
     writer_qa_report: str | None = None
     writer_human_review_required: bool = False
+    final_content_asset: str | None = None
 
 
 class ReviewAction(BaseModel):

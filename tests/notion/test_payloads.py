@@ -28,6 +28,7 @@ def test_build_draft_properties_contains_linkedin_bilingual_fields(linkedin_draf
     assert properties["Parent draft"] == {"rich_text": []}
     assert properties["Approval decided at"] == {"date": None}
     assert properties["Writer human review required"] == {"checkbox": False}
+    assert properties["Final Content Asset"] == {"rich_text": []}
 
 
 def test_build_brief_properties_keeps_reference_sources() -> None:

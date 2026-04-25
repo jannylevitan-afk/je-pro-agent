@@ -31,6 +31,7 @@ DRAFTS_DB_SCHEMA = {
     "CTA options": "rich_text",
     "Writer QA Report": "rich_text",
     "Writer human review required": "checkbox",
+    "Final Content Asset": "rich_text",
 }
 
 BRIEFS_DB_SCHEMA = {

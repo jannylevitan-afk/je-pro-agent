@@ -9,6 +9,7 @@ def test_drafts_schema_contains_bilingual_linkedin_fields() -> None:
     assert "Writer QA Report" in DRAFTS_DB_SCHEMA
     assert "Hook options" in DRAFTS_DB_SCHEMA
     assert "CTA options" in DRAFTS_DB_SCHEMA
+    assert "Final Content Asset" in DRAFTS_DB_SCHEMA
 
 
 def test_content_calendar_contains_publish_fields() -> None:
