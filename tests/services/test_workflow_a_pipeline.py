@@ -128,6 +128,32 @@ def test_develop_video_hooks_uses_source_specific_best_hook() -> None:
     assert any(marker in market_hook.lower() for marker in ("bali", "structure", "risk", "price"))
 
 
+def test_develop_video_hooks_preserves_detected_source_hook_as_primary() -> None:
+    item = make_video_source_item().model_copy(
+        update={
+            "raw_payload": {
+                "video_title": "Founder mistake",
+                "source_hook": "Everyone sees the villa. Almost nobody checks the permit layer.",
+                "caption_text": "Everyone sees the villa. Almost nobody checks the permit layer.",
+                "spoken_transcript": (
+                    "Everyone sees the villa. Almost nobody checks the permit layer. "
+                    "The rest of the video explains legal and zoning risk."
+                ),
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": (
+                "Everyone sees the villa. Almost nobody checks the permit layer. "
+                "The rest of the video explains legal and zoning risk."
+            ),
+        }
+    )
+
+    best_hook = select_best_hook(develop_video_hooks(item, platform="instagram"))
+
+    assert best_hook.hook_text == "Everyone sees the villa. Almost nobody checks the permit layer."
+    assert "source verbatim" in best_hook.angle
+
+
 def test_build_video_script_creates_scripted_queue_item() -> None:
     best_hook = select_best_hook(develop_video_hooks(make_video_source_item(), platform="instagram"))
 

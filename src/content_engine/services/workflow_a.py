@@ -78,7 +78,7 @@ def develop_video_hooks(
                 source_item_id=item.item_id,
                 platform=platform,
                 content_theme=item.content_theme,
-                angle=f"{hook_type.replace('_', ' ')} for {item.audience_segment}",
+                angle=_hook_angle(item, hook_type),
                 hook_text=_build_hook_text(item, hook_type, default_line),
                 hook_type=hook_type,
                 score=score,
@@ -145,6 +145,8 @@ def _score_hook(item: SourceItem, hook_type: str) -> int:
     score = 5
     if hook_type == "market_warning":
         score += 3
+    if hook_type == "market_warning" and _source_verbatim_hook(item):
+        score = 10
     if hook_type == "bts_fragment" and item.media_urls:
         score += 2
     if hook_type == "data_stat_callout" and any(value >= 1000 for value in item.engagement_signals.values()):
@@ -153,6 +155,11 @@ def _score_hook(item: SourceItem, hook_type: str) -> int:
 
 
 def _build_hook_text(item: SourceItem, hook_type: str, default_line: str) -> str:
+    if hook_type == "market_warning":
+        source_hook = _source_verbatim_hook(item)
+        if source_hook:
+            return source_hook
+
     theme = _video_hook_theme_key(item)
     subject = _video_hook_subject(item)
     if hook_type == "market_warning":
@@ -166,6 +173,37 @@ def _build_hook_text(item: SourceItem, hook_type: str, default_line: str) -> str
     if hook_type == "data_stat_callout":
         return _video_data_hook(theme, subject)
     return default_line
+
+
+def _hook_angle(item: SourceItem, hook_type: str) -> str:
+    if hook_type == "market_warning" and _source_verbatim_hook(item):
+        return f"source verbatim hook for {item.audience_segment}"
+    return f"{hook_type.replace('_', ' ')} for {item.audience_segment}"
+
+
+def _source_verbatim_hook(item: SourceItem) -> str:
+    raw_payload = item.raw_payload
+    values = [
+        raw_payload.get("source_hook"),
+        raw_payload.get("detected_hook"),
+        raw_payload.get("opening_line"),
+        raw_payload.get("first_3_seconds"),
+        raw_payload.get("hook"),
+    ]
+    hooks = raw_payload.get("hooks")
+    if isinstance(hooks, list):
+        values.extend(hooks)
+
+    for value in values:
+        if isinstance(value, str) and _looks_like_hook(value):
+            return _normalize_space(value)
+    return ""
+
+
+def _looks_like_hook(value: str) -> bool:
+    normalized = _normalize_space(value)
+    word_count = len(normalized.split())
+    return 4 <= word_count <= 28
 
 
 def _video_market_warning_hook(theme: str, subject: str) -> str:
