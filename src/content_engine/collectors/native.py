@@ -12,13 +12,14 @@ from typing import Any, Literal
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
+from content_engine.collectors.apify import fetch_instagram_profile
 from content_engine.models.source_item import SourceItem
 from content_engine.services.ingestion import build_dedupe_key
 
 
 Fetcher = Callable[[str, float], str]
-NativePlatform = Literal["telegram", "instagram", "linkedin", "youtube", "tiktok"]
 NativePlatform = Literal["telegram", "instagram", "linkedin", "youtube", "tiktok", "web"]
+ApifyProfileFetcher = Callable[["NativeSourceTarget", float], dict[str, Any]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +37,7 @@ class NativeSourceCollector:
     targets: list[NativeSourceTarget]
     timeout_seconds: float = 30.0
     fetcher: Fetcher | None = None
+    apify_profile_fetcher: ApifyProfileFetcher | None = None
     collected_at: str | None = None
 
     def collect(self) -> list[SourceItem]:
@@ -43,6 +45,7 @@ class NativeSourceCollector:
             targets=self.targets,
             timeout_seconds=self.timeout_seconds,
             fetcher=self.fetcher,
+            apify_profile_fetcher=self.apify_profile_fetcher,
             collected_at=self.collected_at,
         )
 
@@ -52,6 +55,7 @@ def collect_native_source_items(
     targets: list[NativeSourceTarget],
     timeout_seconds: float = 30.0,
     fetcher: Fetcher | None = None,
+    apify_profile_fetcher: ApifyProfileFetcher | None = None,
     collected_at: str | None = None,
 ) -> list[SourceItem]:
     resolved_fetcher = fetcher or _default_fetcher
@@ -66,7 +70,18 @@ def collect_native_source_items(
         elif target.platform == "youtube":
             items.extend(_parse_youtube_feed(target, target_url, raw_text, collected_timestamp))
         else:
-            item = _parse_html_meta_page(target, target_url, raw_text, collected_timestamp)
+            try:
+                item = _parse_html_meta_page(target, target_url, raw_text, collected_timestamp)
+            except ValueError as exc:
+                if not _should_use_apify_instagram_profile_fallback(target, target_url, exc):
+                    raise
+                profile_payload = (apify_profile_fetcher or _default_apify_profile_fetcher)(target, timeout_seconds)
+                item = _build_instagram_profile_item(
+                    target=target,
+                    target_url=target_url,
+                    profile_payload=profile_payload,
+                    collected_at=collected_timestamp,
+                )
             items.append(item)
     return items
 
@@ -320,6 +335,68 @@ def _parse_html_meta_page(
     )
 
 
+def _build_instagram_profile_item(
+    *,
+    target: NativeSourceTarget,
+    target_url: str,
+    profile_payload: dict[str, Any],
+    collected_at: str,
+) -> SourceItem:
+    source_url = str(profile_payload.get("url") or target_url).strip()
+    external_item_id = str(profile_payload.get("username") or target.handle.lstrip("@")).strip()
+
+    latest_posts = [entry for entry in profile_payload.get("latestPosts", []) if isinstance(entry, dict)]
+    transcript_parts = [
+        _normalize_text_fragment(str(profile_payload.get("fullName", ""))),
+        _normalize_text_fragment(str(profile_payload.get("biography", ""))),
+        *[
+            _normalize_text_fragment(str(post.get("caption", "")))
+            for post in latest_posts[:3]
+            if str(post.get("caption", "")).strip()
+        ],
+    ]
+    transcript_text = ". ".join(part for part in transcript_parts if part).strip()
+    if not transcript_text:
+        raise ValueError("Apify Instagram profile payload did not contain usable text")
+
+    media_urls = _collect_instagram_profile_media_urls(latest_posts[:3])
+    published_at = _normalize_timestamp(str(latest_posts[0].get("timestamp", collected_at))) if latest_posts else collected_at
+    route, reason, confidence = _infer_route("instagram_profile", transcript_text, media_urls)
+    content_hash = _content_hash(transcript_text, media_urls)
+
+    return SourceItem(
+        item_id=f"instagram_{external_item_id}",
+        source_type="instagram_profile",
+        source_name=target.source_name or external_item_id,
+        source_url=source_url,
+        external_item_id=external_item_id,
+        collected_at=collected_at,
+        published_at=published_at,
+        content_hash=content_hash,
+        dedupe_key=build_dedupe_key(
+            platform="instagram",
+            external_item_id=external_item_id,
+            source_url=source_url,
+            published_at=published_at,
+            content_hash=content_hash,
+        ),
+        audience_segment=target.audience_segment,
+        content_theme=target.content_theme,
+        raw_payload={
+            "platform": "instagram",
+            "target_url": target_url,
+            "apify_profile": profile_payload,
+        },
+        transcript_text=transcript_text,
+        media_urls=media_urls,
+        engagement_signals=_build_instagram_profile_engagement_signals(profile_payload, latest_posts),
+        routing_decision=route,
+        routing_reason=reason,
+        routing_confidence=confidence,
+        processing_state="collected",
+    )
+
+
 class _MetadataParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
@@ -361,6 +438,14 @@ class _MetadataParser(HTMLParser):
                     self.json_ld = merged
 
 
+def _default_apify_profile_fetcher(target: NativeSourceTarget, timeout_seconds: float) -> dict[str, Any]:
+    return fetch_instagram_profile(
+        handle=target.handle,
+        profile_url=resolve_target_url(target),
+        timeout_seconds=timeout_seconds,
+    )
+
+
 def _default_fetcher(url: str, timeout_seconds: float) -> str:
     request = Request(
         url,
@@ -373,6 +458,70 @@ def _default_fetcher(url: str, timeout_seconds: float) -> str:
     )
     with urlopen(request, timeout=timeout_seconds) as response:
         return response.read().decode("utf-8")
+
+
+def _should_use_apify_instagram_profile_fallback(
+    target: NativeSourceTarget,
+    target_url: str,
+    error: ValueError,
+) -> bool:
+    return (
+        target.platform == "instagram"
+        and _is_instagram_profile_url(target_url)
+        and "Could not extract transcript text" in str(error)
+    )
+
+
+def _is_instagram_profile_url(url: str) -> bool:
+    normalized = url.lower()
+    return "instagram.com" in normalized and all(
+        token not in normalized
+        for token in ("/reel/", "/p/", "/tv/", "/stories/", "/video/")
+    )
+
+
+def _normalize_text_fragment(value: str) -> str:
+    return " ".join(value.split()).strip()
+
+
+def _collect_instagram_profile_media_urls(posts: list[dict[str, Any]]) -> list[str]:
+    urls: list[str] = []
+    for post in posts:
+        for key in ("videoUrl", "displayUrl", "url"):
+            value = post.get(key)
+            if isinstance(value, str) and value.startswith("https://"):
+                urls.append(value)
+        images = post.get("images", [])
+        if isinstance(images, list):
+            urls.extend(image for image in images if isinstance(image, str) and image.startswith("https://"))
+    return urls
+
+
+def _build_instagram_profile_engagement_signals(
+    profile_payload: dict[str, Any],
+    latest_posts: list[dict[str, Any]],
+) -> dict[str, int]:
+    signals: dict[str, int] = {}
+    for source_key, target_key in (
+        ("followersCount", "followers"),
+        ("followsCount", "following"),
+        ("postsCount", "posts"),
+    ):
+        value = profile_payload.get(source_key)
+        if isinstance(value, (int, float)):
+            signals[target_key] = int(value)
+
+    if latest_posts:
+        first = latest_posts[0]
+        for source_key, target_key in (
+            ("likesCount", "likes"),
+            ("commentsCount", "comments"),
+            ("videoViewCount", "video_views"),
+        ):
+            value = first.get(source_key)
+            if isinstance(value, (int, float)):
+                signals[target_key] = int(value)
+    return signals
 
 
 def _clean_html_text(text_html: str) -> str:

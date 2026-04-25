@@ -101,6 +101,44 @@ WEB_HTML = """
 """
 
 
+INSTAGRAM_PROFILE_HTML = """
+<html>
+  <head>
+    <meta property="og:url" content="https://www.instagram.com/annalutaeva/" />
+  </head>
+</html>
+"""
+
+
+APIFY_INSTAGRAM_PROFILE = {
+    "inputUrl": "https://www.instagram.com/annalutaeva",
+    "id": "204762173",
+    "username": "annalutaeva",
+    "url": "https://www.instagram.com/annalutaeva",
+    "fullName": "ANNA LUTAEVA ARCHITECT",
+    "biography": "anna lutaeva architect design spaces you want to touch bali",
+    "followersCount": 27476,
+    "followsCount": 4959,
+    "postsCount": 1573,
+    "profilePicUrl": "https://cdn.example.com/profile.jpg",
+    "latestPosts": [
+        {
+            "id": "3655476118233595350",
+            "type": "Video",
+            "caption": "решила больше рассказывать о своей жизни и о школе на Бали, которая стала моей сбывшейся мечтой",
+            "url": "https://www.instagram.com/p/DK63Cl4PL3W/",
+            "displayUrl": "https://cdn.example.com/post.jpg",
+            "videoUrl": "https://cdn.example.com/post.mp4",
+            "likesCount": 25454,
+            "commentsCount": 461,
+            "videoViewCount": 50191,
+            "timestamp": "2025-06-15T11:28:54.000Z",
+            "ownerUsername": "annalutaeva",
+        }
+    ],
+}
+
+
 def test_resolve_target_url_builds_public_platform_urls() -> None:
     assert (
         resolve_target_url(
@@ -275,3 +313,31 @@ def test_native_source_collector_dispatches_multiple_platform_targets() -> None:
         "youtube_video",
         "instagram_reel",
     ]
+
+
+def test_collect_native_source_items_falls_back_to_apify_for_instagram_profiles() -> None:
+    target = NativeSourceTarget(
+        platform="instagram",
+        handle="@annalutaeva",
+        source_url="https://www.instagram.com/annalutaeva/",
+        audience_segment="dreamer_woman",
+        content_theme="founder_journey",
+        source_name="Anna Lutaeva",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: INSTAGRAM_PROFILE_HTML,
+        collected_at="2026-04-25T09:00:00Z",
+        apify_profile_fetcher=lambda _target, _timeout: APIFY_INSTAGRAM_PROFILE,
+    )
+
+    assert len(items) == 1
+    assert items[0].source_type == "instagram_profile"
+    assert items[0].external_item_id == "annalutaeva"
+    assert items[0].published_at == "2025-06-15T11:28:54.000Z"
+    assert items[0].engagement_signals["followers"] == 27476
+    assert items[0].engagement_signals["video_views"] == 50191
+    assert "design spaces you want to touch" in items[0].transcript_text
+    assert "больше рассказывать о своей жизни" in items[0].transcript_text
+    assert items[0].routing_decision == "both"
