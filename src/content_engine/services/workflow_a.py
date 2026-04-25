@@ -213,7 +213,7 @@ def _video_market_warning_hook(theme: str, subject: str) -> str:
         "wellness_design": f"Wellness is not a moodboard anymore. It is a signal of {subject}.",
         "boutique_hospitality": f"A boutique hotel does not win on beauty. It wins on the {subject}.",
         "bali_travel": f"Bali is easy to film beautifully and hard to understand through {subject}.",
-        "founder_life": f"The expensive mistake is building a life that only looks right from the outside.",
+        "founder_life": f"The expensive mistake around {subject} is building a life that only looks right from the outside.",
         "market_structure": f"In Bali, the headline price is not the signal. The {subject} is.",
     }
     return hooks.get(theme, f"The real story is not the surface. It is the {subject}.")
@@ -259,6 +259,22 @@ def _video_data_hook(theme: str, subject: str) -> str:
 
 
 def _video_hook_theme_key(item: SourceItem) -> str:
+    declared_theme = item.content_theme.strip().lower().replace(" ", "_")
+    declared_map = {
+        "founder_journey": "founder_life",
+        "personal_life_entrepreneur": "founder_life",
+        "личная_жизнь_предпринимателя": "founder_life",
+        "bali_travel": "bali_travel",
+        "global_trends": "wellness_design",
+        "wellness_architecture": "wellness_design",
+        "boutique_hotels": "boutique_hospitality",
+        "expert_pain_bali": "market_structure",
+        "market_reports": "market_structure",
+        "land_and_legal": "legal_structure",
+    }
+    if declared_theme in declared_map:
+        return declared_map[declared_theme]
+
     context = _source_context(item)
     if _contains_any(context, ("legal", "law", "lawyer", "zoning", "permit", "regulat", "юрид", "закон", "разреш")):
         return "legal_structure"
@@ -279,6 +295,23 @@ def _video_hook_theme_key(item: SourceItem) -> str:
 
 def _video_hook_subject(item: SourceItem) -> str:
     context = _source_context(item)
+    declared_theme = item.content_theme.strip().lower().replace(" ", "_")
+    if declared_theme in {"founder_journey", "personal_life_entrepreneur"}:
+        return _founder_video_subject(context)
+    if declared_theme == "bali_travel":
+        return _travel_video_subject(context)
+
+    declared_subjects = {
+        "global_trends": "market signal",
+        "wellness_architecture": "restorative feeling",
+        "boutique_hotels": "reason to return",
+        "expert_pain_bali": "market signal",
+        "market_reports": "market signal",
+        "land_and_legal": "legal structure",
+    }
+    if declared_theme in declared_subjects:
+        return declared_subjects[declared_theme]
+
     subjects = [
         (("zoning", "permit", "разреш"), "zoning and permit layer"),
         (("legal", "law", "lawyer", "юрид", "закон"), "legal structure"),
@@ -297,6 +330,28 @@ def _video_hook_subject(item: SourceItem) -> str:
         if _contains_any(context, markers):
             return subject
     return _fallback_subject(item)
+
+
+def _founder_video_subject(context: str) -> str:
+    if _contains_any(context, ("school", "education", "pregnancy", "child", "ханн", "школ", "беремен", "реб")):
+        return "school and child decisions"
+    if _contains_any(context, ("student", "realtor", "course", "client", "deal", "учен", "риелтор", "курс", "клиент", "сдел")):
+        return "client confidence"
+    if _contains_any(context, ("dance", "dream", "desire", "мечт", "танц", "желан")):
+        return "personal desire"
+    if _contains_any(context, ("brother", "sister", "concert", "emily", "family", "брат", "сестр", "концерт", "эмили", "сем")):
+        return "family memory"
+    return "ambition without a perfect image"
+
+
+def _travel_video_subject(context: str) -> str:
+    if _contains_any(context, ("ubud", "dinner", "restaurant", "ужин", "ресторан")):
+        return "Ubud dinner ritual"
+    if _contains_any(context, ("heritage", "village", "rice", "jungle", "soul", "наслед", "деревн", "рисов", "джунг")):
+        return "living heritage"
+    if _contains_any(context, ("guide", "curated", "things to do", "destination", "маршрут", "гид")):
+        return "honest route through Bali"
+    return "honest experience of place"
 
 
 def _source_context(item: SourceItem) -> str:

@@ -195,6 +195,82 @@ def test_writer_entity_uses_lane_specific_hook_direction_for_same_source() -> No
     assert any(marker in professional_result.content_brief.hook_direction.lower() for marker in ("логик", "архитект", "продукт"))
 
 
+def test_writer_entity_prioritizes_declared_topic_over_incidental_keywords() -> None:
+    founder_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="founder journey",
+            source_material=(
+                "Architect founder in Bali designs spaces you can touch, but this source is about family rituals, "
+                "a child, ambition, and the cost of performing a perfect life."
+            ),
+            target_audience="dreamer_woman",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers founder family life and ambition tension."],
+        reference_sources=["https://example.com/founder"],
+    )
+    travel_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="bali travel",
+            source_material=(
+                "Bali travel source mentions hotels, resorts, restaurants, Ubud dinner spots, "
+                "beach rituals, and honest place experience."
+            ),
+            target_audience="lifestyle_expat",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers Bali travel as honest place experience."],
+        reference_sources=["https://example.com/travel"],
+    )
+
+    assert "жизнь предпринимателя" in founder_result.content_brief.hook_direction.lower()
+    assert "wellness" not in founder_result.content_brief.hook_direction.lower()
+    assert "бали" in travel_result.content_brief.hook_direction.lower()
+    assert "бутик-отель" not in travel_result.content_brief.hook_direction.lower()
+
+
+def test_writer_entity_keeps_same_theme_sources_distinct() -> None:
+    school_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="founder journey",
+            source_material="A founder talks about pregnancy, a child, school, and finding a Bali education decision.",
+            target_audience="dreamer_woman",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers founder school decision."],
+        reference_sources=["https://example.com/school"],
+    )
+    course_result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="founder journey",
+            source_material="A broker educator talks about students, realtors, course confidence, clients, and first deals.",
+            target_audience="broker",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers broker course confidence."],
+        reference_sources=["https://example.com/course"],
+    )
+
+    school_hook = school_result.content_brief.hook_direction
+    course_hook = course_result.content_brief.hook_direction
+
+    assert school_hook != course_hook
+    assert any(marker in school_hook.lower() for marker in ("школ", "реб", "дет"))
+    assert any(marker in course_hook.lower() for marker in ("клиент", "увер", "сдел"))
+
+
 def test_video_hooks_topics_generator_applies_quality_gate() -> None:
     output = generate_video_hooks_topics(
         video_source="A villa looks affordable until the legal and operating structure is checked.",

@@ -154,6 +154,93 @@ def test_develop_video_hooks_preserves_detected_source_hook_as_primary() -> None
     assert "source verbatim" in best_hook.angle
 
 
+def test_develop_video_hooks_prioritizes_declared_content_theme_over_bio_keywords() -> None:
+    founder_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_founder_architect",
+            "audience_segment": "dreamer_woman",
+            "content_theme": "founder_journey",
+            "raw_payload": {
+                "video_title": "Architect founder life",
+                "caption_text": "Architect founder in Bali shares family and ambition tension.",
+                "spoken_transcript": (
+                    "Architect founder in Bali designs spaces, but the source is about family rituals, "
+                    "a child, ambition, and the cost of performing a perfect life."
+                ),
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": (
+                "Architect founder in Bali designs spaces, but the source is about family rituals, "
+                "a child, ambition, and the cost of performing a perfect life."
+            ),
+        }
+    )
+    travel_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_bali_travel_resort",
+            "audience_segment": "lifestyle_expat",
+            "content_theme": "bali_travel",
+            "raw_payload": {
+                "video_title": "Best dinner spots in Ubud",
+                "caption_text": "Hotels, resorts, restaurants, and Ubud dinner spots worth saving.",
+                "spoken_transcript": (
+                    "Bali travel guide about hotels, resorts, restaurants, beach rituals, and honest place experience."
+                ),
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": (
+                "Bali travel guide about hotels, resorts, restaurants, beach rituals, and honest place experience."
+            ),
+        }
+    )
+
+    founder_hook = select_best_hook(develop_video_hooks(founder_item, platform="instagram")).hook_text
+    travel_hook = select_best_hook(develop_video_hooks(travel_item, platform="instagram")).hook_text
+
+    assert "life" in founder_hook.lower()
+    assert "wellness" not in founder_hook.lower()
+    assert "bali" in travel_hook.lower()
+    assert "boutique hotel" not in travel_hook.lower()
+
+
+def test_develop_video_hooks_keeps_same_theme_sources_distinct() -> None:
+    school_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_founder_school",
+            "audience_segment": "dreamer_woman",
+            "content_theme": "founder_journey",
+            "raw_payload": {
+                "video_title": "Founder school decision",
+                "caption_text": "A founder talks about pregnancy, a child, school, and Bali.",
+                "spoken_transcript": "A founder talks about pregnancy, a child, school, and Bali.",
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": "A founder talks about pregnancy, a child, school, and Bali.",
+        }
+    )
+    course_item = make_video_source_item().model_copy(
+        update={
+            "item_id": "itm_vid_founder_course",
+            "audience_segment": "broker",
+            "content_theme": "founder_journey",
+            "raw_payload": {
+                "video_title": "Broker course confidence",
+                "caption_text": "Students, realtors, course, clients, confidence, and first deals.",
+                "spoken_transcript": "Students, realtors, course, clients, confidence, and first deals.",
+                "transcript_source": "caption_or_transcript",
+            },
+            "transcript_text": "Students, realtors, course, clients, confidence, and first deals.",
+        }
+    )
+
+    school_hook = select_best_hook(develop_video_hooks(school_item, platform="instagram")).hook_text
+    course_hook = select_best_hook(develop_video_hooks(course_item, platform="instagram")).hook_text
+
+    assert school_hook != course_hook
+    assert "school" in school_hook.lower() or "child" in school_hook.lower()
+    assert "confidence" in course_hook.lower() or "client" in course_hook.lower()
+
+
 def test_build_video_script_creates_scripted_queue_item() -> None:
     best_hook = select_best_hook(develop_video_hooks(make_video_source_item(), platform="instagram"))
 

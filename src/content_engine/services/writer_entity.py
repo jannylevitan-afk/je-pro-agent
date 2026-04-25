@@ -1088,6 +1088,22 @@ def _hook_direction(
 
 
 def _hook_theme_key(context: str) -> str:
+    if _contains_any(
+        context,
+        ("founder_journey", "founder journey", "personal_life_entrepreneur", "personal life entrepreneur", "личная_жизнь_предпринимателя"),
+    ):
+        return "founder_life"
+    if _contains_any(context, ("bali_travel", "bali travel")):
+        return "bali_travel"
+    if _contains_any(context, ("wellness_architecture", "wellness architecture")):
+        return "wellness_design"
+    if _contains_any(context, ("boutique_hotels", "boutique hotels")):
+        return "boutique_hospitality"
+    if _contains_any(context, ("expert_pain_bali", "expert pain bali", "market_reports", "market reports")):
+        return "market_structure"
+    if _contains_any(context, ("land_and_legal", "land and legal")):
+        return "legal_structure"
+
     if _contains_any(context, ("legal", "law", "lawyer", "zoning", "permit", "regulat", "юрид", "закон", "разреш")):
         return "legal_structure"
     if _contains_any(context, ("land", "зем", "leasehold", "freehold")):
@@ -1106,6 +1122,13 @@ def _hook_theme_key(context: str) -> str:
 
 
 def _hook_subject_labels(context: str) -> tuple[str, str]:
+    if _contains_any(context, ("founder_journey", "founder journey", "personal life entrepreneur")):
+        return _founder_hook_subject(context)
+    if _contains_any(context, ("bali_travel", "bali travel")):
+        return _bali_travel_hook_subject(context)
+    if _contains_any(context, ("boutique_hotels", "boutique hotels")):
+        return _boutique_hook_subject(context)
+
     subjects = [
         (("zoning", "permit", "разреш"), "разрешения и зонинг", "zoning and permit layer"),
         (("legal", "law", "lawyer", "юрид", "закон"), "правовая структура", "legal structure"),
@@ -1124,6 +1147,38 @@ def _hook_subject_labels(context: str) -> tuple[str, str]:
         if _contains_any(context, markers):
             return ru_subject, en_subject
     return "решение за красивой поверхностью", "decision behind the surface"
+
+
+def _founder_hook_subject(context: str) -> tuple[str, str]:
+    if _contains_any(context, ("school", "education", "pregnancy", "child", "ханн", "школ", "беремен", "реб")):
+        return "школа и детское чувство дома", "school and child decisions"
+    if _contains_any(context, ("student", "realtor", "course", "client", "deal", "учен", "риелтор", "курс", "клиент", "сдел")):
+        return "уверенность перед клиентом", "client confidence"
+    if _contains_any(context, ("dance", "dream", "desire", "мечт", "танц", "желан")):
+        return "свои желания", "personal desire"
+    if _contains_any(context, ("brother", "sister", "concert", "emily", "family", "брат", "сестр", "концерт", "эмили", "сем")):
+        return "семейная память", "family memory"
+    return "амбиция без идеальной картинки", "ambition without a perfect image"
+
+
+def _bali_travel_hook_subject(context: str) -> tuple[str, str]:
+    if _contains_any(context, ("ubud", "dinner", "restaurant", "ужин", "ресторан")):
+        return "вечерний Убуд", "Ubud dinner ritual"
+    if _contains_any(context, ("heritage", "village", "rice", "jungle", "soul", "наслед", "деревн", "рисов", "джунг")):
+        return "живая связь с местом", "living heritage"
+    if _contains_any(context, ("guide", "curated", "things to do", "destination", "маршрут", "гид")):
+        return "честный маршрут по Бали", "honest route through Bali"
+    return "честный опыт места", "honest experience of place"
+
+
+def _boutique_hook_subject(context: str) -> tuple[str, str]:
+    if _contains_any(context, ("management", "operator", "asset", "owner", "оператор", "управлен")):
+        return "операционная реальность", "operator reality"
+    if _contains_any(context, ("sustainab", "bensley", "designer", "design", "устойчив", "дизайн")):
+        return "точка зрения в дизайне", "design point of view"
+    if _contains_any(context, ("architecture", "interiors", "dezeen", "архитект", "интерьер")):
+        return "архитектурный сигнал", "architecture signal"
+    return "причина вернуться", "reason to return"
 
 
 def _russian_hook_direction(theme: str, subject: str, *, goal: str, voice_register: str) -> str:
