@@ -41,3 +41,13 @@ Find candidate sources for Layer 0B Discovery and tag them with:
 - Candidate scoring: `src/content_engine/services/discovery.py`
 - Source collectors: `src/content_engine/collectors/native.py`
 - Search orchestration: `src/content_engine/orchestration/search_agent.py`
+- Canonical seed pool: `examples/seed_config.sample.yaml`
+- Discovery query builder: `content_engine.config.seed_config.build_discovery_queries`
+- Native monitoring targets: `content_engine.config.seed_config.build_native_source_targets`
+
+## Blog Source Pool Rules
+
+- Treat `content_theme_sources[].sources` as approved inputs for monitoring.
+- Treat `content_theme_sources[].discovery_keywords` and `similar_source_targets` as the inputs for finding similar posts, accounts, channels, reports, and videos.
+- Keep the source's `content_theme`, primary audience, and route when building discovery candidates.
+- New candidates do not enter monitoring until they are approved or explicitly included.

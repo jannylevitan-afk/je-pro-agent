@@ -1,56 +1,365 @@
 audience_segments:
   - name: developer_investor
+    role_in_funnel: client
     route_to: workflow_b
     seed_profiles:
       - platform: instagram
         handle: artur_mkhitaryan_
+        why: developer/investor reference profile
       - platform: instagram
         handle: anton.karotki
+        why: Bali entrepreneur building hospitality assets
+    discovery_criteria:
+      bio_keywords: [real estate, developer, investor, CEO, hotel, девелопер, инвестор]
+      geo: [Bali, Dubai, Singapore, Jakarta, Moscow]
+      follower_range: 5K-500K
+      content_signals: [ROI, construction, hospitality, villas, market analysis]
 
-  - name: real_estate_broker
+  - name: broker
+    role_in_funnel: partner_leadgen
     route_to: workflow_b
     seed_profiles:
       - platform: instagram
         handle: kseniya_asap
+        why: luxury property broker and personal brand reference
       - platform: instagram
         handle: joravdubae
+        why: provocative property agent content
       - platform: instagram
         handle: demuntergilles
+        why: senior Bali realtor reference
+    discovery_criteria:
+      bio_keywords: [realtor, broker, agent, luxury homes, риелтор, брокер]
+      geo: [Bali, Dubai, Thailand, Moscow, London]
+      follower_range: 1K-100K
+      content_signals: [villa tours, deals, buyer objections, listings]
 
   - name: architect_designer
+    role_in_funnel: partner_creator
     route_to: workflow_b
     seed_profiles:
       - platform: instagram
         handle: antoniusrichard
+        why: Bali architecture studio founder
       - platform: instagram
         handle: alyona_miller__
+        why: urban development and spatial thinking reference
+    discovery_criteria:
+      bio_keywords: [architect, designer, architecture, studio, архитектор, дизайнер]
+      geo: [Bali, Jakarta, Singapore, Europe, CIS]
+      follower_range: 1K-50K
+      content_signals: [renders, projects, sketches, materials, construction process]
 
   - name: lifestyle_expat
+    role_in_funnel: engagement_core
     route_to: workflow_b
     seed_profiles:
       - platform: instagram
         handle: viktoriya.onelife
+        why: Bali lifestyle and community reference
       - platform: instagram
         handle: polinka.apelsinka
+        why: Bali visual/lifestyle reference
+    discovery_criteria:
+      bio_keywords: [Bali, travel, photographer, community, lifestyle, digital nomad, expat]
+      geo: [Bali, Canggu, Ubud, Seminyak, Uluwatu]
+      follower_range: 500-50K
+      content_signals: [Bali visuals, travel content, expat life, community]
+
+  - name: dreamer_woman
+    role_in_funnel: affinity_core
+    route_to: workflow_b
+    seed_profiles:
+      - platform: instagram
+        handle: annalutaeva
+        why: founder/lifestyle/family story reference
+      - platform: instagram
+        handle: marinamogilko
+        why: entrepreneur lifestyle and Bali context reference
+    discovery_criteria:
+      bio_keywords: [founder, entrepreneur, creator, Bali, family, lifestyle, women in business]
+      geo: [Bali, California, Dubai, Europe, Moscow]
+      follower_range: 5K-2M
+      content_signals: [founder story, family, business journey, relocation, personal transformation]
 
 content_theme_sources:
-  - name: founder_lifestyle
+  - name: founder_journey
+    title: Personal life of entrepreneur
     route_to: workflow_b
+    audience_segments: [dreamer_woman, lifestyle_expat]
+    primary_audience_segment: dreamer_woman
+    content_pillars: [lifestyle, journey, human_struggle]
+    narrative_types: [founder_struggle, journey_of_creation, aesthetic_reflection]
+    suggested_registers: [register_7, register_8, register_9]
+    collect_fields:
+      - personal scene
+      - family/business tension
+      - founder decision
+      - identity shift
+      - emotional payoff
+      - audience pain and trigger
+    discovery_keywords:
+      - founder story
+      - women entrepreneur lifestyle
+      - Bali entrepreneur
+      - family and business
+      - personal brand founder
+    similar_source_targets: [instagram profiles, telegram founder channels, linkedin founders, youtube interviews]
+    sources:
+      - platform: instagram
+        source_name: Anna Lutaeva
+        handle: annalutaeva
+        source_url: https://www.instagram.com/annalutaeva/
+        collect_for: personal brand, lifestyle, family, founder story
+      - platform: telegram
+        source_name: TorbosovLife
+        handle: "@TorbosovLife"
+        source_url: https://t.me/TorbosovLife
+        collect_for: entrepreneur journey, personal reflections, business/life tension
+      - platform: instagram
+        source_name: Kseniya ASAP
+        handle: kseniya_asap
+        source_url: https://www.instagram.com/kseniya_asap/
+        collect_for: broker personal brand, business plus lifestyle
+        audience_segment: broker
+      - platform: instagram
+        source_name: Burimova
+        handle: burimova
+        source_url: https://www.instagram.com/burimova/
+        collect_for: female entrepreneur blog, founder tone, intimate story angles
+      - platform: instagram
+        source_name: Marina Mogilko
+        handle: marinamogilko
+        source_url: https://www.instagram.com/marinamogilko/
+        collect_for: entrepreneur lifestyle, Bali context, creator/founder story
 
-  - name: bali_real_estate_expertise
+  - name: expert_pain_bali
+    title: Expert pains and Bali real estate
     route_to: workflow_b
+    audience_segments: [developer_investor, broker]
+    primary_audience_segment: developer_investor
+    content_pillars: [expertise, proof]
+    narrative_types: [authority, market_observation, professional_lesson]
+    suggested_registers: [register_3, register_4, register_6]
+    collect_fields:
+      - market pain
+      - legal risk
+      - land/deal structure
+      - professional lesson
+      - proof point
+      - date and source citation
+    discovery_keywords:
+      - Bali real estate risk
+      - Bali property law
+      - Bali land investment
+      - hotel investment Bali
+      - Indonesian real estate market report
+    similar_source_targets: [telegram expert channels, web market reports, linkedin brokers, youtube property explainers]
+    sources:
+      - platform: telegram
+        source_name: Bali Expert
+        handle: "@Bali_expert"
+        source_url: https://t.me/Bali_expert
+        collect_for: expert market observations and investor pain points
+      - platform: telegram
+        source_name: AlexLandSale
+        handle: "@AlexLandSale"
+        source_url: https://t.me/AlexLandSale
+        collect_for: land, deals, legal nuances, buyer risk
+      - platform: web
+        source_name: Hotelier Indonesia 2026
+        source_url: https://www.hotelier-indonesia.com/2026/
+        collect_for: hospitality industry analytics and operator signals
+      - platform: telegram
+        source_name: Bali Lawyer
+        handle: "@BaliLawyer"
+        source_url: https://t.me/BaliLawyer
+        collect_for: legal changes, compliance risks, deal structure
+      - platform: web
+        source_name: REID Market Reports
+        source_url: https://www.realinfo.id/market-reports
+        collect_for: market reports, data-backed proof, Bali real estate benchmarks
+      - platform: telegram
+        source_name: Wellstate
+        handle: "@wellstate"
+        source_url: https://t.me/wellstate
+        collect_for: wellness plus real estate intersection, Bali opportunity signals
 
   - name: bali_travel
+    title: Bali travel and visual lifestyle
     route_to: both
+    audience_segments: [lifestyle_expat, dreamer_woman]
+    primary_audience_segment: lifestyle_expat
+    content_pillars: [lifestyle, invitation]
+    narrative_types: [aesthetic_reflection, invitation_community]
+    suggested_registers: [register_1, register_2, register_7]
+    collect_fields:
+      - location
+      - visual hook
+      - atmosphere
+      - community signal
+      - repeatable format
+      - first 3 seconds
+    discovery_keywords:
+      - Bali travel guide
+      - Bali hidden gems
+      - Canggu Ubud Uluwatu lifestyle
+      - Bali reels
+      - Bali things to do
+    similar_source_targets: [instagram travel pages, tiktok Bali videos, youtube Bali guides, web travel editorials]
+    sources:
+      - platform: instagram
+        source_name: The Bali Bible
+        handle: thebalibible
+        source_url: https://www.instagram.com/thebalibible/
+        collect_for: top Bali content, formats, locations, visual hooks
+      - platform: instagram
+        source_name: Baligasm
+        handle: baligasm
+        source_url: https://www.instagram.com/baligasm/
+        collect_for: visual hooks, locations, travel atmosphere
+      - platform: web
+        source_name: NOW Bali
+        source_url: https://www.nowbali.co.id/
+        collect_for: events, local news, Bali editorial trends
+      - platform: web
+        source_name: The Bali Bible
+        source_url: https://www.thebalibible.com/
+        collect_for: Bali editorial content, destinations, activity ideas
 
   - name: global_trends
+    title: Global travel and wellness trends
     route_to: both
+    audience_segments: [developer_investor, broker, architect_designer, lifestyle_expat]
+    primary_audience_segment: developer_investor
+    content_pillars: [expertise, market_signals]
+    narrative_types: [market_observation, authority]
+    suggested_registers: [register_3, register_4]
+    collect_fields:
+      - trend
+      - date
+      - industry signal
+      - benchmark
+      - source citation
+      - freshness signal
+    discovery_keywords:
+      - travel trends
+      - wellness economy trends
+      - hospitality trends
+      - luxury travel research
+      - wellness tourism report
+    similar_source_targets: [web reports, linkedin industry posts, youtube conference talks, trend newsletters]
+    sources:
+      - platform: web
+        source_name: HTrends Travel Trends
+        source_url: https://www.htrends.com/trends-category-category-Travel%20Trends.html
+        collect_for: travel trend formats and hospitality signals
+      - platform: web
+        source_name: Global Wellness Institute Presentations
+        source_url: https://globalwellnessinstitute.org/global-wellness-institute-blog/2022/08/22/presentations/
+        collect_for: wellness industry presentations and thesis points
+      - platform: web
+        source_name: Global Wellness Institute Reports
+        source_url: https://globalwellnessinstitute.org/industry-research/featured-reports/
+        collect_for: wellness research reports, data points, market language
 
   - name: wellness_architecture
+    title: Wellness architecture
     route_to: workflow_b
+    audience_segments: [developer_investor, architect_designer, lifestyle_expat]
+    primary_audience_segment: architect_designer
+    content_pillars: [expertise, lifestyle]
+    narrative_types: [authority, aesthetic_reflection, journey_of_creation]
+    suggested_registers: [register_2, register_6]
+    collect_fields:
+      - design logic
+      - spa/wellness feature
+      - luxury cue
+      - human feeling
+      - project lesson
+      - visual detail
+    discovery_keywords:
+      - wellness architecture
+      - spa design
+      - home wellness design
+      - biophilic design resort
+      - luxury wellness interiors
+    similar_source_targets: [architecture magazines, instagram studios, web design articles, linkedin architects]
+    sources:
+      - platform: web
+        source_name: Elite Traveler Home Spa Design
+        source_url: https://elitetraveler.com/design-culture/architecture-interiors/home-spa-design-tip
+        collect_for: design, spa, luxury interiors, wellness cues
 
   - name: boutique_hotels
+    title: Boutique hotels and hospitality design
     route_to: both
+    audience_segments: [developer_investor, broker, architect_designer]
+    primary_audience_segment: developer_investor
+    content_pillars: [expertise, proof]
+    narrative_types: [authority, market_observation]
+    suggested_registers: [register_3, register_6]
+    collect_fields:
+      - hospitality case
+      - positioning
+      - ADR/yield signal
+      - visual proof
+      - operator lesson
+      - design trend
+    discovery_keywords:
+      - boutique hotel design
+      - sustainable hotel designer
+      - hospitality concept
+      - hotel development case study
+      - luxury hotel design trend
+    similar_source_targets: [hospitality magazines, architecture media, instagram hospitality pages, linkedin hotel founders]
+    sources:
+      - platform: web
+        source_name: The Hotel Journal Bill Bensley
+        source_url: https://thehoteljournal.com/bill-bensley-interview-sustainable-hotel-designer/
+        collect_for: designer interview, boutique hotel case, sustainability angle
+      - platform: web
+        source_name: BLLA Blog
+        source_url: https://blla.org/blla-blog/
+        collect_for: boutique hotel trends, independent hospitality signals
+      - platform: instagram
+        source_name: The Stanza Media
+        handle: thestanzamedia
+        source_url: https://www.instagram.com/thestanzamedia/
+        collect_for: hospitality media, visual trends, hotel storytelling
+      - platform: web
+        source_name: Dezeen
+        source_url: https://www.dezeen.com/
+        collect_for: architecture and design trends useful for hospitality angles
+      - platform: web
+        source_name: Wallpaper
+        source_url: https://www.wallpaper.com/
+        collect_for: design, interiors, architecture, luxury lifestyle cues
 
   - name: marketing_cases
+    title: Hospitality and real estate marketing cases
     route_to: workflow_b
+    audience_segments: [developer_investor, broker]
+    primary_audience_segment: developer_investor
+    content_pillars: [expertise, proof]
+    narrative_types: [professional_lesson, market_observation]
+    suggested_registers: [register_3, register_8]
+    collect_fields:
+      - marketing mechanic
+      - case evidence
+      - mistake
+      - framework
+      - commercial lesson
+    discovery_keywords:
+      - hospitality marketing case
+      - real estate marketing case
+      - hotel launch campaign
+      - property funnel
+      - broker content strategy
+    similar_source_targets: [telegram marketing channels, linkedin agency posts, web case studies, youtube breakdowns]
+    sources:
+      - platform: telegram
+        source_name: Artem Mkey
+        handle: "@artemmkey"
+        source_url: https://t.me/artemmkey
+        collect_for: marketing cases, breakdowns, commercial insight
