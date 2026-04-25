@@ -1,5 +1,6 @@
 import pytest
 
+from content_engine.knowledge.kmd import MarkdownKnowledgeStore
 from content_engine.runtime.live_run import (
     StaticSourceCollector,
     resolve_anthropic_model,
@@ -82,7 +83,7 @@ class StubModelDiscoveryClient:
         return {"data": [{"id": model_id} for model_id in self.model_ids]}
 
 
-def test_run_configured_live_pipeline_bootstraps_and_processes_items(video_source_item) -> None:
+def test_run_configured_live_pipeline_bootstraps_processes_items_and_writes_kmd(tmp_path, video_source_item) -> None:
     client = StubRuntimeClient(
         search_results=[{"results": []}] * 8,
         database_create_results=[
@@ -130,9 +131,11 @@ def test_run_configured_live_pipeline_bootstraps_and_processes_items(video_sourc
         collector=StaticSourceCollector([video_source_item]),
         verified_facts={"Boutique hotel ROI beats mass-market in Bali."},
         submitted_at="2026-04-24T10:00:00Z",
+        knowledge_store=MarkdownKnowledgeStore(tmp_path),
     )
 
     assert results[0].script_page_id == "script_page_1"
+    assert len(results[0].knowledge_file_paths) == 2
     assert client.database_create_calls[0][1] == "Content Engine Sources"
     assert client.page_create_calls[1][1]["Script text"]["rich_text"][0]["text"]["content"] == "Anthropic video script"
 

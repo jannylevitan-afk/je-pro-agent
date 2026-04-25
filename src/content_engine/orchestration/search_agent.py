@@ -9,6 +9,7 @@ from content_engine.collectors.native import (
     collect_native_source_items,
     resolve_target_url,
 )
+from content_engine.knowledge.kmd import KnowledgeStore
 from content_engine.models.source_item import SourceItem
 from content_engine.notion.sync import NotionClientLike
 from content_engine.orchestration.live_pipeline import LivePipelineItemResult, WorkflowWriter, run_live_pipeline
@@ -58,6 +59,7 @@ def run_search_agent(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    knowledge_store: KnowledgeStore | None = None,
     timeout_seconds: float = 30.0,
     fetcher: Fetcher | None = None,
     collected_at: str | None = None,
@@ -99,6 +101,7 @@ def run_search_agent(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        knowledge_store=knowledge_store,
     )
     return SearchAgentReport(
         compliance_checks=compliance_checks,

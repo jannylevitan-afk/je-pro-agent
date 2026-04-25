@@ -8,18 +8,18 @@ This project is set up as a standalone repository so it stays fully isolated fro
 - `docs/notes/` — working notes and briefs
 - `docs/superpowers/specs/` — design notes for the setup
 - `docs/superpowers/plans/` — implementation planning notes
-- `src/` — future source code
+- `src/` — Content Engine application code
+- `knowledge/kmd/` — generated workflow knowledge material for Research Agent handoff
 - `assets/` — static assets
 
 ## Current Reference File
 
-The original architecture document lives at:
+The current architecture document lives at:
 
-- `docs/architecture/content_engine_architecture_v2.html`
+- `content_engine_architecture_v3.md`
 
-## Next Steps
+## Runtime Notes
 
-1. Create a dedicated GitHub repository for this folder.
-2. Push this local repository to that remote.
-3. Add your friend as a collaborator on GitHub.
-4. Start building the first version inside `src/`.
+- Research Agent collects and tags source items; workflows only process prepared inputs.
+- Workflow A/B can write `.kmd.md` material files through `CONTENT_ENGINE_KMD_ROOT`.
+- Notion publishing is manual; the system prepares queues, briefs, drafts, and review events.

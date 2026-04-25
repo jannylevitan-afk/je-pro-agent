@@ -22,6 +22,7 @@ class RuntimeSettings:
     anthropic_model: str = "claude-sonnet-4-20250514"
     request_timeout_seconds: float = 30.0
     source_feed_url: str | None = None
+    kmd_root: str = "knowledge/kmd"
 
     def __post_init__(self) -> None:
         notion_api_key = self.notion_api_key.strip()
@@ -41,12 +42,14 @@ class RuntimeSettings:
 
         if self.request_timeout_seconds <= 0:
             raise ValueError("request_timeout_seconds must be greater than zero")
+        kmd_root = self.kmd_root.strip() or "knowledge/kmd"
 
         object.__setattr__(self, "notion_api_key", notion_api_key)
         object.__setattr__(self, "anthropic_api_key", anthropic_api_key)
         object.__setattr__(self, "notion_parent_page_url", notion_parent_page_url)
         object.__setattr__(self, "notion_parent_page_id", resolved_page_id)
         object.__setattr__(self, "anthropic_model", self.anthropic_model.strip() or "claude-sonnet-4-20250514")
+        object.__setattr__(self, "kmd_root", kmd_root)
 
 
 def load_runtime_settings(
@@ -68,6 +71,7 @@ def load_runtime_settings(
         anthropic_model=merged.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
         request_timeout_seconds=float(merged.get("CONTENT_ENGINE_REQUEST_TIMEOUT_SECONDS", "30.0")),
         source_feed_url=merged.get("CONTENT_ENGINE_SOURCE_FEED_URL"),
+        kmd_root=merged.get("CONTENT_ENGINE_KMD_ROOT", "knowledge/kmd"),
     )
 
 

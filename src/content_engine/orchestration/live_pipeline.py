@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol, cast
 
 from content_engine.context.workflow_b_rules import (
@@ -9,6 +9,7 @@ from content_engine.context.workflow_b_rules import (
     infer_narrative_type,
     infer_useful_lesson,
 )
+from content_engine.knowledge.kmd import KnowledgeStore
 from content_engine.models.approval import DraftRecord
 from content_engine.models.source_item import SourceItem
 from content_engine.models.workflow_a import VideoPlatform
@@ -59,6 +60,7 @@ class LivePipelineItemResult:
     event_page_ids: list[str]
     script_page_id: str | None
     filming_card_page_id: str | None
+    knowledge_file_paths: list[str] = field(default_factory=list)
 
 
 class SourceCollector(Protocol):
@@ -96,6 +98,7 @@ def run_live_pipeline(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    knowledge_store: KnowledgeStore | None = None,
 ) -> list[LivePipelineItemResult]:
     return [
         process_source_item(
@@ -105,6 +108,7 @@ def run_live_pipeline(
             verified_facts=verified_facts,
             submitted_at=submitted_at,
             writer=writer,
+            knowledge_store=knowledge_store,
         )
         for item in items
     ]
@@ -117,6 +121,7 @@ def run_collector_cycle(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    knowledge_store: KnowledgeStore | None = None,
 ) -> list[LivePipelineItemResult]:
     return run_live_pipeline(
         client=client,
@@ -125,6 +130,7 @@ def run_collector_cycle(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        knowledge_store=knowledge_store,
     )
 
 
@@ -135,6 +141,7 @@ def process_source_item(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    knowledge_store: KnowledgeStore | None = None,
 ) -> LivePipelineItemResult:
     source_response = upsert_source(client, targets.sources_database_id, item)
     source_page_id = _page_id(source_response)
@@ -143,7 +150,9 @@ def process_source_item(
 
     script_page_id: str | None = None
     filming_card_page_id: str | None = None
+    knowledge_file_paths: list[str] = []
     if route in {"workflow_a", "both"}:
+        knowledge_file_paths.extend(_write_workflow_material(knowledge_store, item, "workflow_a"))
         script_page_id, filming_card_page_id = _run_workflow_a(
             client=client,
             targets=targets,
@@ -157,6 +166,7 @@ def process_source_item(
     draft_page_ids: list[str] = []
     event_page_ids: list[str] = []
     if route in {"workflow_b", "both"}:
+        knowledge_file_paths.extend(_write_workflow_material(knowledge_store, item, "workflow_b"))
         (
             insight_page_id,
             idea_page_ids,
@@ -183,7 +193,18 @@ def process_source_item(
         event_page_ids=event_page_ids,
         script_page_id=script_page_id,
         filming_card_page_id=filming_card_page_id,
+        knowledge_file_paths=knowledge_file_paths,
     )
+
+
+def _write_workflow_material(
+    knowledge_store: KnowledgeStore | None,
+    item: SourceItem,
+    workflow: Literal["workflow_a", "workflow_b"],
+) -> list[str]:
+    if knowledge_store is None:
+        return []
+    return [str(knowledge_store.write_source_material(item, workflow=workflow))]
 
 
 def _run_workflow_a(

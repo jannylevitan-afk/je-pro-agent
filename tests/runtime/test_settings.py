@@ -22,6 +22,7 @@ def test_load_runtime_settings_prefers_explicit_environment_over_file(tmp_path: 
             "NOTION_PARENT_PAGE_URL": "https://www.notion.so/workspace/Other-page-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "ANTHROPIC_API_KEY": "env-anthropic-token",
             "ANTHROPIC_MODEL": "claude-opus-4-20250514",
+            "CONTENT_ENGINE_KMD_ROOT": "tmp/kmd",
         },
         env_file=env_file,
     )
@@ -30,6 +31,7 @@ def test_load_runtime_settings_prefers_explicit_environment_over_file(tmp_path: 
     assert settings.anthropic_api_key == "env-anthropic-token"
     assert settings.anthropic_model == "claude-opus-4-20250514"
     assert settings.notion_parent_page_id == "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+    assert settings.kmd_root == "tmp/kmd"
 
 
 def test_load_runtime_settings_reads_env_file_when_process_env_missing(tmp_path: Path) -> None:
@@ -51,6 +53,7 @@ def test_load_runtime_settings_reads_env_file_when_process_env_missing(tmp_path:
     assert settings.anthropic_api_key == "file-anthropic-token"
     assert settings.anthropic_model == "claude-sonnet-4-20250514"
     assert settings.notion_parent_page_id == "34b2a925-8157-80b8-bd08-d56c7e1293cf"
+    assert settings.kmd_root == "knowledge/kmd"
 
 
 def test_runtime_settings_accepts_explicit_page_id_without_url() -> None:

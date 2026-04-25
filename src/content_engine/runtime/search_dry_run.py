@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from content_engine.collectors.native import Fetcher, NativeSourceTarget
+from content_engine.knowledge.kmd import KnowledgeStore
 from content_engine.orchestration.search_agent import SearchAgentReport, run_search_agent
 from content_engine.orchestration.targets import LivePipelineTargets
 from content_engine.runtime.dry_run import InMemoryNotionClient
@@ -35,6 +36,7 @@ def run_local_search_agent_dry_run(
     submitted_at: str,
     timeout_seconds: float = 30.0,
     fetcher: Fetcher | None = None,
+    knowledge_store: KnowledgeStore | None = None,
     collected_at: str | None = None,
 ) -> LocalSearchAgentDryRunReport:
     client = InMemoryNotionClient()
@@ -45,6 +47,7 @@ def run_local_search_agent_dry_run(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        knowledge_store=knowledge_store,
         timeout_seconds=timeout_seconds,
         fetcher=fetcher,
         collected_at=collected_at,

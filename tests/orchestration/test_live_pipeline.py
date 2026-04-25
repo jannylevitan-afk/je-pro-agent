@@ -1,3 +1,4 @@
+from content_engine.knowledge.kmd import MarkdownKnowledgeStore
 from content_engine.orchestration.live_pipeline import (
     LivePipelineTargets,
     process_source_item,
@@ -106,6 +107,55 @@ def test_process_source_item_routes_video_item_into_both_workflows(video_source_
     assert result.filming_card_page_id == "filming_page_1"
     assert result.insight_page_id == "insight_page_1"
     assert len(result.draft_page_ids) == 2
+
+
+def test_process_source_item_writes_kmd_material_before_workflow_steps(tmp_path, video_source_item) -> None:
+    client = StubNotionClient(
+        query_results=[
+            {"results": []},  # source upsert
+            {"results": []},  # brief upsert lane 1
+            {"results": []},  # draft upsert lane 1
+            {"results": []},  # brief upsert lane 2
+            {"results": []},  # draft upsert lane 2
+        ],
+        create_results=[
+            {"id": "src_page_1"},
+            {"id": "script_page_1"},
+            {"id": "filming_page_1"},
+            {"id": "insight_page_1"},
+            {"id": "idea_page_1"},
+            {"id": "brief_page_1"},
+            {"id": "draft_page_1"},
+            {"id": "event_page_1"},
+            {"id": "idea_page_2"},
+            {"id": "brief_page_2"},
+            {"id": "draft_page_2"},
+            {"id": "event_page_2"},
+        ],
+    )
+    targets = LivePipelineTargets(
+        sources_database_id="db_sources",
+        insights_database_id="db_insights",
+        ideas_database_id="db_ideas",
+        briefs_database_id="db_briefs",
+        drafts_database_id="db_drafts",
+        events_database_id="db_events",
+        scripts_database_id="db_scripts",
+        filming_cards_database_id="db_filming",
+    )
+
+    result = process_source_item(
+        client=client,
+        targets=targets,
+        item=video_source_item,
+        verified_facts=set(),
+        submitted_at="2026-04-24T10:00:00Z",
+        knowledge_store=MarkdownKnowledgeStore(tmp_path),
+    )
+
+    assert len(result.knowledge_file_paths) == 2
+    assert (tmp_path / "workflow_a" / "developer_investor" / "boutique_hotels" / "itm_vid_001.kmd.md").exists()
+    assert (tmp_path / "workflow_b" / "developer_investor" / "boutique_hotels" / "itm_vid_001.kmd.md").exists()
 
 
 def test_run_live_pipeline_processes_batch(source_item, video_source_item) -> None:

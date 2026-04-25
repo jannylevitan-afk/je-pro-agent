@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from content_engine.collectors.http_json import fetch_source_items_from_json_feed
+from content_engine.knowledge.kmd import KnowledgeStore, MarkdownKnowledgeStore
 from content_engine.llm import AnthropicClient, AnthropicClientConfig, AnthropicPipelineWriter
 from content_engine.models.source_item import SourceItem
 from content_engine.notion import (
@@ -82,6 +84,7 @@ def run_configured_live_pipeline(
     submitted_at: str,
     notion_client: NotionClient | None = None,
     writer: WorkflowWriter | None = None,
+    knowledge_store: KnowledgeStore | None = None,
 ) -> list[LivePipelineItemResult]:
     client = notion_client or build_notion_client(settings)
     _verify_notion_page_access(client, settings.notion_parent_page_id)
@@ -97,6 +100,7 @@ def run_configured_live_pipeline(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=pipeline_writer,
+        knowledge_store=knowledge_store or MarkdownKnowledgeStore(Path(settings.kmd_root)),
     )
 
 

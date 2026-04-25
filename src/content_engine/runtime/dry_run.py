@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from content_engine.knowledge.kmd import KnowledgeStore
 from content_engine.orchestration.live_pipeline import (
     LivePipelineItemResult,
     SourceCollector,
@@ -112,6 +113,7 @@ def run_local_pipeline_dry_run(
     writer: WorkflowWriter | None,
     verified_facts: set[str],
     submitted_at: str,
+    knowledge_store: KnowledgeStore | None = None,
 ) -> LocalPipelineDryRunReport:
     client = InMemoryNotionClient()
     item_results = run_collector_cycle(
@@ -121,6 +123,7 @@ def run_local_pipeline_dry_run(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        knowledge_store=knowledge_store,
     )
     return LocalPipelineDryRunReport(
         item_results=item_results,
