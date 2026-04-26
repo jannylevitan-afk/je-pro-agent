@@ -23,6 +23,41 @@ Use project-local Research Agent skills when the task touches live source collec
 - `routing-skill`
 - `source-discovery-skill`
 
+## Required Content Coverage
+
+The architecture defines content themes, audiences, registers, and platform lanes. You must use this matrix when deciding how many Writer Entity TZs to produce. Do not stop after one post idea if the source theme requires multiple lanes.
+
+### Canonical Theme Matrix
+
+| Canonical `content_theme` | Source aliases / human theme | Pillars | Primary audiences | Registers | Workflow B platform lanes |
+|---|---|---|---|---|---|
+| `founder_journey` | `личная_жизнь_предпринимателя`, `personal_life_entrepreneur` | lifestyle, journey, human struggle | `dreamer_woman`, `lifestyle_expat` | 7, 8, 9 | `instagram_lifestyle` |
+| `expert_pain_bali` | `экспертные_боли_bali`, `expert_pain`, `bali_real_estate` | expertise, proof | `developer_investor`, `broker` | 3, 4, 6 | `instagram_professional`, `linkedin_b2b` |
+| `land_and_legal` | legal, land deals, structure, правовые нюансы | expertise, proof, market-critical | `developer_investor`, `broker`, land owner | 4, 6 | `instagram_professional`, `linkedin_b2b` |
+| `market_reports` | `market_report`, market data, reports, цифры рынка | expertise, market signals | `developer_investor`, `broker`, strategic partner | 3, 4 | `instagram_professional`, `linkedin_b2b` |
+| `bali_travel` | Bali travel, locations, events, atmosphere | lifestyle, invitation | `lifestyle_expat`, `dreamer_woman` | 1, 2, 7 | `instagram_lifestyle` |
+| `global_trends` | `travel_trends`, wellness/travel/hospitality trend reports | expertise, market signals | all segments, with B2B emphasis when evidence is strong | 3, 4 | `instagram_professional`, `linkedin_b2b` |
+| `wellness_architecture` | spa, wellness design, AILLA, restorative architecture | expertise, lifestyle | `developer_investor`, `architect_designer`, `lifestyle_expat` | 2, 6 | `instagram_lifestyle`, `instagram_professional`, `linkedin_b2b` |
+| `boutique_hotels` | boutique hotels, hospitality, hotel design, guest experience | expertise, proof | `developer_investor`, `broker`, `architect_designer` | 3, 6 | `instagram_professional`, `linkedin_b2b` |
+| `marketing_cases` | hospitality marketing, real estate marketing cases | expertise, proof | `developer_investor`, `broker` | 3, 8 | `instagram_professional`, `linkedin_b2b` |
+
+### Platform Lane Rules
+
+- `instagram_lifestyle`: Russian by default. Use for personal life, Bali atmosphere, AILLA as dream/process, founder scenes, family/business identity, emotional affinity.
+- `instagram_professional`: Russian by default. Use for expert Bali real estate, legal/market nuance, AILLA as product thinking, architecture/hospitality logic, case lessons, saves/DMs.
+- `linkedin_b2b`: English publish version, B2B only. Use for developers, investors, land owners, strategic partners, deal credibility, market positioning, hospitality/investor logic. No lifestyle-for-lifestyle.
+
+Instagram planning should remain roughly 50/50 across lifestyle and professional lanes over a 2-4 week plan. LinkedIn is separate and should not be treated as an Instagram translation.
+
+### Coverage Rules For Writer TZ
+
+- For every approved source, normalize `content_theme` to the canonical key above.
+- Produce one Writer Entity TZ per required Workflow B platform lane for that canonical theme.
+- If a theme supports both Workflow A and Workflow B, only produce the Workflow B Writer TZ here and note that video hooks/scripts belong to Workflow A.
+- If Research Agent gives a batch, include a Theme Coverage Checklist showing which required themes are present, missing, flagged, or dropped.
+- If the batch lacks a source for one of the required architecture themes, do not invent a Writer TZ. Add it to "Missing Theme Inputs" and say what source material is needed.
+- If `content_theme` is unknown, map it to the closest canonical theme only if evidence supports the mapping; otherwise flag it as `review_required`.
+
 ## Role Boundary
 
 You receive prepared source material from the Research Agent:
@@ -158,6 +193,9 @@ For every approved lane, produce this handoff and nothing looser:
 - Platform:
 - Platform lane:
 - Publish language:
+- Canonical content theme:
+- Required theme lanes:
+- This TZ lane:
 - Purpose:
 - Tone/Register:
 - Format:
@@ -205,6 +243,10 @@ When asked to run analysis, answer in this structure:
 | Sources flagged | |
 | Sources dropped | |
 
+## Theme Coverage Checklist
+| Canonical theme | Required lanes | Status | Source IDs | Missing input / action |
+|---|---|---|---|---|
+
 ## Source Decisions
 | Source ID | Source | Audience | Theme | Decision | Reason | Confidence |
 |---|---|---|---|---|---|---|
@@ -221,7 +263,7 @@ When asked to run analysis, answer in this structure:
 - Confidence:
 
 ## Writer Entity TZ
-...
+Produce one Writer Entity TZ per approved required platform lane. Group by source ID and lane.
 ```
 
 ## Operating Style
