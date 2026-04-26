@@ -623,6 +623,8 @@ Workflow B не пишет посты напрямую из темы. Любой
 - Конкретный, не абстрактный.
 - Звучит как живая речь, не как рекламный баннер.
 - Соответствует платформе, тону и языку результата.
+- Не использует тавтологию или круговую фразу: нельзя повторять один и тот же смысловой корень в первой строке (`дешёвый/дешево`, `risk/risky`, `cheap/cheap`).
+- Не начинает с слабых формулировок вроде `Дешёвый вход на Бали...`, `Дешёвый риск почти никогда не выглядит дешево`, `Cheap risk rarely looks cheap`.
 
 **Запрещённые старты:**
 - `Сегодня поговорим о...`
@@ -649,7 +651,7 @@ if emotional_trigger == "страх": use Warning Hook
 if tone == "дерзкий" or tone == "прямой": use Direct Truth Hook
 ```
 
-**Quality Filter:** Writer Entity отклоняет opening sentence, если он длиннее 14 слов, звучит как вступление, не вызывает вопрос, слишком общий, не связан с аудиторией, обещает то, чего нет в тексте, звучит как дешёвый кликбейт или подходит к любому посту.
+**Quality Filter:** Writer Entity отклоняет opening sentence, если он длиннее 14 слов, звучит как вступление, не вызывает вопрос, слишком общий, не связан с аудиторией, обещает то, чего нет в тексте, звучит как дешёвый кликбейт, подходит к любому посту или строится на тавтологии.
 
 **Score System:** каждый candidate оценивается по 5 критериям от 1 до 5: `clarity`, `specificity`, `tension`, `relevance`, `continuation_pull`. Минимальный score: `20/25`. Если score ниже 20, opening sentence перегенерируется.
 
@@ -1148,7 +1150,7 @@ Research Agent raw item
 
 ### Writer Entity TZ — выход Analyst Entity
 
-```markdown
+````markdown
 ## Writer Entity TZ
 
 ### Phase 1 Source Note
@@ -1184,7 +1186,32 @@ Research Agent raw item
 - Key points:
 - Facts allowed:
 - Reference sources:
+
+### Opening Sentence Guardrails
+- First line of Final Text = opening_sentence; no separate Hook block.
+- 5–14 words, source-specific, concrete, understandable without context.
+- Must create tension, recognition, useful problem, conflict, fear, benefit, or precise audience pain.
+- Reject tautology and repeated-root loops: `дешёвый/дешево`, `cheap/cheap`, `risk/risky`.
+- Banned weak examples: `Дешёвый вход на Бали...`, `Дешёвый риск почти никогда не выглядит дешево`, `Cheap risk rarely looks cheap`.
+- If the sentence can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.
+- Do not end Final Text with a standalone CTA question.
+
+### Required Output Format
+```markdown
+## Final Content Asset
+**Content ID:**
+**Title:**
+**Platform:**
+**Pillar:**
+**Format:**
+**Approval Status:**
+
+### Final Text
+...
 ```
+
+Do not output `Hook`, `CTA`, `Traceability`, or `QA` sections in the final asset.
+````
 
 Правило: Writer Entity получает это ТЗ как входной контекст. Он может усилить формулировку, но не должен заново придумывать тему, аудиторию, источник боли или доказательную базу.
 

@@ -88,6 +88,23 @@ def test_run_analyst_writer_specs_have_correct_types(source_item) -> None:
         assert spec.brief.analyst_tz == spec.writer_tz
 
 
+def test_run_analyst_writer_tz_contains_output_contract_and_opening_guard(source_item) -> None:
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(source_item, analyst)
+
+    for spec in report.writer_specs:
+        assert "### Required Output Format" in spec.writer_tz
+        assert "## Final Content Asset" in spec.writer_tz
+        assert "**Content ID:**" in spec.writer_tz
+        assert "### Final Text" in spec.writer_tz
+        assert "### Opening Sentence Guardrails" in spec.writer_tz
+        assert "Do not use tautological openings" in spec.writer_tz
+        assert "cheap/cheap" in spec.writer_tz
+        assert "дешёв" in spec.writer_tz
+        assert "Do not output Hook, CTA, Traceability, or QA sections" in spec.writer_tz
+
+
 def test_run_analyst_linkedin_spec_has_bilingual_brief(source_item) -> None:
     analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
 

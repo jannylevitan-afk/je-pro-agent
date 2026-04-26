@@ -101,6 +101,9 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
     assert "Insight first, draft second" in str(client.calls[0]["user_prompt"])
     assert "Start draft_text_ru with one unique source-specific opening sentence" in str(client.calls[0]["user_prompt"])
     assert "Do not return Hook, CTA, Traceability, or QA sections" in str(client.calls[0]["user_prompt"])
+    assert "Reject tautological opening sentences" in str(client.calls[0]["user_prompt"])
+    assert "cheap/cheap" in str(client.calls[0]["user_prompt"])
+    assert "Do not end Final Text with a standalone CTA question" in str(client.calls[0]["user_prompt"])
     assert "Copyright safety" in str(client.calls[0]["user_prompt"])
     assert "paraphrase the source meaning" in str(client.calls[0]["user_prompt"])
     assert "Writer Entity TZ" in str(client.calls[0]["user_prompt"])
@@ -251,3 +254,77 @@ def test_write_workflow_b_draft_normalizes_string_null_to_none(source_item) -> N
     )
 
     assert draft.draft_text_en is None
+
+
+def test_write_workflow_b_draft_removes_standalone_final_cta_questions(source_item) -> None:
+    client = StubAnthropicClient(
+        responses=[
+            (
+                '{"draft_text_ru":"Сначала проверьте структуру сделки.\\n\\n'
+                'Без неё красивый объект остаётся красивой неопределённостью.\\n\\n'
+                'Вопрос для любого актива: есть ли доказательства спроса?",'
+                '"draft_text_en":"Start with the operating logic.\\n\\n'
+                'The asset has to explain how demand repeats.\\n\\n'
+                'What do you check first?"}'
+            )
+        ]
+    )
+    writer = AnthropicPipelineWriter(client)
+    insight = InsightCard(
+        audience="developer_investor",
+        platform="linkedin",
+        content_theme="boutique_hotels",
+        content_pillar="expertise_proof",
+        narrative_type="market observation",
+        priority=2,
+        reuse_score=4,
+        emotional_trigger="status anxiety",
+        useful_lesson="Boutique hotel ROI beats mass-market in Bali.",
+    )
+    brief = ContentBrief(
+        audience="developer_investor",
+        platform="linkedin",
+        platform_lane="linkedin_b2b",
+        working_language="ru",
+        publish_language="en",
+        funnel_role="authority",
+        purpose="Build authority.",
+        angle="Boutique hotel ROI beats mass-market in Bali.",
+        hook="The cheapest line item in Bali is often the most expensive strategic mistake.",
+        key_points=["Point 1", "Point 2", "Point 3"],
+        cta_type="comment",
+        tone="register_3",
+        length_target="medium",
+        engagement_objective="Developer discussion",
+        fact_pack=["Verified fact"],
+        source_rigor="expert",
+        reference_sources=["https://a.example", "https://b.example", "https://c.example"],
+    )
+    decision = WorkflowBDecision(
+        platform="linkedin",
+        platform_lane="linkedin_b2b",
+        language_mode="ru",
+        funnel_role="authority",
+        tone="register_3",
+        cta_type="comment",
+        engagement_objective="Developer discussion",
+        source_rigor="expert",
+        desired_reaction="Invite qualified discussion.",
+        emotional_hook="Expose hidden market logic.",
+    )
+
+    draft = writer.write_workflow_b_draft(
+        item=source_item,
+        insight=insight,
+        decision=decision,
+        brief=brief,
+    )
+
+    assert draft.draft_text_ru == (
+        "Сначала проверьте структуру сделки.\n\n"
+        "Без неё красивый объект остаётся красивой неопределённостью."
+    )
+    assert draft.draft_text_en == (
+        "Start with the operating logic.\n\n"
+        "The asset has to explain how demand repeats."
+    )

@@ -124,10 +124,14 @@ class AnthropicPipelineWriter:
                     "- It must be specific, alive, platform-native, and never sound like an ad banner.",
                     "- Forbidden starts: Сегодня поговорим о, В этом посте я расскажу, Давайте разберёмся, Хочу поделиться, Наверное, вы знаете, Очень важно понимать, В современном мире, Сейчас многие.",
                     "- Reject openings that are longer than 14 words, generic, intro-like, cheap clickbait, unsupported, or usable for any post.",
+                    "- Reject tautological opening sentences: no repeated same-root loops such as cheap/cheap, risk/risky, дешёвый/дешево, or a circular phrase that says the same thing twice.",
+                    "- Never open with weak phrases like 'Дешёвый вход на Бали', 'Дешёвый риск почти никогда не выглядит дешево', or 'Cheap risk rarely looks cheap'.",
+                    "- If the first line repeats the same semantic hit twice, regenerate the first line before returning.",
                     "- Score the opening internally from 1-5 on clarity, specificity, tension, relevance, and continuation_pull; minimum 20/25.",
                     "- Do not reuse a generic opening from another source.",
                     "- Do not return Hook, CTA, Traceability, or QA sections.",
                     "- Do not add a standalone CTA question at the end; Final Text should be the finished text only.",
+                    "- Do not end Final Text with a standalone CTA question; no trailing 'What do you check first?' style line.",
                     "- Copyright safety: paraphrase the source meaning; do not copy the source transcript sentence-by-sentence.",
                     "- Verbatim reuse is allowed only for a short detected hook or a short evidence excerpt, not for full source text.",
                     "Analyst TZ:",
@@ -171,8 +175,8 @@ class AnthropicPipelineWriter:
             raise ValueError("Anthropic writer draft_text_en must be a string or null")
 
         return PipelineDraftText(
-            draft_text_ru=draft_text_ru.strip(),
-            draft_text_en=_normalize_optional_text(draft_text_en),
+            draft_text_ru=_remove_standalone_final_question(draft_text_ru),
+            draft_text_en=_normalize_optional_text(_remove_standalone_final_question(draft_text_en)),
         )
 
 
@@ -241,3 +245,43 @@ def _normalize_optional_text(value: object) -> str | None:
     if normalized.lower() in {"", "null", "none", "n/a"}:
         return None
     return normalized
+
+
+def _remove_standalone_final_question(value: object) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = value.strip()
+    if not normalized:
+        return ""
+
+    paragraphs = [paragraph.strip() for paragraph in re.split(r"\n\s*\n", normalized) if paragraph.strip()]
+    if len(paragraphs) <= 1:
+        return normalized
+
+    final_paragraph = paragraphs[-1]
+    if _looks_like_standalone_cta_question(final_paragraph):
+        return "\n\n".join(paragraphs[:-1]).strip()
+    return normalized
+
+
+def _looks_like_standalone_cta_question(value: str) -> bool:
+    normalized = value.strip()
+    if not normalized.endswith("?"):
+        return False
+    words = re.findall(r"[A-Za-zА-Яа-яЁё0-9$%-]+", normalized)
+    if len(words) > 18:
+        return False
+    lower = normalized.lower()
+    return lower.startswith(
+        (
+            "что ",
+            "какой ",
+            "какая ",
+            "какие ",
+            "как ",
+            "вопрос ",
+            "what ",
+            "which ",
+            "how ",
+        )
+    )

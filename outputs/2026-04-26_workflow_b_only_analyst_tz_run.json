@@ -1,0 +1,484 @@
+{
+  "engine_mode": "workflow_b_only_local_dry_run_with_real_anthropic",
+  "anthropic_model": "claude-sonnet-4-6",
+  "generated_at": "2026-04-26T06:38:18.605616+00:00",
+  "source_items": [
+    {
+      "item_id": "workflow_b_boutique_signal_001",
+      "source_type": "telegram_post",
+      "source_name": "Controlled boutique hotel signal",
+      "source_url": "https://t.me/wellstate/2001",
+      "external_item_id": "2001",
+      "collected_at": "2026-04-26T09:00:00Z",
+      "published_at": "2026-04-26T08:10:00Z",
+      "content_hash": "72b597db8b878f23",
+      "dedupe_key": "telegram:2001",
+      "audience_segment": "developer_investor",
+      "content_theme": "boutique_hotels",
+      "raw_payload": {
+        "platform": "telegram",
+        "text": "Bali boutique hotel buyers increasingly evaluate management depth, legal structure, occupancy logic, and guest experience before discussing price. Generic villas lose trust when they cannot explain how demand, operations, and exit logic work together."
+      },
+      "transcript_text": "Bali boutique hotel buyers increasingly evaluate management depth, legal structure, occupancy logic, and guest experience before discussing price. Generic villas lose trust when they cannot explain how demand, operations, and exit logic work together.",
+      "media_urls": [],
+      "engagement_signals": {
+        "views": 1800
+      },
+      "routing_decision": "workflow_b",
+      "routing_reason": "textual depth for Workflow B only test",
+      "routing_confidence": 0.9,
+      "processing_state": "collected"
+    },
+    {
+      "item_id": "workflow_b_market_signal_001",
+      "source_type": "web_report",
+      "source_name": "Controlled Bali market report signal",
+      "source_url": "https://www.realinfo.id/market-reports/controlled-bali-demand-shift",
+      "external_item_id": "controlled-bali-demand-shift",
+      "collected_at": "2026-04-26T09:00:00Z",
+      "published_at": "2026-04-26T08:20:00Z",
+      "content_hash": "8128e9a78f374bf8",
+      "dedupe_key": "web:controlled-bali-demand-shift",
+      "audience_segment": "developer_investor",
+      "content_theme": "market_reports",
+      "raw_payload": {
+        "platform": "web",
+        "text": "Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and properties with credible operator discipline. Developers need evidence of repeat demand and clear management logic before turning a trend into new inventory."
+      },
+      "transcript_text": "Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and properties with credible operator discipline. Developers need evidence of repeat demand and clear management logic before turning a trend into new inventory.",
+      "media_urls": [],
+      "engagement_signals": {
+        "views": 950
+      },
+      "routing_decision": "workflow_b",
+      "routing_reason": "textual depth for Workflow B only test",
+      "routing_confidence": 0.9,
+      "processing_state": "collected"
+    }
+  ],
+  "pipeline_results": [
+    {
+      "source_item_id": "workflow_b_boutique_signal_001",
+      "route": "workflow_b",
+      "source_page_id": "db_sources_page_1",
+      "insight_page_id": "db_insights_page_1",
+      "idea_page_ids": [
+        "db_ideas_page_1",
+        "db_ideas_page_2"
+      ],
+      "brief_page_ids": [
+        "db_briefs_page_1",
+        "db_briefs_page_2"
+      ],
+      "draft_page_ids": [
+        "db_drafts_page_1",
+        "db_drafts_page_2"
+      ],
+      "event_page_ids": [
+        "db_events_page_1",
+        "db_events_page_2"
+      ],
+      "script_page_id": null,
+      "filming_card_page_id": null,
+      "video_n8n_envelope": null,
+      "video_telegram_notification": null,
+      "knowledge_file_paths": []
+    },
+    {
+      "source_item_id": "workflow_b_market_signal_001",
+      "route": "workflow_b",
+      "source_page_id": "db_sources_page_2",
+      "insight_page_id": "db_insights_page_2",
+      "idea_page_ids": [
+        "db_ideas_page_3",
+        "db_ideas_page_4"
+      ],
+      "brief_page_ids": [
+        "db_briefs_page_3",
+        "db_briefs_page_4"
+      ],
+      "draft_page_ids": [
+        "db_drafts_page_3",
+        "db_drafts_page_4"
+      ],
+      "event_page_ids": [
+        "db_events_page_3",
+        "db_events_page_4"
+      ],
+      "script_page_id": null,
+      "filming_card_page_id": null,
+      "video_n8n_envelope": null,
+      "video_telegram_notification": null,
+      "knowledge_file_paths": []
+    }
+  ],
+  "writer_tz_entries": [
+    {
+      "source_item_id": "workflow_b_boutique_signal_001",
+      "platform_lane": "instagram_professional",
+      "writer_tz": "## Writer Entity TZ\n\n### Phase 1 Source Note\n- Source ID: workflow_b_boutique_signal_001\n- Source URL: https://t.me/wellstate/2001\n- Platform: instagram_professional\n- Audience: developer_investor\n- Content theme: boutique_hotels\n- Raw excerpt: Bali boutique hotel buyers increasingly evaluate management depth, legal structure, occupancy logic, and guest experience before discussing price. Generic villas lose trust when they cannot explain how demand, operations, and exit logic work together.\n\n### Phase 2 Insight Card\n- Topic: What Bali boutique hotel buyers actually evaluate before discussing price\n- Angle: Sophisticated investors are raising the bar — generic villa pitches are losing deals to operators who can explain the full system\n- Emotional Trigger: Status anxiety — fear of being exposed as an unsophisticated operator or seller in a market where buyers are becoming more rigorous\n- Audience Fit: Developer-investors in Bali's boutique hotel segment need to know that the competitive threshold has shifted; positioning a project without a coherent operational and exit narrative now signals weakness, not just incompleteness\n- Useful Lesson: Boutique hotel buyers in Bali now scrutinize management depth, legal structure, occupancy logic, and guest experience as a unified system before price enters the conversation. Sellers who cannot articulate how demand, operations, and exit strategy connect are losing credibility before negotiations begin.\n- Narrative Type: market_observation\n- Reuse Score: 4/5\n- Confidence: 0.87\n\n### Marketing Research Adaptation\n- JTBD / Customer Job: Decide whether their current project or pitch is positioned to survive scrutiny from increasingly sophisticated buyers, and avoid losing deals to better-prepared competitors\n- Pain Point: Generic villa or hotel pitches that lead with price or aesthetics but cannot explain the operational logic, legal structure, or exit pathway are being dismissed early in buyer conversations\n- Trigger Event: A developer or investor is preparing to bring a boutique hotel asset to market and realizes their pitch deck or broker materials do not address the systemic questions buyers are now asking\n- Desired Outcome: Understand exactly what due-diligence questions serious buyers are asking so they can build a credible, system-level narrative around their asset before going to market\n- Behavioral Trigger: loss_aversion\n\n### Writer Constraints\n- Purpose: Build market trust through concrete insight.\n- Tone/Register: register_3\n- Format: carousel_caption\n- Opening guide: What looks cheap first is often the most expensive later.\n- Key points: Boutique hotel buyers in Bali now scrutinize management depth, legal structure, occupancy logic, and guest experience as a unified system before price enters the conversation. Sellers who cannot articulate how demand, operations, and exit strategy connect are losing credibility before negotiations begin; Sophisticated investors are raising the bar — generic villa pitches are losing deals to operators who can explain the full system; Developer-investors in Bali's boutique hotel segment need to know that the competitive threshold has shifted; positioning a project without a coherent operational and exit narrative now signals weakness, not just incompleteness; Legal structure changes the deal far more than brochure language suggests.\n- Facts allowed: Bali hospitality buyers evaluate management depth, legal structure, occupancy logic, and guest experience before price.; Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and credible operator discipline.\n- Reference sources: https://t.me/wellstate/2001#source; https://t.me/wellstate/2001#context; https://t.me/wellstate/2001#ops\n- Do not write from raw topic alone; write from this insight and source note.\n\n### Opening Sentence Guardrails\n- The first line of Final Text is the opening_sentence; do not output a separate Hook block.\n- Keep it 5-14 words, concrete, source-specific, and understandable without context.\n- It must create tension, recognition, a useful problem, or a precise conflict for the stated audience.\n- Do not use tautological openings: no repeated same-root adjective/noun loops such as cheap/cheap, risk/risky, or дешёвый/дешево.\n- Banned weak examples: Дешёвый вход на Бали..., Дешёвый риск почти никогда не выглядит дешево, Cheap risk rarely looks cheap.\n- If an opening can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.\n- Do not end Final Text with a standalone CTA question; keep review-facing output as final text only.\n\n### Required Output Format\n```markdown\n## Final Content Asset\n**Content ID:**\n**Title:**\n**Platform:**\n**Pillar:**\n**Format:**\n**Approval Status:**\n\n### Final Text\n...\n```\n- Do not output Hook, CTA, Traceability, or QA sections in the final asset."
+    },
+    {
+      "source_item_id": "workflow_b_boutique_signal_001",
+      "platform_lane": "linkedin_b2b",
+      "writer_tz": "## Writer Entity TZ\n\n### Phase 1 Source Note\n- Source ID: workflow_b_boutique_signal_001\n- Source URL: https://t.me/wellstate/2001\n- Platform: linkedin_b2b\n- Audience: developer_investor\n- Content theme: boutique_hotels\n- Raw excerpt: Bali boutique hotel buyers increasingly evaluate management depth, legal structure, occupancy logic, and guest experience before discussing price. Generic villas lose trust when they cannot explain how demand, operations, and exit logic work together.\n\n### Phase 2 Insight Card\n- Topic: What Bali boutique hotel buyers actually evaluate before discussing price\n- Angle: Sophisticated investors are raising the bar — generic villa pitches are losing deals to operators who can explain the full system\n- Emotional Trigger: Status anxiety — fear of being exposed as an unsophisticated operator or seller in a market where buyers are becoming more rigorous\n- Audience Fit: Developer-investors in Bali's boutique hotel segment need to know that the competitive threshold has shifted; positioning a project without a coherent operational and exit narrative now signals weakness, not just incompleteness\n- Useful Lesson: Boutique hotel buyers in Bali now scrutinize management depth, legal structure, occupancy logic, and guest experience as a unified system before price enters the conversation. Sellers who cannot articulate how demand, operations, and exit strategy connect are losing credibility before negotiations begin.\n- Narrative Type: market_observation\n- Reuse Score: 4/5\n- Confidence: 0.87\n\n### Marketing Research Adaptation\n- JTBD / Customer Job: Decide whether their current project or pitch is positioned to survive scrutiny from increasingly sophisticated buyers, and avoid losing deals to better-prepared competitors\n- Pain Point: Generic villa or hotel pitches that lead with price or aesthetics but cannot explain the operational logic, legal structure, or exit pathway are being dismissed early in buyer conversations\n- Trigger Event: A developer or investor is preparing to bring a boutique hotel asset to market and realizes their pitch deck or broker materials do not address the systemic questions buyers are now asking\n- Desired Outcome: Understand exactly what due-diligence questions serious buyers are asking so they can build a credible, system-level narrative around their asset before going to market\n- Behavioral Trigger: loss_aversion\n\n### Writer Constraints\n- Purpose: Build market trust through concrete insight.\n- Tone/Register: register_3\n- Format: thought_leadership_post\n- Opening guide: The cheapest line item in Bali is often the most expensive strategic mistake.\n- Key points: Boutique hotel buyers in Bali now scrutinize management depth, legal structure, occupancy logic, and guest experience as a unified system before price enters the conversation. Sellers who cannot articulate how demand, operations, and exit strategy connect are losing credibility before negotiations begin; Sophisticated investors are raising the bar — generic villa pitches are losing deals to operators who can explain the full system; Developer-investors in Bali's boutique hotel segment need to know that the competitive threshold has shifted; positioning a project without a coherent operational and exit narrative now signals weakness, not just incompleteness; Legal structure changes the deal far more than brochure language suggests.\n- Facts allowed: Bali hospitality buyers evaluate management depth, legal structure, occupancy logic, and guest experience before price.; Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and credible operator discipline.\n- Reference sources: https://t.me/wellstate/2001#source; https://t.me/wellstate/2001#context; https://t.me/wellstate/2001#ops\n- Do not write from raw topic alone; write from this insight and source note.\n\n### Opening Sentence Guardrails\n- The first line of Final Text is the opening_sentence; do not output a separate Hook block.\n- Keep it 5-14 words, concrete, source-specific, and understandable without context.\n- It must create tension, recognition, a useful problem, or a precise conflict for the stated audience.\n- Do not use tautological openings: no repeated same-root adjective/noun loops such as cheap/cheap, risk/risky, or дешёвый/дешево.\n- Banned weak examples: Дешёвый вход на Бали..., Дешёвый риск почти никогда не выглядит дешево, Cheap risk rarely looks cheap.\n- If an opening can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.\n- Do not end Final Text with a standalone CTA question; keep review-facing output as final text only.\n\n### Required Output Format\n```markdown\n## Final Content Asset\n**Content ID:**\n**Title:**\n**Platform:**\n**Pillar:**\n**Format:**\n**Approval Status:**\n\n### Final Text\n...\n```\n- Do not output Hook, CTA, Traceability, or QA sections in the final asset."
+    },
+    {
+      "source_item_id": "workflow_b_market_signal_001",
+      "platform_lane": "instagram_professional",
+      "writer_tz": "## Writer Entity TZ\n\n### Phase 1 Source Note\n- Source ID: workflow_b_market_signal_001\n- Source URL: https://www.realinfo.id/market-reports/controlled-bali-demand-shift\n- Platform: instagram_professional\n- Audience: developer_investor\n- Content theme: market_reports\n- Raw excerpt: Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and properties with credible operator discipline. Developers need evidence of repeat demand and clear management logic before turning a trend into new inventory.\n\n### Phase 2 Insight Card\n- Topic: Bali hospitality demand shift toward longer stays, wellness experiences, and operator-disciplined properties\n- Angle: Why chasing hospitality trends without demand evidence is the most expensive mistake a Bali developer can make right now\n- Emotional Trigger: Status anxiety around being caught holding the wrong asset in a market that has quietly moved on\n- Audience Fit: Developer-investors in Bali are actively allocating capital into hospitality product and need a clear framework to separate durable demand signals from trend noise before locking in development decisions\n- Useful Lesson: Bali's hospitality market is rewarding developers who can demonstrate repeat demand and credible management systems — not those who simply follow trend cycles into new inventory. Before committing capital, the discipline question must come before the design question.\n- Narrative Type: market_observation\n- Reuse Score: 4/5\n- Confidence: 0.85\n\n### Marketing Research Adaptation\n- JTBD / Customer Job: Decide whether to build, hold, or reposition a hospitality asset in Bali based on current demand intelligence\n- Pain Point: Fear of developing inventory that looks right on paper but misses the actual demand profile — resulting in underperforming occupancy and weak returns\n- Trigger Event: Bali hospitality demand is visibly shifting toward longer-stay and wellness-led profiles, creating pressure to act while also raising the risk of misreading the trend\n- Desired Outcome: A clear decision filter that lets them validate demand evidence and operator capability before committing to new hospitality inventory\n- Behavioral Trigger: loss_aversion\n\n### Writer Constraints\n- Purpose: Build market trust through concrete insight.\n- Tone/Register: register_3\n- Format: carousel_caption\n- Opening guide: What looks cheap first is often the most expensive later.\n- Key points: Bali's hospitality market is rewarding developers who can demonstrate repeat demand and credible management systems — not those who simply follow trend cycles into new inventory. Before committing capital, the discipline question must come before the design question; Why chasing hospitality trends without demand evidence is the most expensive mistake a Bali developer can make right now; Developer-investors in Bali are actively allocating capital into hospitality product and need a clear framework to separate durable demand signals from trend noise before locking in development decisions; Legal structure changes the deal far more than brochure language suggests.\n- Facts allowed: Bali hospitality buyers evaluate management depth, legal structure, occupancy logic, and guest experience before price.; Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and credible operator discipline.\n- Reference sources: https://www.realinfo.id/market-reports/controlled-bali-demand-shift#source; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#context; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#ops; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#market\n- Do not write from raw topic alone; write from this insight and source note.\n\n### Opening Sentence Guardrails\n- The first line of Final Text is the opening_sentence; do not output a separate Hook block.\n- Keep it 5-14 words, concrete, source-specific, and understandable without context.\n- It must create tension, recognition, a useful problem, or a precise conflict for the stated audience.\n- Do not use tautological openings: no repeated same-root adjective/noun loops such as cheap/cheap, risk/risky, or дешёвый/дешево.\n- Banned weak examples: Дешёвый вход на Бали..., Дешёвый риск почти никогда не выглядит дешево, Cheap risk rarely looks cheap.\n- If an opening can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.\n- Do not end Final Text with a standalone CTA question; keep review-facing output as final text only.\n\n### Required Output Format\n```markdown\n## Final Content Asset\n**Content ID:**\n**Title:**\n**Platform:**\n**Pillar:**\n**Format:**\n**Approval Status:**\n\n### Final Text\n...\n```\n- Do not output Hook, CTA, Traceability, or QA sections in the final asset."
+    },
+    {
+      "source_item_id": "workflow_b_market_signal_001",
+      "platform_lane": "linkedin_b2b",
+      "writer_tz": "## Writer Entity TZ\n\n### Phase 1 Source Note\n- Source ID: workflow_b_market_signal_001\n- Source URL: https://www.realinfo.id/market-reports/controlled-bali-demand-shift\n- Platform: linkedin_b2b\n- Audience: developer_investor\n- Content theme: market_reports\n- Raw excerpt: Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and properties with credible operator discipline. Developers need evidence of repeat demand and clear management logic before turning a trend into new inventory.\n\n### Phase 2 Insight Card\n- Topic: Bali hospitality demand shift toward longer stays, wellness experiences, and operator-disciplined properties\n- Angle: Why chasing hospitality trends without demand evidence is the most expensive mistake a Bali developer can make right now\n- Emotional Trigger: Status anxiety around being caught holding the wrong asset in a market that has quietly moved on\n- Audience Fit: Developer-investors in Bali are actively allocating capital into hospitality product and need a clear framework to separate durable demand signals from trend noise before locking in development decisions\n- Useful Lesson: Bali's hospitality market is rewarding developers who can demonstrate repeat demand and credible management systems — not those who simply follow trend cycles into new inventory. Before committing capital, the discipline question must come before the design question.\n- Narrative Type: market_observation\n- Reuse Score: 4/5\n- Confidence: 0.85\n\n### Marketing Research Adaptation\n- JTBD / Customer Job: Decide whether to build, hold, or reposition a hospitality asset in Bali based on current demand intelligence\n- Pain Point: Fear of developing inventory that looks right on paper but misses the actual demand profile — resulting in underperforming occupancy and weak returns\n- Trigger Event: Bali hospitality demand is visibly shifting toward longer-stay and wellness-led profiles, creating pressure to act while also raising the risk of misreading the trend\n- Desired Outcome: A clear decision filter that lets them validate demand evidence and operator capability before committing to new hospitality inventory\n- Behavioral Trigger: loss_aversion\n\n### Writer Constraints\n- Purpose: Build market trust through concrete insight.\n- Tone/Register: register_4\n- Format: thought_leadership_post\n- Opening guide: The cheapest line item in Bali is often the most expensive strategic mistake.\n- Key points: Bali's hospitality market is rewarding developers who can demonstrate repeat demand and credible management systems — not those who simply follow trend cycles into new inventory. Before committing capital, the discipline question must come before the design question; Why chasing hospitality trends without demand evidence is the most expensive mistake a Bali developer can make right now; Developer-investors in Bali are actively allocating capital into hospitality product and need a clear framework to separate durable demand signals from trend noise before locking in development decisions; Legal structure changes the deal far more than brochure language suggests.\n- Facts allowed: Bali hospitality buyers evaluate management depth, legal structure, occupancy logic, and guest experience before price.; Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and credible operator discipline.\n- Reference sources: https://www.realinfo.id/market-reports/controlled-bali-demand-shift#source; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#context; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#ops; https://www.realinfo.id/market-reports/controlled-bali-demand-shift#market\n- Do not write from raw topic alone; write from this insight and source note.\n\n### Opening Sentence Guardrails\n- The first line of Final Text is the opening_sentence; do not output a separate Hook block.\n- Keep it 5-14 words, concrete, source-specific, and understandable without context.\n- It must create tension, recognition, a useful problem, or a precise conflict for the stated audience.\n- Do not use tautological openings: no repeated same-root adjective/noun loops such as cheap/cheap, risk/risky, or дешёвый/дешево.\n- Banned weak examples: Дешёвый вход на Бали..., Дешёвый риск почти никогда не выглядит дешево, Cheap risk rarely looks cheap.\n- If an opening can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.\n- Do not end Final Text with a standalone CTA question; keep review-facing output as final text only.\n\n### Required Output Format\n```markdown\n## Final Content Asset\n**Content ID:**\n**Title:**\n**Platform:**\n**Pillar:**\n**Format:**\n**Approval Status:**\n\n### Final Text\n...\n```\n- Do not output Hook, CTA, Traceability, or QA sections in the final asset."
+    }
+  ],
+  "database_snapshots": {
+    "sources": [
+      {
+        "Title": "Controlled boutique hotel signal:2001",
+        "Platform": "telegram_post",
+        "Raw text": "Bali boutique hotel buyers increasingly evaluate management depth, legal structure, occupancy logic, and guest experience before discussing price. Generic villas lose trust when they cannot explain how demand, operations, and exit logic work together.",
+        "External item ID": "2001",
+        "Dedupe key": "telegram:2001",
+        "Content hash": "72b597db8b878f23",
+        "Ingestion status": "collected"
+      },
+      {
+        "Title": "Controlled Bali market report signal:controlled-bali-demand-shift",
+        "Platform": "web_report",
+        "Raw text": "Bali hospitality demand is shifting toward longer stays, wellness-led experiences, and properties with credible operator discipline. Developers need evidence of repeat demand and clear management logic before turning a trend into new inventory.",
+        "External item ID": "controlled-bali-demand-shift",
+        "Dedupe key": "web:controlled-bali-demand-shift",
+        "Content hash": "8128e9a78f374bf8",
+        "Ingestion status": "collected"
+      }
+    ],
+    "insights": [
+      {
+        "Topic": "boutique_hotels",
+        "Angle": "Boutique hotel buyers in Bali now scrutinize management depth, legal structure, occupancy logic, and guest experience as a unified system before price enters the conversation. Sellers who cannot articulate how demand, operations, and exit strategy connect are losing credibility before negotiations begin.",
+        "Audience portrait": "developer_investor",
+        "Narrative type": "market_observation",
+        "Emotional trigger": "Status anxiety — fear of being exposed as an unsophisticated operator or seller in a market where buyers are becoming more rigorous",
+        "Reuse score": 4
+      },
+      {
+        "Topic": "market_reports",
+        "Angle": "Bali's hospitality market is rewarding developers who can demonstrate repeat demand and credible management systems — not those who simply follow trend cycles into new inventory. Before committing capital, the discipline question must come before the design question.",
+        "Audience portrait": "developer_investor",
+        "Narrative type": "market_observation",
+        "Emotional trigger": "Status anxiety around being caught holding the wrong asset in a market that has quietly moved on",
+        "Reuse score": 4
+      }
+    ],
+    "ideas": [
+      {
+        "Title": "Boutique Hotels — instagram_professional",
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Show where premium positioning beats cheap inventory logic. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Save this for the next deal review.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Boutique Hotels — linkedin_b2b",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Expose the hidden cost logic behind hospitality yield. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Invite qualified market discussion.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Market Reports — instagram_professional",
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Make the market shift visible before it becomes obvious. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Save the signal for the next market conversation.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Market Reports — linkedin_b2b",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Turn dated market evidence into a strategic point of view. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Invite qualified disagreement or confirmation from operators.",
+        "Gate passed": true,
+        "Status": "ready"
+      }
+    ],
+    "briefs": [
+      {
+        "Brief ID": "brief_workflow_b_boutique_signal_001_instagram_professional",
+        "Title": "Boutique Hotels -> instagram professional",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://t.me/wellstate/2001#source\nhttps://t.me/wellstate/2001#context\nhttps://t.me/wellstate/2001#ops"
+      },
+      {
+        "Brief ID": "brief_workflow_b_boutique_signal_001_linkedin_b2b",
+        "Title": "Boutique Hotels -> linkedin b2b",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://t.me/wellstate/2001#source\nhttps://t.me/wellstate/2001#context\nhttps://t.me/wellstate/2001#ops"
+      },
+      {
+        "Brief ID": "brief_workflow_b_market_signal_001_instagram_professional",
+        "Title": "Market Reports -> instagram professional",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "market-critical",
+        "Reference sources": "https://www.realinfo.id/market-reports/controlled-bali-demand-shift#source\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#context\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#ops\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#market"
+      },
+      {
+        "Brief ID": "brief_workflow_b_market_signal_001_linkedin_b2b",
+        "Title": "Market Reports -> linkedin b2b",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "market-critical",
+        "Reference sources": "https://www.realinfo.id/market-reports/controlled-bali-demand-shift#source\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#context\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#ops\nhttps://www.realinfo.id/market-reports/controlled-bali-demand-shift#market"
+      }
+    ],
+    "drafts": [
+      {
+        "Draft ID": "draft_workflow_b_boutique_signal_001_instagram_professional",
+        "Title": "developer_investor — instagram_professional",
+        "Draft text RU": "Серьёзные покупатели на Бали давно перестали начинать разговор с цены.\n\nПрежде чем обсуждать стоимость, они разбирают проект по четырём осям: глубина управления, правовая структура, логика загрузки, качество гостевого опыта. Не по отдельности — как единую систему.\n\nЕсли продавец или девелопер не может объяснить, как спрос, операционка и стратегия выхода работают вместе, доверие теряется до начала переговоров. Не после. До.\n\nЭто не придирки. Это новый порог входа в сегмент.\n\nРынок бутик-отелей на Бали смещается в сторону длительных stays, wellness-форматов и операторов с дисциплиной. Питч без операционной и exit-логики сегодня читается как слабость, а не как незавершённость.\n\nПравовая структура меняет сделку сильнее, чем любой брошюрный текст.\n\nПроверьте свой проект по этим четырём осям — до того, как это сделает покупатель.",
+        "Draft text EN": null,
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "ru",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T09:30:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_workflow_b_boutique_signal_001_instagram_professional",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: Сохрани это перед следующей проверкой объекта.\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_workflow_b_boutique_signal_001_instagram_professional\n**Title:** developer_investor — instagram_professional\n**Platform:** instagram\n**Pillar:** expertise_proof\n**Format:** carousel_caption\n**Approval Status:** pending\n\n### Final Text\nСерьёзные покупатели на Бали давно перестали начинать разговор с цены.\n\nПрежде чем обсуждать стоимость, они разбирают проект по четырём осям: глубина управления, правовая структура, логика загрузки, качество гостевого опыта. Не по отдельности — как единую систему.\n\nЕсли продавец или девелопер не может объяснить, как спрос, операционка и стратегия выхода работают вместе, доверие теряется до начала переговоров. Не после. До.\n\nЭто не придирки. Это новый порог входа в сегмент.\n\nРынок бутик-отелей на Бали смещается в сторону длительных stays, wellness-форматов и операторов с дисциплиной. Питч без операционной и exit-логики сегодня читается как слабость, а не как незавершённость.\n\nПравовая структура меняет сделку сильнее, чем любой брошюрный текст.\n\nПроверьте свой проект по этим четырём осям — до того, как это сделает покупатель."
+      },
+      {
+        "Draft ID": "draft_workflow_b_boutique_signal_001_linkedin_b2b",
+        "Title": "developer_investor — linkedin_b2b",
+        "Draft text RU": "Правовая структура меняет сделку сильнее, чем любой брошюрный текст.\n\nПокупатели бутик-отелей на Бали изменили последовательность разговора. Цена больше не открывает диалог — её обсуждают только после того, как актив выдержал проверку по четырём осям: глубина управления, правовая структура, логика загрузки и качество гостевого опыта. Не по отдельности — как единая система.\n\nЭто смещение болезненно для тех, кто готовил питч иначе. Проект, который начинается с эстетики и заканчивается доходностью, не проходит первый фильтр у серьёзного инвестора. Не потому что цифры плохие — а потому что нет ответа на вопрос: как спрос, операционная модель и сценарий выхода работают вместе?\n\nСпрос на Бали смещается в сторону длинных stays, wellness-ориентированных форматов и операторов с дисциплиной. Покупатели это видят. Они задают вопросы, на которые дженерик-вилла не может ответить: кто управляет, на каком основании, с какой загрузочной логикой, и что происходит при выходе?\n\nЕсли продавец не может связать эти элементы в единый нарратив до начала переговоров — он теряет доверие раньше, чем называет цену. Конкурентный порог сместился. Отсутствие операционного и exit-нарратива сегодня читается не как незавершённость, а как слабость позиции.\n\nРынок не стал сложнее. Он стал точнее.",
+        "Draft text EN": "Legal structure reshapes the deal long before price enters the room.\n\nBoutique hotel buyers in Bali have reordered the conversation. Price no longer opens the negotiation — it arrives only after an asset has been tested across four dimensions: management depth, legal structure, occupancy logic, and guest experience. Not as separate checkboxes. As a connected system.\n\nThis shift is costly for sellers who prepared a different pitch. A project that leads with aesthetics and closes with yield projections fails the first filter with a rigorous buyer — not because the numbers are wrong, but because there is no coherent answer to one question: how do demand, operations, and exit strategy work together?\n\nDemand in Bali is moving toward longer stays, wellness-led formats, and operators who demonstrate discipline. Sophisticated buyers see this. They ask questions a generic villa cannot answer: who manages, under what legal basis, with what occupancy logic, and what does the exit pathway look like?\n\nIf a seller cannot connect those elements into a single narrative before negotiations begin, credibility is gone before the price is named. The competitive threshold has moved. Positioning a project without an operational and exit narrative no longer signals incompleteness — it signals a weak hand.\n\nThe market has not become more complex. It has become more precise.",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "en",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T09:30:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_workflow_b_boutique_signal_001_linkedin_b2b",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: What do you check first before trusting a market opportunity?\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_workflow_b_boutique_signal_001_linkedin_b2b\n**Title:** developer_investor — linkedin_b2b\n**Platform:** linkedin\n**Pillar:** expertise_proof\n**Format:** thought_leadership_post\n**Approval Status:** pending\n\n### Final Text\nLegal structure reshapes the deal long before price enters the room.\n\nBoutique hotel buyers in Bali have reordered the conversation. Price no longer opens the negotiation — it arrives only after an asset has been tested across four dimensions: management depth, legal structure, occupancy logic, and guest experience. Not as separate checkboxes. As a connected system.\n\nThis shift is costly for sellers who prepared a different pitch. A project that leads with aesthetics and closes with yield projections fails the first filter with a rigorous buyer — not because the numbers are wrong, but because there is no coherent answer to one question: how do demand, operations, and exit strategy work together?\n\nDemand in Bali is moving toward longer stays, wellness-led formats, and operators who demonstrate discipline. Sophisticated buyers see this. They ask questions a generic villa cannot answer: who manages, under what legal basis, with what occupancy logic, and what does the exit pathway look like?\n\nIf a seller cannot connect those elements into a single narrative before negotiations begin, credibility is gone before the price is named. The competitive threshold has moved. Positioning a project without an operational and exit narrative no longer signals incompleteness — it signals a weak hand.\n\nThe market has not become more complex. It has become more precise."
+      },
+      {
+        "Draft ID": "draft_workflow_b_market_signal_001_instagram_professional",
+        "Title": "developer_investor — instagram_professional",
+        "Draft text RU": "Тренд на Бали не становится активом без доказательства спроса.\n\nРынок гостеприимства на Бали сместился: гости выбирают длительное проживание, велнес-форматы и объекты с понятной операционной логикой. Девелоперы, которые заходят в новый продукт без подтверждённого повторного спроса, строят под тренд — не под рынок.\n\nПрежде чем фиксировать капитал, стоит ответить на несколько вопросов:\n\n— Есть ли доказательства повторного спроса на этот формат в этой локации?\n— Кто управляет объектом и какова глубина их операционной системы?\n— Как юридическая структура влияет на доходность — не на бумаге, а в реальной сделке?\n\nПокупатели на Бали оценивают глубину управления, юридическую структуру и логику заполняемости раньше, чем цену.\n\nДисциплинарный вопрос должен предшествовать дизайнерскому. Иначе красивый проект решает не ту задачу.",
+        "Draft text EN": null,
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "ru",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T09:30:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_workflow_b_market_signal_001_instagram_professional",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "market reports: hidden risk",
+        "Hook options": "hook_01: market reports: hidden risk\nhook_02: What looks like design taste is becoming a business differentiator.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: Сохрани это перед следующей проверкой объекта.\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: medium\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_workflow_b_market_signal_001_instagram_professional\n**Title:** developer_investor — instagram_professional\n**Platform:** instagram\n**Pillar:** expertise_proof\n**Format:** carousel_caption\n**Approval Status:** pending\n\n### Final Text\nТренд на Бали не становится активом без доказательства спроса.\n\nРынок гостеприимства на Бали сместился: гости выбирают длительное проживание, велнес-форматы и объекты с понятной операционной логикой. Девелоперы, которые заходят в новый продукт без подтверждённого повторного спроса, строят под тренд — не под рынок.\n\nПрежде чем фиксировать капитал, стоит ответить на несколько вопросов:\n\n— Есть ли доказательства повторного спроса на этот формат в этой локации?\n— Кто управляет объектом и какова глубина их операционной системы?\n— Как юридическая структура влияет на доходность — не на бумаге, а в реальной сделке?\n\nПокупатели на Бали оценивают глубину управления, юридическую структуру и логику заполняемости раньше, чем цену.\n\nДисциплинарный вопрос должен предшествовать дизайнерскому. Иначе красивый проект решает не ту задачу."
+      },
+      {
+        "Draft ID": "draft_workflow_b_market_signal_001_linkedin_b2b",
+        "Title": "developer_investor — linkedin_b2b",
+        "Draft text RU": "Тренд на Бали не становится активом без доказательства спроса.\n\nРынок гостиничной недвижимости Бали сместился. Гости остаются дольше, выбирают объекты с wellness-логикой и уходят от краткосрочной аренды без управленческой дисциплины. Это не цикличный всплеск — это структурный сдвиг в профиле спроса.\n\nПроблема в том, что большинство девелоперских решений по-прежнему принимаются в обратном порядке: сначала концепция и дизайн, потом — вопрос о том, кто будет управлять объектом и есть ли повторный спрос. Именно здесь капитал теряется не сразу, а постепенно — через слабую загрузку, высокую операционную нагрузку и активы, которые выглядят правильно на бумаге, но не работают в реальности.\n\nПокупатели на этом рынке оценивают не цену входа. Они оценивают глубину управления, юридическую структуру, логику загрузки и качество гостевого опыта. Юридическая структура меняет сделку значительно сильнее, чем любой брендинговый документ.\n\nДисциплинарный вопрос должен предшествовать дизайнерскому. Прежде чем фиксировать капитал в новом гостиничном продукте, девелопер обязан ответить на три вопроса: есть ли подтверждённый повторный спрос, есть ли операционная система с доказанной логикой, и выдержит ли юридическая структура давление реального цикла.\n\nРынок Бали вознаграждает тех, кто может это доказать — не тех, кто просто следует за трендом в новый инвентарь.",
+        "Draft text EN": "A Bali trend does not become an asset without evidence of demand.\n\nThe hospitality market here has shifted. Guests are staying longer, gravitating toward wellness-led properties, and moving away from short-term inventory that lacks credible operator discipline. This is not a cyclical spike — it is a structural change in the demand profile.\n\nThe problem is that most development decisions still run in reverse: concept and design first, management logic and repeat demand evidence second. That is where capital erodes — not in a single moment, but gradually, through weak occupancy, heavy operational load, and assets that read correctly on paper but underperform in practice.\n\nBuyers in this market do not lead with entry price. They evaluate management depth, legal structure, occupancy logic, and guest experience. Legal structure, in particular, reshapes a deal far beyond what any brochure language implies.\n\nThe discipline question must come before the design question. Before committing capital to new hospitality inventory, a developer needs clear answers to three things: is there confirmed repeat demand, is there an operating system with proven logic, and will the legal structure hold under a real market cycle.\n\nBali's hospitality market is rewarding developers who can demonstrate all three — not those who convert trend momentum directly into new inventory.",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_4",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "en",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T09:30:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_workflow_b_market_signal_001_linkedin_b2b",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "market reports: hidden risk",
+        "Hook options": "hook_01: market reports: hidden risk\nhook_02: What looks like design taste is becoming a business differentiator.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: What do you check first before trusting a market opportunity?\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_workflow_b_market_signal_001_linkedin_b2b\n**Title:** developer_investor — linkedin_b2b\n**Platform:** linkedin\n**Pillar:** expertise_proof\n**Format:** thought_leadership_post\n**Approval Status:** pending\n\n### Final Text\nA Bali trend does not become an asset without evidence of demand.\n\nThe hospitality market here has shifted. Guests are staying longer, gravitating toward wellness-led properties, and moving away from short-term inventory that lacks credible operator discipline. This is not a cyclical spike — it is a structural change in the demand profile.\n\nThe problem is that most development decisions still run in reverse: concept and design first, management logic and repeat demand evidence second. That is where capital erodes — not in a single moment, but gradually, through weak occupancy, heavy operational load, and assets that read correctly on paper but underperform in practice.\n\nBuyers in this market do not lead with entry price. They evaluate management depth, legal structure, occupancy logic, and guest experience. Legal structure, in particular, reshapes a deal far beyond what any brochure language implies.\n\nThe discipline question must come before the design question. Before committing capital to new hospitality inventory, a developer needs clear answers to three things: is there confirmed repeat demand, is there an operating system with proven logic, and will the legal structure hold under a real market cycle.\n\nBali's hospitality market is rewarding developers who can demonstrate all three — not those who convert trend momentum directly into new inventory."
+      }
+    ],
+    "events": [
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_workflow_b_boutique_signal_001_instagram_professional",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T09:30:00Z",
+        "Draft ID": "draft_workflow_b_boutique_signal_001_instagram_professional",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_workflow_b_boutique_signal_001_linkedin_b2b",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T09:30:00Z",
+        "Draft ID": "draft_workflow_b_boutique_signal_001_linkedin_b2b",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_workflow_b_market_signal_001_instagram_professional",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T09:30:00Z",
+        "Draft ID": "draft_workflow_b_market_signal_001_instagram_professional",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_workflow_b_market_signal_001_linkedin_b2b",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T09:30:00Z",
+        "Draft ID": "draft_workflow_b_market_signal_001_linkedin_b2b",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      }
+    ]
+  },
+  "qa": {
+    "workflow_b_only": true,
+    "final_asset_contract_passed": true,
+    "no_tautological_openings": true,
+    "no_duplicate_openings": true,
+    "no_final_cta_questions": true
+  }
+}
