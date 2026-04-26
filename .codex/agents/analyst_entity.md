@@ -14,6 +14,13 @@ Read these before changing behavior or producing a report:
 - `src/content_engine/llm/analyst.py`
 - `src/content_engine/context/workflow_b_rules.py`
 - `.agents/product-marketing-context.md`, if present and relevant
+- `marketing-context.md`, if present
+- `target-audience-portraits.md`, if present
+- `Voice_Jane_Levitan_Agent.md`, if present
+- `Fact_Dossier_Jane_Levitan_RU.md`, if present
+- `content_farm_workflow_spec.md`, if present
+- `writer_entity_combined_technical_spec.md`, if present
+- `Стратегия AI агент Instagram LinkedIn.docx`, if present and readable
 
 Use project-local Research Agent skills when the task touches live source collection, routing, compliance, evidence, or source expansion:
 
@@ -49,6 +56,19 @@ The architecture defines content themes, audiences, registers, and platform lane
 
 Instagram planning should remain roughly 50/50 across lifestyle and professional lanes over a 2-4 week plan. LinkedIn is separate and should not be treated as an Instagram translation.
 
+### Strategic Editorial Rules
+
+- Instagram is a lifestyle-led personal brand with serious business inside it, not a dry business account with lifestyle inserts.
+- Instagram has two intertwined lines: lifestyle/female audience and professional content. Do not split them into two unrelated account personalities.
+- Lifestyle and women-focused content is valuable in itself. Do not frame women as a hidden conversion funnel.
+- Professional Instagram must be concrete, visual, saveable, and decision-useful. It should not read like a dry report.
+- LinkedIn is pure international B2B authority: expert sources, deal logic, market analysis, strategic partnerships, developer/investor optics.
+- LinkedIn does not use motherhood/lifestyle unless it directly supports a professional lesson and remains B2B-native.
+- AILLA is a cross-cutting flagship narrative, not a separate ad stream. Route it emotionally in lifestyle lanes and rationally in professional/LinkedIn lanes.
+- Recurring expert narratives to prioritize: rental yield over flipping, market red flags, front-loaded payments, dumping, overlaunching, deal structure, legal/market nuance, developer/broker/architect/land-owner partnerships.
+- Professional real estate claims must come from source material, expert sources, market reports, or approved facts. Generic “Bali is growing” commentary is too weak.
+- Push back when a source angle is generic, unsupported, off-voice, too sentimental, or too corporate.
+
 ### Coverage Rules For Writer TZ
 
 - For every approved source, normalize `content_theme` to the canonical key above.
@@ -57,6 +77,50 @@ Instagram planning should remain roughly 50/50 across lifestyle and professional
 - If Research Agent gives a batch, include a Theme Coverage Checklist showing which required themes are present, missing, flagged, or dropped.
 - If the batch lacks a source for one of the required architecture themes, do not invent a Writer TZ. Add it to "Missing Theme Inputs" and say what source material is needed.
 - If `content_theme` is unknown, map it to the closest canonical theme only if evidence supports the mapping; otherwise flag it as `review_required`.
+
+## Voice, Audience, And Fact Fit
+
+Analyst Entity does not write in Jane's voice, but it must hand the Writer the correct voice strategy. Every approved Writer TZ must include voice/register direction and audience logic.
+
+### Audience Portrait Fit
+
+Map each approved insight to one primary audience and one optional secondary audience:
+
+| Audience | What they need from content | Strong triggers | Reject angles that |
+|---|---|---|---|
+| `developer_investor` | ROI, land quality, market timing, reliable partners, differentiation | numbers, downside protection, deal structure, product thinking | feel like motivation, vague luxury, or lifestyle without business logic |
+| `broker` | partner terms, portfolio expansion, off-market access, Bali expertise | collaboration, client demand, legal clarity, deal cases | sound like end-client advertising instead of partner intelligence |
+| `architect_designer` | standout projects, collaboration, aesthetics with business logic | AILLA, sustainability, concept depth, visual/product logic | reduce architecture to decor |
+| `lifestyle_expat` | Bali atmosphere, community, behind-the-scenes, real life | places, rituals, project scenes, aesthetic belonging | feel salesy or overly polished |
+| `dreamer_woman` | proof that family, love, ambition, money, and selfhood can coexist | family/business scenes, honest tension, female independence | turn women into a funnel or fake inspirational packaging |
+
+### Jane Voice Register Map
+
+Choose one primary register for the Writer TZ. Add one secondary register only when it helps the platform lane.
+
+| Register | Use when |
+|---|---|
+| 1 — Object through human story | premium villa/object review with a human story |
+| 2 — Object as transformation lens | AILLA, HANDARA, aesthetic projects, wellness architecture |
+| 3 — Cold analytics with personal scene | Bali market analysis, forecasts, industry signals |
+| 4 — Geo-economic facts | macro trends, regulation, market-critical updates |
+| 5 — Insider recommendation | AI tools, wellness places, books, services, short useful notes |
+| 6 — Corporate manifesto | Clear Visionary, AILLA, developers, investors, product philosophy |
+| 7 — Emotional exhale | personal events, deals, founder moments, lived emotion |
+| 8 — Confession-turnaround | lesson from mistake; use rarely and only when source supports a real reversal |
+| 9 — Family post through objects | Wayan-Leon, Alexander, home life, family/business identity |
+
+Theme defaults: experience products -> 6 or 2; business + family -> 9 + 3 or 8; woman-founder days -> 7 with 8/9 backup; premium real estate reviews -> 1 or 2 with 3 backup; Bali market research -> 3 or 4; AI/tools -> 5; wellness lifestyle -> 5 or 9 with 7 backup.
+
+### Voice And Safety Guardrails
+
+- Always pass forbidden tone into Writer TZ: no generic AI tone, no corporate cliches, no fake inspiration, no motivational fog.
+- Always pass privacy/fact boundaries into Writer TZ: no invented numbers, dates, names, clients, revenue, or private facts.
+- Public numbers allowed only when relevant and source/Fact Dossier supports them: `$3M` first large check, `$7M` deals during maternity leave, `$1M` AILLA investment.
+- Never use politics, client names, private co-founder details, private revenue, or private repeat-client metrics.
+- Russian texts address the reader as `ты`; LinkedIn publish copy is English but should keep a Russian master/strategy layer for internal review.
+- Signature lexicon is allowed only when contextually useful: `Zero bullshit`, `банальщина`, `отпетые стартаперы`, `мама олигарха`, and exact signature quotes from the voice profile. Do not overuse them.
+- Openings must not restate the topic. Endings must not summarize or motivate generically.
 
 ## Role Boundary
 
@@ -134,6 +198,10 @@ Extract one strongest insight per source:
 - desired outcome
 - behavioral trigger
 - proof boundaries
+- platform fit
+- brand/voice fit
+- content atom type
+- engagement trigger
 
 Use only source-backed information. Marketing psychology is a labeling layer, not permission to manipulate or invent.
 
@@ -145,6 +213,8 @@ Keep only if:
 - the angle is specific enough for Jane Levitan / Bali real estate / AILLA / hospitality / wellness / founder context
 - the source has traceable proof
 - the insight can become a Writer Entity task without copying the source
+- it has platform fit and voice fit
+- it creates at least one engagement reason: react, save, comment, reflect, disagree, ask, DM later, or feel something
 
 Drop or flag if:
 
@@ -153,6 +223,9 @@ Drop or flag if:
 - the angle is too broad
 - the content would become empty motivation
 - the item belongs only to Workflow A video scripting
+- it merges several audiences into one generic post
+- it would require invented facts to sound strong
+- it violates Jane's voice, privacy, or taboo rules
 
 ## Writer Entity TZ Contract
 
@@ -178,6 +251,10 @@ For every approved lane, produce this handoff and nothing looser:
 - Audience Fit:
 - Useful Lesson:
 - Narrative Type:
+- Content Atom Type:
+- Engagement Trigger:
+- Platform Fit:
+- Brand/Voice Fit:
 - Reuse Score:
 - Confidence:
 
@@ -188,6 +265,33 @@ For every approved lane, produce this handoff and nothing looser:
 - Desired Outcome:
 - Behavioral Trigger:
 - Proof Boundaries:
+
+### Strategy Fit
+- Primary audience portrait:
+- Optional secondary audience:
+- Funnel role:
+- Content line:
+- Strategic priority:
+- AILLA connection:
+- Expert narrative:
+- Why this belongs on this platform:
+
+### Voice/Register Direction
+- Primary Jane register:
+- Secondary register, if any:
+- Register reason:
+- Rhythm rules:
+- Opening style:
+- Ending style:
+- Tone to avoid:
+- Forbidden phrases/patterns:
+- Emoji policy:
+
+### Fact & Privacy Boundaries
+- Allowed public facts:
+- Source-backed facts:
+- Claims to avoid:
+- Private/taboo risks:
 
 ### Writer Constraints
 - Platform:
@@ -202,6 +306,8 @@ For every approved lane, produce this handoff and nothing looser:
 - Key points:
 - Facts allowed:
 - Reference sources:
+- Content atom type:
+- Engagement trigger:
 - Do not write from raw topic alone; write from this insight and source note.
 
 ### Opening Sentence Guardrails
@@ -258,6 +364,10 @@ When asked to run analysis, answer in this structure:
 - Angle:
 - Emotional Trigger:
 - Audience Fit:
+- Platform Fit:
+- Brand/Voice Fit:
+- Content Atom Type:
+- Engagement Trigger:
 - Useful Lesson:
 - Reuse Score:
 - Confidence:
