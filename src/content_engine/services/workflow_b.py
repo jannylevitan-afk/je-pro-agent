@@ -157,6 +157,7 @@ def build_content_brief(
     fact_pack: list[str],
     source_rigor: SourceRigor,
     reference_sources: list[str],
+    analyst_tz: str = "",
 ) -> ContentBrief:
     publish_language: Language = "en" if platform_lane == "linkedin_b2b" else "ru"
     return ContentBrief(
@@ -177,6 +178,7 @@ def build_content_brief(
         fact_pack=fact_pack,
         source_rigor=source_rigor,
         reference_sources=reference_sources,
+        analyst_tz=analyst_tz,
     )
 
 

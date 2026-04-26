@@ -33,6 +33,7 @@ from content_engine.services.approval import submit_for_review
 from content_engine.services.draft import build_draft_bundle
 from content_engine.services.editing import run_editorial_gate
 from content_engine.services.routing import route_signal
+from content_engine.services.analyst import WorkflowAnalyst, run_analyst
 from content_engine.services.workflow_a import (
     build_filming_card,
     build_video_intake_record,
@@ -109,6 +110,7 @@ def run_live_pipeline(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    analyst: WorkflowAnalyst | None = None,
     knowledge_store: KnowledgeStore | None = None,
 ) -> list[LivePipelineItemResult]:
     return [
@@ -119,6 +121,7 @@ def run_live_pipeline(
             verified_facts=verified_facts,
             submitted_at=submitted_at,
             writer=writer,
+            analyst=analyst,
             knowledge_store=knowledge_store,
         )
         for item in items
@@ -132,6 +135,7 @@ def run_collector_cycle(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    analyst: WorkflowAnalyst | None = None,
     knowledge_store: KnowledgeStore | None = None,
 ) -> list[LivePipelineItemResult]:
     return run_live_pipeline(
@@ -141,6 +145,7 @@ def run_collector_cycle(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        analyst=analyst,
         knowledge_store=knowledge_store,
     )
 
@@ -152,6 +157,7 @@ def process_source_item(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    analyst: WorkflowAnalyst | None = None,
     knowledge_store: KnowledgeStore | None = None,
 ) -> LivePipelineItemResult:
     source_response = upsert_source(client, targets.sources_database_id, item)
@@ -197,6 +203,7 @@ def process_source_item(
             verified_facts=verified_facts,
             submitted_at=submitted_at,
             writer=writer,
+            analyst=analyst,
         )
 
     return LivePipelineItemResult(
@@ -282,15 +289,23 @@ def _run_workflow_b(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None,
+    analyst: WorkflowAnalyst | None,
 ) -> tuple[str, list[str], list[str], list[str], list[str]]:
-    note = normalize_source_item(item)
-    insight = build_insight_card(
-        note=note,
-        emotional_trigger=_emotional_trigger(item),
-        useful_lesson=infer_useful_lesson(item),
-        narrative_type=infer_narrative_type(item),
-        reuse_score=_reuse_score(item),
-    )
+    if analyst is not None:
+        analyst_report = run_analyst(item, analyst, verified_facts=verified_facts)
+        note = analyst_report.source_note
+        insight = analyst_report.insight
+        writer_specs = analyst_report.writer_specs
+    else:
+        note = normalize_source_item(item)
+        insight = build_insight_card(
+            note=note,
+            emotional_trigger=_emotional_trigger(item),
+            useful_lesson=infer_useful_lesson(item),
+            narrative_type=infer_narrative_type(item),
+            reuse_score=_reuse_score(item),
+        )
+        writer_specs = []
     insight_response = create_insight(client, targets.insights_database_id, insight)
     insight_page_id = _page_id(insight_response)
 
@@ -299,8 +314,15 @@ def _run_workflow_b(
     draft_page_ids: list[str] = []
     event_page_ids: list[str] = []
 
-    for decision in expand_workflow_b_decisions(item):
-        reference_sources = _reference_sources(item, decision)
+    workflow_specs = writer_specs or [None for _ in expand_workflow_b_decisions(item)]
+    fallback_decisions = expand_workflow_b_decisions(item)
+    for index, writer_spec in enumerate(workflow_specs):
+        if writer_spec is not None:
+            decision = writer_spec.decision
+            reference_sources = writer_spec.brief.reference_sources
+        else:
+            decision = fallback_decisions[index]
+            reference_sources = _reference_sources(item, decision)
         writer_entity_output = run_writer_entity_for_workflow_b(
             item=item,
             legacy_insight=insight,
@@ -308,17 +330,20 @@ def _run_workflow_b(
             verified_facts=verified_facts,
             reference_sources=reference_sources,
         )
-        idea = build_idea_candidate(
-            insight=insight,
-            platform=decision.platform,
-            platform_lane=decision.platform_lane,
-            language_mode="ru",
-            funnel_role=decision.funnel_role,
-            working_title=writer_entity_output.selected_idea.title,
-            emotional_hook=writer_entity_output.selected_idea.emotional_trigger,
-            desired_reaction=writer_entity_output.content_brief.cta,
-            suggested_format=writer_entity_output.selected_idea.format_suggestion,
-        )
+        if writer_spec is not None:
+            idea = writer_spec.idea
+        else:
+            idea = build_idea_candidate(
+                insight=insight,
+                platform=decision.platform,
+                platform_lane=decision.platform_lane,
+                language_mode="ru",
+                funnel_role=decision.funnel_role,
+                working_title=writer_entity_output.selected_idea.title,
+                emotional_hook=writer_entity_output.selected_idea.emotional_trigger,
+                desired_reaction=writer_entity_output.content_brief.cta,
+                suggested_format=writer_entity_output.selected_idea.format_suggestion,
+            )
         gate_passed = writer_entity_output.selected_idea.idea_id in writer_entity_output.idea_gate.passed
         idea_response = create_idea(
             client,
@@ -334,22 +359,25 @@ def _run_workflow_b(
 
         draft_id = _draft_id(item, decision)
         edit_version_id = f"{draft_id}_edit_v1"
-        brief = build_content_brief(
-            insight=insight,
-            platform=decision.platform,
-            platform_lane=decision.platform_lane,
-            funnel_role=decision.funnel_role,
-            purpose=_purpose(decision),
-            hook=writer_entity_output.content_brief.hook_direction,
-            key_points=_writer_entity_key_points(writer_entity_output, item),
-            cta_type=decision.cta_type,
-            tone=writer_entity_output.voice_selection.primary_register,
-            length_target="medium",
-            engagement_objective=decision.engagement_objective,
-            fact_pack=_matching_fact_pack(item, verified_facts),
-            source_rigor=decision.source_rigor,
-            reference_sources=reference_sources,
-        )
+        if writer_spec is not None:
+            brief = writer_spec.brief
+        else:
+            brief = build_content_brief(
+                insight=insight,
+                platform=decision.platform,
+                platform_lane=decision.platform_lane,
+                funnel_role=decision.funnel_role,
+                purpose=_purpose(decision),
+                hook=writer_entity_output.content_brief.hook_direction,
+                key_points=_writer_entity_key_points(writer_entity_output, item),
+                cta_type=decision.cta_type,
+                tone=writer_entity_output.voice_selection.primary_register,
+                length_target="medium",
+                engagement_objective=decision.engagement_objective,
+                fact_pack=_matching_fact_pack(item, verified_facts),
+                source_rigor=decision.source_rigor,
+                reference_sources=reference_sources,
+            )
         brief_record = BriefRecord(
             brief_id=_brief_id(item, decision),
             title=_build_working_title(item, decision),

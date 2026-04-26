@@ -67,6 +67,7 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
         fact_pack=["Verified fact"],
         source_rigor="expert",
         reference_sources=["https://a.example", "https://b.example", "https://c.example"],
+        analyst_tz="## Writer Entity TZ\n- JTBD / Customer Job: decide whether this deal deserves trust",
     )
     decision = WorkflowBDecision(
         platform="linkedin",
@@ -102,6 +103,8 @@ def test_write_workflow_b_draft_parses_bilingual_json_payload(source_item) -> No
     assert "Do not return Hook, CTA, Traceability, or QA sections" in str(client.calls[0]["user_prompt"])
     assert "Copyright safety" in str(client.calls[0]["user_prompt"])
     assert "paraphrase the source meaning" in str(client.calls[0]["user_prompt"])
+    assert "Writer Entity TZ" in str(client.calls[0]["user_prompt"])
+    assert "decide whether this deal deserves trust" in str(client.calls[0]["user_prompt"])
 
 
 def test_write_video_script_returns_text_from_anthropic(video_source_item) -> None:

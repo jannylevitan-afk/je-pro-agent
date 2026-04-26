@@ -57,6 +57,9 @@ class InsightCard(BaseModel):
 
     audience: str
     platform: Platform | str
+    topic: str = ""
+    angle: str = ""
+    audience_fit: str = ""
     content_theme: str
     content_pillar: str
     narrative_type: str
@@ -102,6 +105,7 @@ class ContentBrief(BaseModel):
     fact_pack: list[str]
     source_rigor: SourceRigor
     reference_sources: list[str]
+    analyst_tz: str = ""
 
     @model_validator(mode="after")
     def validate_linkedin_language_policy(self) -> "ContentBrief":

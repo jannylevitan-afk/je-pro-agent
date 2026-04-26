@@ -14,6 +14,7 @@ from content_engine.models.source_item import SourceItem
 from content_engine.notion.sync import NotionClientLike
 from content_engine.orchestration.live_pipeline import LivePipelineItemResult, WorkflowWriter, run_live_pipeline
 from content_engine.orchestration.targets import LivePipelineTargets
+from content_engine.services.analyst import WorkflowAnalyst
 
 
 ComplianceStatus = Literal["allowed", "review", "blocked"]
@@ -59,6 +60,7 @@ def run_search_agent(
     verified_facts: set[str],
     submitted_at: str,
     writer: WorkflowWriter | None = None,
+    analyst: WorkflowAnalyst | None = None,
     knowledge_store: KnowledgeStore | None = None,
     timeout_seconds: float = 30.0,
     fetcher: Fetcher | None = None,
@@ -101,6 +103,7 @@ def run_search_agent(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        analyst=analyst,
         knowledge_store=knowledge_store,
     )
     return SearchAgentReport(

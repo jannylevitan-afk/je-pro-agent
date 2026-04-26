@@ -77,6 +77,76 @@ def test_process_source_item_routes_text_item_into_workflow_b(source_item) -> No
     assert "Video Hooks" not in final_asset
 
 
+def test_process_source_item_uses_analyst_for_workflow_b_phase_1_and_2(source_item) -> None:
+    class FakeAnalyst:
+        def extract_insight(self, item):
+            class Result:
+                useful_lesson = "Analyst extracted lesson for Writer Entity TZ."
+                emotional_trigger = "status anxiety around weak deal logic"
+                narrative_type = "market_observation"
+                reuse_score = 5
+                topic = "analyst topic"
+                angle = "analyst angle"
+                audience_fit = "developer_investor fit"
+                customer_job = "decide whether this deal deserves trust"
+                pain_point = "surface story hides weak structure"
+                trigger_event = "reviewing a Bali opportunity"
+                desired_outcome = "avoid the wrong deal"
+                behavioral_trigger = "loss_aversion"
+                confidence_score = 0.9
+
+            return Result()
+
+    client = StubNotionClient(
+        query_results=[
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+            {"results": []},
+        ],
+        create_results=[
+            {"id": "src_page_1"},
+            {"id": "insight_page_1"},
+            {"id": "idea_page_1"},
+            {"id": "brief_page_1"},
+            {"id": "draft_page_1"},
+            {"id": "event_page_1"},
+            {"id": "idea_page_2"},
+            {"id": "brief_page_2"},
+            {"id": "draft_page_2"},
+            {"id": "event_page_2"},
+        ],
+    )
+    targets = LivePipelineTargets(
+        sources_database_id="db_sources",
+        insights_database_id="db_insights",
+        ideas_database_id="db_ideas",
+        briefs_database_id="db_briefs",
+        drafts_database_id="db_drafts",
+        events_database_id="db_events",
+        scripts_database_id="db_scripts",
+        filming_cards_database_id="db_filming",
+    )
+
+    process_source_item(
+        client=client,
+        targets=targets,
+        item=source_item,
+        verified_facts={"Boutique hotel ROI beats mass-market in Bali."},
+        submitted_at="2026-04-24T10:00:00Z",
+        analyst=FakeAnalyst(),
+    )
+
+    insight_properties = client.create_calls[1][1]
+    assert insight_properties["Angle"]["rich_text"][0]["text"]["content"] == (
+        "Analyst extracted lesson for Writer Entity TZ."
+    )
+    first_brief = client.create_calls[3][1]
+    reference_sources = first_brief["Reference sources"]["rich_text"][0]["text"]["content"]
+    assert "https://t.me/wellstate/1#source" in reference_sources
+
+
 def test_matching_fact_pack_ignores_generic_villa_bali_overlap(source_item) -> None:
     item = source_item.model_copy(
         update={

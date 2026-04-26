@@ -8,6 +8,7 @@ from content_engine.orchestration.search_agent import SearchAgentReport, run_sea
 from content_engine.orchestration.targets import LivePipelineTargets
 from content_engine.runtime.dry_run import InMemoryNotionClient
 from content_engine.orchestration.live_pipeline import WorkflowWriter
+from content_engine.services.analyst import WorkflowAnalyst
 
 
 _LOCAL_TARGETS = LivePipelineTargets(
@@ -32,6 +33,7 @@ def run_local_search_agent_dry_run(
     *,
     search_targets: list[NativeSourceTarget],
     writer: WorkflowWriter | None,
+    analyst: WorkflowAnalyst | None = None,
     verified_facts: set[str],
     submitted_at: str,
     timeout_seconds: float = 30.0,
@@ -47,6 +49,7 @@ def run_local_search_agent_dry_run(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        analyst=analyst,
         knowledge_store=knowledge_store,
         timeout_seconds=timeout_seconds,
         fetcher=fetcher,

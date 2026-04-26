@@ -1,3 +1,4 @@
+from content_engine.llm.analyst import AnthropicPipelineAnalyst, InsightExtractionResult
 from content_engine.llm.anthropic import (
     AnthropicClient,
     AnthropicClientConfig,
@@ -14,6 +15,8 @@ __all__ = [
     "AnthropicClientError",
     "AnthropicDecodeError",
     "AnthropicHTTPError",
+    "AnthropicPipelineAnalyst",
     "AnthropicPipelineWriter",
+    "InsightExtractionResult",
     "PipelineDraftText",
 ]

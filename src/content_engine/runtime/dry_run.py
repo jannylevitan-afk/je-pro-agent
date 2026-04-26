@@ -10,6 +10,7 @@ from content_engine.orchestration.live_pipeline import (
     WorkflowWriter,
     run_collector_cycle,
 )
+from content_engine.services.analyst import WorkflowAnalyst
 from content_engine.orchestration.targets import LivePipelineTargets
 
 
@@ -111,6 +112,7 @@ def run_local_pipeline_dry_run(
     *,
     collector: SourceCollector,
     writer: WorkflowWriter | None,
+    analyst: WorkflowAnalyst | None = None,
     verified_facts: set[str],
     submitted_at: str,
     knowledge_store: KnowledgeStore | None = None,
@@ -123,6 +125,7 @@ def run_local_pipeline_dry_run(
         verified_facts=verified_facts,
         submitted_at=submitted_at,
         writer=writer,
+        analyst=analyst,
         knowledge_store=knowledge_store,
     )
     return LocalPipelineDryRunReport(

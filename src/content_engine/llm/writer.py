@@ -130,6 +130,8 @@ class AnthropicPipelineWriter:
                     "- Do not add a standalone CTA question at the end; Final Text should be the finished text only.",
                     "- Copyright safety: paraphrase the source meaning; do not copy the source transcript sentence-by-sentence.",
                     "- Verbatim reuse is allowed only for a short detected hook or a short evidence excerpt, not for full source text.",
+                    "Analyst TZ:",
+                    brief.analyst_tz or "-",
                     f"Platform lane: {decision.platform_lane}",
                     f"Audience portrait: {insight.audience}",
                     f"Emotional hook: {decision.emotional_hook}",

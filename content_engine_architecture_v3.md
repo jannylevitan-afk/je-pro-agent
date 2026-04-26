@@ -547,13 +547,13 @@ Measure → top hook patterns + topics → Research Agent adjusts search params
 
 ## Writer Entity — обязательный writing workflow
 
-Workflow B не пишет посты напрямую из темы. Любой текстовый пост, content brief или draft проходит через `Writer Entity`.
+Workflow B не пишет посты напрямую из темы. Любой текстовый пост, content brief или draft проходит через `Writer Entity`, но upstream-анализ для Phase 1/2 делает `Analyst Entity`.
 
 Принцип:
 
 ```text
 Пост не пишется из темы.
-Пост пишется из инсайта.
+Пост пишется из Analyst TZ: source note + insight + audience fit + доказательная база.
 
 Голос не имитируется "по стилю".
 Голос собирается из фактов, регистров, запретов, ритма и границ автора.
@@ -563,12 +563,14 @@ Workflow B не пишет посты напрямую из темы. Любой
 
 | Слой | За что отвечает |
 |---|---|
-| Universal Writing Engine | task classification, insight extraction, idea generation, idea gate, brief, draft, editing, platform adaptation, QA |
+| Universal Writing Engine | task classification, consumes Analyst TZ, idea gate, brief refinement, draft, editing, platform adaptation, QA |
 | Author Voice Module | факты автора, регистры, табу, forbidden phrases, privacy boundaries, rhythm, lexicon, platform rules |
 
 Для Jane Levitan используется `Voice_Jane_Levitan_Agent`. Если для текста от имени Jane нет Fact Dossier или Voice Profile, финальный текст не генерируется.
 
 ### Required Writer Input
+
+В Workflow B Writer получает не только сырой `source_material`, но и `analyst_tz` из Analyst Entity. Если `analyst_tz` есть, он является главным входным контекстом для темы, угла, аудитории и доказательности.
 
 ```json
 {
@@ -581,6 +583,7 @@ Workflow B не пишет посты напрямую из темы. Любой
   "length": "short | medium | long",
   "cta_type": "comment | save | share | DM | click | no_CTA",
   "author_profile": "generic | jane_levitan | custom",
+  "analyst_tz": "Writer Entity TZ из Analyst Entity",
   "available_context": {
     "fact_dossier": true,
     "voice_profile": true,
@@ -656,7 +659,7 @@ if tone == "дерзкий" or tone == "прямой": use Direct Truth Hook
 |---|---|---|
 | 0 | Preflight / Fact / Privacy Gate | `ready / needs_context / blocked`; проверяет тему, source material, audience, platform, goal, Jane dossier/voice/profile/privacy |
 | 1 | Task Classification | content type, platform, audience, goal, voice mode, risk level, fact verification required |
-| 2 | Insight Extraction | topic, angle, emotional trigger, audience fit, hidden tension, promise, risk |
+| 2 | Analyst TZ Intake | принимает topic, angle, emotional trigger, audience fit, JTBD, pain point, proof boundaries из Analyst Entity |
 | 3 | Voice / Register Selection | generic register или Jane register 1–9, rhythm, opening, ending, emoji policy |
 | 4 | Idea Generation | 1 insight → 3–5 идей; слабые идеи убиваются здесь |
 | 5 | Idea Gate | проходит только идея с инсайтом, эмоцией, пользой, tension/promise, platform fit, voice fit, no invented facts |
@@ -1037,9 +1040,49 @@ AILLA не должна жить отдельной рекламной ветк�
 ### Правила repurposing
 
 - Один сильный atom может пойти одновременно в Workflow A и Workflow B, но с разной упаковкой.
-- Для каждой repurpose-версии переписывается хук и CTA под platform lane, а не копируется исходный текст.
+- Для каждой repurpose-версии переписывается opening sentence и финальная подача под platform lane, а не копируется исходный текст.
 - Atom без самостоятельного смысла не идёт в публикацию: каждый фрагмент должен работать вне исходного длинного контента.
 - Evergreen atoms можно возвращать в план раз в 3–6 месяцев, если тема не потеряла актуальность.
+
+---
+
+## Analyst Entity — Phase 1/2 между Research Agent и Writer Entity
+
+Analyst Entity — это отдельная сущность между `Research Agent` и `Writer Entity`.
+
+Она **не пишет посты** и **не генерирует финальный текст**. Её задача — превратить сырые сигналы Research Agent в понятное Writer-ready ТЗ:
+
+```text
+Research Agent raw item
+→ Analyst Entity: Phase 1 Intake + Structure
+→ Analyst Entity: Phase 2 Insight Extraction
+→ Writer Entity TZ
+→ Writer Entity пишет draft/final asset
+```
+
+### Что Analyst Entity забирает у Research Agent
+
+- `source_url`, `source_type`, `source_name`, `external_item_id`
+- `raw_text / transcript_text`
+- `media_urls`, если source video-native
+- `engagement_signals`
+- `audience_segment`, `content_theme`, `routing_decision`
+- `raw_payload.reference_sources`
+- evidence fields: timestamp, raw excerpt, confidence score
+
+### Что Analyst Entity адаптирует из marketing skills
+
+Из `coreyhaines31/marketingskills` берём только аналитические фреймворки, не готовые шаблоны постов:
+
+| Skill source | Что берём | Как используется |
+|---|---|---|
+| `customer-research` | JTBD, pain point, trigger event, desired outcome, confidence | усиливает Insight Card и Writer TZ |
+| `marketing-psychology` | loss aversion, status signal, identity pull, curiosity gap, direct benefit | маркирует behavioral trigger без манипулятивного кликбейта |
+| `content-strategy` | searchable/shareable, content pillar, buyer-stage logic | помогает выбрать content pillar, narrative type, platform lane |
+| `social-content` | content atoms и platform fit | помогает отличать Instagram/LinkedIn упаковку до передачи Writer |
+| `product-marketing-context` | ICP, positioning, objections, proof points | future context document, если появится `.agents/product-marketing-context.md` |
+
+Не берём: generic copy templates, viral formulas, ad creative frameworks, CRO/paywall/pricing skills — они не относятся к Phase 1/2 и создадут мешанину.
 
 ---
 
@@ -1049,6 +1092,8 @@ AILLA не должна жить отдельной рекламной ветк�
 
 ### Phase 1 — Intake & Structure
 **Входящие данные:** raw data от Research Agent
+
+**Выполняет:** `Analyst Entity`
 
 - Принять raw data
 - Дедупликация, нормализация, удаление шума
@@ -1062,6 +1107,8 @@ AILLA не должна жить отдельной рекламной ветк�
 ---
 
 ### Phase 2 — Insight Extraction
+
+**Выполняет:** `Analyst Entity`
 
 Часть тегов уже проставлена автоматически на Phase 1 на основе источника (`content_theme` из Seed Config). AI уточняет и дополняет.
 
@@ -1078,18 +1125,68 @@ AILLA не должна жить отдельной рекламной ветк�
 | marketing_cases | Девелопер · Брокер | expertise · proof | 3 · 8 |
 
 **Что AI извлекает дополнительно:**
+- topic
 - конкретный угол подачи
 - emotional trigger (что именно задевает аудиторию)
+- fit аудитории / почему source важен именно этому портрету
 - полезный урок или напряжение/противоречие
+- JTBD / customer job
+- pain point
+- trigger event
+- desired outcome
+- behavioral trigger
+- confidence score
 - human story element
 - reuse potential
 - итоговый narrative_type
 
-Обязательные теги: `audience · platform · content_theme · content_pillar · narrative_type · priority · reuse_score`
+Обязательные теги: `audience · platform · topic · angle · audience_fit · content_theme · content_pillar · narrative_type · priority · reuse_score`
 
 Типы нарративов: authority / behind the scenes / journey of creation / founder struggle / professional lesson / market observation / invitation / aesthetic reflection
 
-**Выход:** Insight Card с полным набором тегов
+**Выход:** Insight Card с полным набором тегов + `Writer Entity TZ`
+
+### Writer Entity TZ — выход Analyst Entity
+
+```markdown
+## Writer Entity TZ
+
+### Phase 1 Source Note
+- Source ID:
+- Source URL:
+- Platform:
+- Audience:
+- Content theme:
+- Raw excerpt:
+
+### Phase 2 Insight Card
+- Topic:
+- Angle:
+- Emotional Trigger:
+- Audience Fit:
+- Useful Lesson:
+- Narrative Type:
+- Reuse Score:
+- Confidence:
+
+### Marketing Research Adaptation
+- JTBD / Customer Job:
+- Pain Point:
+- Trigger Event:
+- Desired Outcome:
+- Behavioral Trigger:
+
+### Writer Constraints
+- Purpose:
+- Tone/Register:
+- Format:
+- Opening guide:
+- Key points:
+- Facts allowed:
+- Reference sources:
+```
+
+Правило: Writer Entity получает это ТЗ как входной контекст. Он может усилить формулировку, но не должен заново придумывать тему, аудиторию, источник боли или доказательную базу.
 
 ---
 
