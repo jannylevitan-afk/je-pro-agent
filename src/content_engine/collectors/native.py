@@ -13,7 +13,7 @@ from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 from content_engine.collectors.apify import fetch_instagram_profile
-from content_engine.models.source_item import SourceItem
+from content_engine.models.source_item import RoutingDecision, SourceItem
 from content_engine.services.ingestion import build_dedupe_key
 
 
@@ -220,12 +220,14 @@ def _parse_youtube_feed(
             namespaces=namespaces,
         ).strip()
         link = entry.find("atom:link", namespaces)
-        link_url = link.get("href") if link is not None else f"https://www.youtube.com/watch?v={video_id}"
+        raw_href = link.get("href") if link is not None else None
+        link_url: str = raw_href if raw_href is not None else f"https://www.youtube.com/watch?v={video_id}"
         published_at = _normalize_timestamp(
             entry.findtext("atom:published", default=collected_at, namespaces=namespaces)
         )
         thumbnail = entry.find("media:group/media:thumbnail", namespaces)
-        media_urls = [thumbnail.get("url")] if thumbnail is not None and thumbnail.get("url") else []
+        thumb_url = thumbnail.get("url") if thumbnail is not None else None
+        media_urls: list[str] = [thumb_url] if thumb_url else []
         engagement_signals = _extract_youtube_engagement_signals(entry, namespaces)
 
         transcript_text = ". ".join(part for part in [title, description] if part).strip()
@@ -600,7 +602,7 @@ def _extract_youtube_engagement_signals(
     return signals
 
 
-def _infer_route(source_type: str, transcript_text: str, media_urls: list[str]) -> tuple[str, str, float]:
+def _infer_route(source_type: str, transcript_text: str, media_urls: list[str]) -> tuple[RoutingDecision, str, float]:
     words = len(transcript_text.split())
     has_video_signal = bool(media_urls) or any(token in source_type for token in ("video", "reel", "tiktok"))
     if has_video_signal and words >= 8:

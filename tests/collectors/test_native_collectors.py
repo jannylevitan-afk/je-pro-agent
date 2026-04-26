@@ -246,6 +246,28 @@ def test_collect_native_source_items_parses_youtube_feed() -> None:
     assert items[0].routing_reason == "video signal with textual depth"
 
 
+def test_collect_native_source_items_ignores_empty_youtube_thumbnail_url() -> None:
+    target = NativeSourceTarget(
+        platform="youtube",
+        handle="UC1234567890",
+        audience_segment="developer_investor",
+        content_theme="boutique_hotels",
+    )
+    rss_without_thumbnail_url = YOUTUBE_RSS.replace(
+        'url="https://i.ytimg.com/vi/abc123/hqdefault.jpg"',
+        'url=""',
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: rss_without_thumbnail_url,
+        collected_at="2026-04-24T08:00:00Z",
+    )
+
+    assert len(items) == 1
+    assert items[0].media_urls == []
+
+
 @pytest.mark.parametrize(
     ("platform", "url", "html", "expected_source_type", "expected_route"),
     [

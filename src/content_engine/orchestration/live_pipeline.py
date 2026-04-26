@@ -33,7 +33,7 @@ from content_engine.services.approval import submit_for_review
 from content_engine.services.draft import build_draft_bundle
 from content_engine.services.editing import run_editorial_gate
 from content_engine.services.routing import route_signal
-from content_engine.services.analyst import WorkflowAnalyst, run_analyst
+from content_engine.services.analyst import WorkflowAnalyst, WriterSpec, run_analyst
 from content_engine.services.workflow_a import (
     build_filming_card,
     build_video_intake_record,
@@ -314,8 +314,8 @@ def _run_workflow_b(
     draft_page_ids: list[str] = []
     event_page_ids: list[str] = []
 
-    workflow_specs = writer_specs or [None for _ in expand_workflow_b_decisions(item)]
     fallback_decisions = expand_workflow_b_decisions(item)
+    workflow_specs: list[WriterSpec | None] = list(writer_specs) if writer_specs else [None for _ in fallback_decisions]
     for index, writer_spec in enumerate(workflow_specs):
         if writer_spec is not None:
             decision = writer_spec.decision

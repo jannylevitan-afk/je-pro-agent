@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 from content_engine.models.source_item import SourceItem
 
@@ -34,7 +34,7 @@ _AUDIENCE_CONTEXT: dict[str, str] = {
 }
 
 
-_THEME_PROFILES: dict[str, dict[str, object]] = {
+_THEME_PROFILES: dict[str, dict[str, Any]] = {
     "founder_journey": {
         "route": "workflow_b",
         "content_pillars": ["lifestyle", "journey", "human struggle"],

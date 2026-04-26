@@ -106,11 +106,13 @@ def run_configured_live_pipeline(
     n8n_client: N8NClientLike | None = None,
 ) -> list[LivePipelineItemResult]:
     client = notion_client or build_notion_client(settings)
-    _verify_notion_page_access(client, settings.notion_parent_page_id)
+    page_id = settings.notion_parent_page_id
+    assert page_id is not None, "notion_parent_page_id must be resolved before calling run_configured_live_pipeline"
+    _verify_notion_page_access(client, page_id)
     pipeline_writer = writer or build_pipeline_writer(settings)
     targets = ensure_live_pipeline_targets(
         client=client,
-        parent_page_id=settings.notion_parent_page_id,
+        parent_page_id=page_id,
     )
     results = run_collector_cycle(
         collector=collector,
@@ -151,8 +153,8 @@ def dispatch_video_gate_payloads(
 
 def resolve_anthropic_model(client: AnthropicClient, requested_model: str) -> str:
     response = client.list_models()
-    available_ids = [
-        item.get("id")
+    available_ids: list[str] = [
+        item["id"]
         for item in response.get("data", [])
         if isinstance(item, dict) and isinstance(item.get("id"), str)
     ]
