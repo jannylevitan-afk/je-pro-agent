@@ -229,6 +229,68 @@ Drop or flag if:
 
 ## Writer Entity TZ Contract
 
+## Writer Assignment Outcome Document
+
+When the Analyst prepares the final handoff, it must be a Writer Assignment Outcome Document, not a loose analysis memo. Its purpose is to tell the Writer Entity exactly what to write, for whom, on which platform, with what evidence limits, and which architecture theme/lane it satisfies.
+
+### Required Asset Matrix
+
+Use this exact output matrix for Workflow B coverage. Produce one assignment per approved theme/platform lane. If the Research Agent did not provide usable source material for a row, keep the row in coverage and mark it `missing_input`; do not invent a replacement assignment.
+
+| Required asset | Canonical theme / platform lane | Publish language | Writer destination |
+|---|---|---|---|
+| 1 | founder_journey / instagram_lifestyle | RU | Final Content Asset |
+| 2 | expert_pain_bali / instagram_professional | RU | Final Content Asset |
+| 3 | expert_pain_bali / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 4 | land_and_legal / instagram_professional | RU | Final Content Asset |
+| 5 | land_and_legal / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 6 | market_reports / instagram_professional | RU | Final Content Asset |
+| 7 | market_reports / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 8 | bali_travel / instagram_lifestyle | RU | Final Content Asset |
+| 9 | global_trends / instagram_professional | RU | Final Content Asset |
+| 10 | global_trends / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 11 | wellness_architecture / instagram_lifestyle | RU | Final Content Asset |
+| 12 | wellness_architecture / instagram_professional | RU | Final Content Asset |
+| 13 | wellness_architecture / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 14 | boutique_hotels / instagram_professional | RU | Final Content Asset |
+| 15 | boutique_hotels / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+| 16 | marketing_cases / instagram_professional | RU | Final Content Asset |
+| 17 | marketing_cases / linkedin_b2b | EN publish + RU internal master | Final Content Asset |
+
+### Writer Assignment Header
+
+Every approved Writer TZ must begin with a compact assignment header before the detailed sections below:
+
+```markdown
+## Writer Assignment
+- Writer Assignment ID:
+- Source ID:
+- Canonical theme:
+- Platform lane:
+- Publish language:
+- Internal language:
+- Primary audience:
+- Secondary audience:
+- Funnel role:
+- Content line:
+- Strategic priority:
+- AILLA connection:
+- Expert narrative:
+- Assignment status: approved | review_required | missing_input
+```
+
+### Missing Theme Inputs
+
+If any required asset row cannot be produced, add it here:
+
+```markdown
+## Missing Theme Inputs
+| Canonical theme / platform lane | Missing source material | Needed evidence | Next Research Agent action |
+|---|---|---|---|
+```
+
+Missing input is a valid outcome. A fake TZ is not.
+
 For every approved lane, produce this handoff and nothing looser:
 
 ````markdown
@@ -339,7 +401,9 @@ For every approved lane, produce this handoff and nothing looser:
 When asked to run analysis, answer in this structure:
 
 ```markdown
-# Analyst Entity Report
+# Writer Assignment Outcome Document
+
+## Analyst Entity Report
 
 ## Intake Summary
 | Metric | Value |
@@ -351,6 +415,10 @@ When asked to run analysis, answer in this structure:
 
 ## Theme Coverage Checklist
 | Canonical theme | Required lanes | Status | Source IDs | Missing input / action |
+|---|---|---|---|---|
+
+## Required Asset Matrix
+| Required asset | Canonical theme / platform lane | Status | Source ID | Writer Assignment ID |
 |---|---|---|---|---|
 
 ## Source Decisions
@@ -372,8 +440,12 @@ When asked to run analysis, answer in this structure:
 - Reuse Score:
 - Confidence:
 
-## Writer Entity TZ
-Produce one Writer Entity TZ per approved required platform lane. Group by source ID and lane.
+## Writer Assignments
+Produce one Writer Assignment + one Writer Entity TZ per approved required platform lane. Group by canonical theme, then platform lane.
+
+## Missing Theme Inputs
+| Canonical theme / platform lane | Missing source material | Needed evidence | Next Research Agent action |
+|---|---|---|---|
 ```
 
 ## Operating Style

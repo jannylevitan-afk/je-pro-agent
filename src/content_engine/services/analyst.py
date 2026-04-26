@@ -273,6 +273,22 @@ def _format_writer_tz(
 ) -> str:
     return "\n".join(
         [
+            "## Writer Assignment",
+            f"- Writer Assignment ID: wa_{item.item_id}_{decision.platform_lane}",
+            f"- Source ID: {item.item_id}",
+            f"- Canonical theme: {insight.content_theme}",
+            f"- Platform lane: {decision.platform_lane}",
+            f"- Publish language: {brief.publish_language}",
+            f"- Internal language: {brief.working_language}",
+            f"- Primary audience: {insight.audience}",
+            f"- Secondary audience: {_secondary_audience(insight)}",
+            f"- Funnel role: {brief.funnel_role}",
+            f"- Content line: {_content_line(decision.platform_lane)}",
+            f"- Strategic priority: {_strategic_priority(decision, insight)}",
+            f"- AILLA connection: {_ailla_connection(item, insight, decision)}",
+            f"- Expert narrative: {_expert_narrative(insight, decision)}",
+            "- Assignment status: approved",
+            "",
             "## Writer Entity TZ",
             "",
             "### Phase 1 Source Note",
@@ -299,8 +315,42 @@ def _format_writer_tz(
             f"- Trigger Event: {extraction.trigger_event or 'source event or monitoring signal'}",
             f"- Desired Outcome: {extraction.desired_outcome or decision.desired_reaction}",
             f"- Behavioral Trigger: {extraction.behavioral_trigger or 'direct_benefit'}",
+            f"- Proof Boundaries: {_proof_boundaries(brief)}",
+            "",
+            "### Strategy Fit",
+            f"- Primary audience portrait: {insight.audience}",
+            f"- Optional secondary audience: {_secondary_audience(insight)}",
+            f"- Funnel role: {brief.funnel_role}",
+            f"- Content line: {_content_line(decision.platform_lane)}",
+            f"- Strategic priority: {_strategic_priority(decision, insight)}",
+            f"- AILLA connection: {_ailla_connection(item, insight, decision)}",
+            f"- Expert narrative: {_expert_narrative(insight, decision)}",
+            f"- Why this belongs on this platform: {_platform_fit_reason(decision)}",
+            "",
+            "### Voice/Register Direction",
+            f"- Primary Jane register: {brief.tone}",
+            f"- Secondary register, if any: {_secondary_register(decision)}",
+            f"- Register reason: {_register_reason(decision)}",
+            f"- Rhythm rules: {_rhythm_rules(decision.platform_lane)}",
+            f"- Opening style: source-specific first sentence, no separate Hook block",
+            "- Ending style: finish as a complete thought; no standalone CTA question",
+            "- Tone to avoid: generic AI tone, corporate cliches, fake inspiration, motivational fog",
+            "- Forbidden phrases/patterns: Сегодня поговорим о; Давайте разберёмся; В современном мире; Сейчас многие",
+            "- Emoji policy: no emoji in LinkedIn; rare/no emoji in professional IG; restrained if lifestyle needs warmth",
+            "",
+            "### Fact & Privacy Boundaries",
+            f"- Allowed public facts: {_allowed_public_facts(item)}",
+            f"- Source-backed facts: {'; '.join(brief.fact_pack) or 'source note only'}",
+            "- Claims to avoid: invented numbers, invented dates, client names, private deal terms, unsupported ROI claims",
+            "- Private/taboo risks: politics, private family details, client identities, closed deal details not marked public",
             "",
             "### Writer Constraints",
+            f"- Platform: {brief.platform}",
+            f"- Platform lane: {brief.platform_lane}",
+            f"- Publish language: {brief.publish_language}",
+            f"- Canonical content theme: {insight.content_theme}",
+            f"- Required theme lanes: {_required_theme_lanes(insight.content_theme)}",
+            f"- This TZ lane: {decision.platform_lane}",
             f"- Purpose: {brief.purpose}",
             f"- Tone/Register: {brief.tone}",
             f"- Format: {_suggested_format(decision)}",
@@ -342,3 +392,135 @@ def _excerpt(text: str, limit: int = 260) -> str:
     if len(normalized) <= limit:
         return normalized
     return normalized[: limit - 1].rstrip() + "…"
+
+
+def _secondary_audience(insight: InsightCard) -> str:
+    if insight.audience == "developer_investor":
+        return "broker / architect_designer when the source supports partner or product logic"
+    if insight.audience == "broker":
+        return "developer_investor when the source supports market or deal logic"
+    if insight.audience == "architect_designer":
+        return "developer_investor when design has commercial implications"
+    if insight.audience == "lifestyle_expat":
+        return "dreamer_woman when the source carries emotional affinity"
+    if insight.audience == "dreamer_woman":
+        return "lifestyle_expat when the source carries Bali life context"
+    return "none"
+
+
+def _content_line(platform_lane: str) -> str:
+    if platform_lane == "instagram_lifestyle":
+        return "Instagram lifestyle-led personal brand: founder life, Bali atmosphere, AILLA as lived dream/process"
+    if platform_lane == "instagram_professional":
+        return "Instagram professional: concrete, visual, saveable Bali real estate / hospitality / product thinking"
+    if platform_lane == "linkedin_b2b":
+        return "LinkedIn B2B authority: international developer, investor, land-owner, and partner logic"
+    return "Workflow B content farm"
+
+
+def _strategic_priority(decision: WorkflowBDecision, insight: InsightCard) -> str:
+    if decision.platform_lane == "linkedin_b2b":
+        return "B2B trust, strategic partnerships, and market authority"
+    if decision.platform_lane == "instagram_professional":
+        return "saveable expertise, deal literacy, and expert positioning"
+    if insight.content_theme in {"founder_journey", "bali_travel", "wellness_architecture"}:
+        return "emotional affinity and personal brand depth"
+    return "audience fit and reusable insight"
+
+
+def _ailla_connection(
+    item: SourceItem,
+    insight: InsightCard,
+    decision: WorkflowBDecision,
+) -> str:
+    text = f"{item.transcript_text} {insight.useful_lesson}".lower()
+    if "ailla" not in text and insight.content_theme != "wellness_architecture":
+        return "Do not force AILLA; mention only if source material supports the bridge."
+    if decision.platform_lane == "instagram_lifestyle":
+        return "Use AILLA emotionally as lived transformation, process, and atmosphere."
+    if decision.platform_lane == "instagram_professional":
+        return "Use AILLA rationally as product thinking, not decor."
+    return "Use AILLA as an experience-development case only when source-backed."
+
+
+def _expert_narrative(insight: InsightCard, decision: WorkflowBDecision) -> str:
+    if insight.content_theme == "market_reports":
+        return "market red flags, dumping, overlaunching, timing, and downside protection"
+    if insight.content_theme == "land_and_legal":
+        return "legal structure, land quality, rights, and pre-deal risk"
+    if insight.content_theme == "expert_pain_bali":
+        return "Bali-specific deal friction, buyer pain, and operational reality"
+    if insight.content_theme == "global_trends":
+        return "global travel/wellness behavior translated into Bali positioning"
+    if insight.content_theme == "boutique_hotels":
+        return "hospitality positioning, operations, guest experience, and yield logic"
+    if insight.content_theme == "marketing_cases":
+        return "commercial signal over noisy marketing activity"
+    if decision.platform_lane == "instagram_lifestyle":
+        return "personal brand affinity without turning lifestyle into a hidden funnel"
+    return "source-backed product and market logic"
+
+
+def _platform_fit_reason(decision: WorkflowBDecision) -> str:
+    if decision.platform_lane == "linkedin_b2b":
+        return "The lane needs international B2B authority, not lifestyle translation."
+    if decision.platform_lane == "instagram_professional":
+        return "The lane turns expert insight into concrete, saveable Instagram content."
+    return "The lane builds recognition, emotional affinity, and lived context around the founder brand."
+
+
+def _secondary_register(decision: WorkflowBDecision) -> str:
+    if decision.platform_lane == "linkedin_b2b":
+        return "register_3 when a personal scene clarifies the market point"
+    if decision.platform_lane == "instagram_professional":
+        return "register_6 when the post needs manifesto/product clarity"
+    if decision.platform_lane == "instagram_lifestyle":
+        return "register_9 when family/home/project objects support the source"
+    return "none"
+
+
+def _register_reason(decision: WorkflowBDecision) -> str:
+    if decision.tone == "register_3":
+        return "cold analytics with a human scene keeps the expert point readable"
+    if decision.tone == "register_4":
+        return "geo-economic facts make the risk and market logic credible"
+    if decision.tone == "register_6":
+        return "corporate manifesto fits AILLA, product philosophy, and developer trust"
+    if decision.tone == "register_7":
+        return "emotional exhale fits founder-life material without fake inspiration"
+    if decision.tone == "register_2":
+        return "object as transformation lens fits Bali, wellness, and lived design"
+    return "selected by canonical theme and platform lane"
+
+
+def _rhythm_rules(platform_lane: str) -> str:
+    if platform_lane == "linkedin_b2b":
+        return "clear short paragraphs, one strategic claim per paragraph, no lifestyle detour"
+    if platform_lane == "instagram_professional":
+        return "sharp first line, visual example, saveable insight, no report-like bulk"
+    return "alive, intimate, concrete scenes; avoid syrupy inspiration"
+
+
+def _proof_boundaries(brief: ContentBrief) -> str:
+    if brief.source_rigor == "market-critical":
+        return "market/legal claims require source references or must be softened"
+    if brief.source_rigor == "expert":
+        return "expert claims require source note, fact pack, or references"
+    return "standard source note is enough; do not add unsupported metrics"
+
+
+def _allowed_public_facts(item: SourceItem) -> str:
+    raw = item.raw_payload.get("allowed_public_facts")
+    if isinstance(raw, list):
+        facts = [str(fact).strip() for fact in raw if str(fact).strip()]
+        if facts:
+            return "; ".join(facts[:5])
+    return "Jane/Clear/AILLA facts only if present in source note, Fact Dossier, or approved fact pack"
+
+
+def _required_theme_lanes(content_theme: str) -> str:
+    if content_theme in {"founder_journey", "bali_travel"}:
+        return "instagram_lifestyle"
+    if content_theme == "wellness_architecture":
+        return "instagram_lifestyle, instagram_professional, linkedin_b2b"
+    return "instagram_professional, linkedin_b2b"

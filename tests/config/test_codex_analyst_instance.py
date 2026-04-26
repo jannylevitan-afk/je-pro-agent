@@ -66,3 +66,36 @@ def test_codex_analyst_instance_passes_editorial_strategy_to_writer_tz() -> None
     assert "Primary Jane register" in prompt
     assert "Tone to avoid" in prompt
     assert "Claims to avoid" in prompt
+
+
+def test_codex_analyst_instance_defines_writer_assignment_outcome_contract() -> None:
+    prompt = PROMPT.read_text(encoding="utf-8")
+
+    assert "Writer Assignment Outcome Document" in prompt
+    assert "Required Asset Matrix" in prompt
+    assert "Missing Theme Inputs" in prompt
+    assert "Writer Assignment ID" in prompt
+    assert "Produce one assignment per approved theme/platform lane" in prompt
+
+    required_lane_pairs = [
+        "founder_journey / instagram_lifestyle",
+        "expert_pain_bali / instagram_professional",
+        "expert_pain_bali / linkedin_b2b",
+        "land_and_legal / instagram_professional",
+        "land_and_legal / linkedin_b2b",
+        "market_reports / instagram_professional",
+        "market_reports / linkedin_b2b",
+        "bali_travel / instagram_lifestyle",
+        "global_trends / instagram_professional",
+        "global_trends / linkedin_b2b",
+        "wellness_architecture / instagram_lifestyle",
+        "wellness_architecture / instagram_professional",
+        "wellness_architecture / linkedin_b2b",
+        "boutique_hotels / instagram_professional",
+        "boutique_hotels / linkedin_b2b",
+        "marketing_cases / instagram_professional",
+        "marketing_cases / linkedin_b2b",
+    ]
+
+    for lane_pair in required_lane_pairs:
+        assert lane_pair in prompt

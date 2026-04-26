@@ -105,6 +105,25 @@ def test_run_analyst_writer_tz_contains_output_contract_and_opening_guard(source
         assert "Do not output Hook, CTA, Traceability, or QA sections" in spec.writer_tz
 
 
+def test_run_analyst_writer_tz_contains_assignment_header_and_strategy_fit(source_item) -> None:
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(source_item, analyst)
+
+    for spec in report.writer_specs:
+        assert "## Writer Assignment" in spec.writer_tz
+        assert "Writer Assignment ID" in spec.writer_tz
+        assert "Canonical theme" in spec.writer_tz
+        assert "Platform lane" in spec.writer_tz
+        assert "Publish language" in spec.writer_tz
+        assert "### Strategy Fit" in spec.writer_tz
+        assert "Primary audience portrait" in spec.writer_tz
+        assert "AILLA connection" in spec.writer_tz
+        assert "Expert narrative" in spec.writer_tz
+        assert "### Fact & Privacy Boundaries" in spec.writer_tz
+        assert "Claims to avoid" in spec.writer_tz
+
+
 def test_run_analyst_linkedin_spec_has_bilingual_brief(source_item) -> None:
     analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
 
