@@ -1,0 +1,491 @@
+{
+  "engine_mode": "local_search_agent_dry_run_with_real_anthropic",
+  "anthropic_model": "claude-sonnet-4-6",
+  "generated_at": "2026-04-26T06:17:00.181114+00:00",
+  "compliance_checks": [
+    {
+      "target_handle": "@wellstate",
+      "platform": "telegram",
+      "source_url": "https://t.me/s/wellstate",
+      "status": "allowed",
+      "risk_level": "low",
+      "reason": "public_source_minimal_collection",
+      "collection_mode": "public_page_or_feed"
+    },
+    {
+      "target_handle": "@controlled_video_source",
+      "platform": "tiktok",
+      "source_url": "https://example.com/controlled-video-source/polished-villa-trap",
+      "status": "review",
+      "risk_level": "medium",
+      "reason": "public_page_only_no_auth_or_personal_data",
+      "collection_mode": "public_metadata_only"
+    }
+  ],
+  "evidence_logs": [
+    {
+      "item_id": "telegram_1001",
+      "source_type": "telegram_post",
+      "route": "workflow_b",
+      "source_url": "https://t.me/wellstate/1001",
+      "timestamp": "2026-04-26T05:55:00Z",
+      "raw_excerpt": "Bali boutique hotels are starting to win against generic villas because buyers compare management depth, legal structure, occupancy logic, and guest experience before they compare price.",
+      "confidence_score": 0.84
+    },
+    {
+      "item_id": "tiktok_polished-villa-trap",
+      "source_type": "tiktok_video",
+      "route": "both",
+      "source_url": "https://example.com/controlled-video-source/polished-villa-trap",
+      "timestamp": "2026-04-26T06:10:00Z",
+      "raw_excerpt": "The polished villa trap. Cheap-looking risk usually hides in structure, management, and exit logic. A buyer who checks price first misses the part of the deal that decides whether the asset can actually perform.",
+      "confidence_score": 0.92
+    }
+  ],
+  "pipeline_results": [
+    {
+      "source_item_id": "telegram_1001",
+      "route": "workflow_b",
+      "source_page_id": "db_sources_page_1",
+      "insight_page_id": "db_insights_page_1",
+      "idea_page_ids": [
+        "db_ideas_page_1",
+        "db_ideas_page_2"
+      ],
+      "brief_page_ids": [
+        "db_briefs_page_1",
+        "db_briefs_page_2"
+      ],
+      "draft_page_ids": [
+        "db_drafts_page_1",
+        "db_drafts_page_2"
+      ],
+      "event_page_ids": [
+        "db_events_page_1",
+        "db_events_page_2"
+      ],
+      "script_page_id": null,
+      "filming_card_page_id": null,
+      "video_n8n_envelope": null,
+      "video_telegram_notification": null,
+      "knowledge_file_paths": [
+        "outputs/2026-04-26_analyst_layer_run_kmd/workflow_b/developer_investor/boutique_hotels/telegram_1001.kmd.md"
+      ]
+    },
+    {
+      "source_item_id": "tiktok_polished-villa-trap",
+      "route": "both",
+      "source_page_id": "db_sources_page_2",
+      "insight_page_id": "db_insights_page_2",
+      "idea_page_ids": [
+        "db_ideas_page_3",
+        "db_ideas_page_4"
+      ],
+      "brief_page_ids": [
+        "db_briefs_page_3",
+        "db_briefs_page_4"
+      ],
+      "draft_page_ids": [
+        "db_drafts_page_3",
+        "db_drafts_page_4"
+      ],
+      "event_page_ids": [
+        "db_events_page_3",
+        "db_events_page_4"
+      ],
+      "script_page_id": "db_scripts_page_1",
+      "filming_card_page_id": "db_filming_page_1",
+      "video_n8n_envelope": {
+        "workflow": "video_pipeline",
+        "route": "script_ready",
+        "script": {
+          "script_id": "scr_tiktok_polished-villa-trap_hook_1",
+          "source_item_id": "tiktok_polished-villa-trap",
+          "title": "The polished villa trap",
+          "platform": "tiktok",
+          "hook_text": "A boutique hotel does not win on beauty. It wins on the reason to return.",
+          "script_text": "A boutique hotel does not win on beauty. It wins on the reason to return.\n\nAnd that distinction is exactly what separates a performing asset from a polished trap.\n\nHere is what most developer-investors get wrong. They open a deal with the price. But price is the last thing that tells you whether this asset can actually work. The real exposure is buried deeper — in how the legal structure is built, in whether the operations can hold under pressure, and in whether there is a credible exit when you need one.\n\nA villa that photographs well is not a business. A business needs a reason guests come back, a management layer that does not collapse without the owner in the room, and a structure that a future buyer can actually step into.\n\nThe market logic has to come before the object. If you cannot explain why this location, this format, and this operator create repeat demand — the tile selection does not matter.\n\nCheap-looking risk rarely announces itself. It sits inside the documents, the management agreement, and the assumptions nobody challenged at the beginning.\n\nThat is the polished villa trap. Everything visible looks right. Everything invisible is where the deal breaks.\n\nSave this before your next Bali property review.",
+          "cta": "Save this before your next Bali property review.",
+          "filming_priority": 1,
+          "status": "scripted"
+        },
+        "hook": {
+          "hook_id": "tiktok_polished-villa-trap_hook_1",
+          "hook_type": "market_warning",
+          "hook_text": "A boutique hotel does not win on beauty. It wins on the reason to return.",
+          "platform": "tiktok",
+          "score": 8,
+          "angle": "market warning for developer_investor"
+        }
+      },
+      "video_telegram_notification": {
+        "channel": "telegram",
+        "route": "script_ready",
+        "script_id": "scr_tiktok_polished-villa-trap_hook_1",
+        "message": "New script ready to film: The polished villa trap [tiktok] — priority 1"
+      },
+      "knowledge_file_paths": [
+        "outputs/2026-04-26_analyst_layer_run_kmd/workflow_a/developer_investor/boutique_hotels/tiktok_polished-villa-trap.kmd.md",
+        "outputs/2026-04-26_analyst_layer_run_kmd/workflow_b/developer_investor/boutique_hotels/tiktok_polished-villa-trap.kmd.md"
+      ]
+    }
+  ],
+  "database_snapshots": {
+    "sources": [
+      {
+        "Title": "Wellstate controlled Telegram signal:1001",
+        "Platform": "telegram_post",
+        "Raw text": "Bali boutique hotels are starting to win against generic villas because buyers compare management depth, legal structure, occupancy logic, and guest experience before they compare price.",
+        "External item ID": "1001",
+        "Dedupe key": "telegram:1001",
+        "Content hash": "c654ce10b31bdf86",
+        "Ingestion status": "collected"
+      },
+      {
+        "Title": "Controlled video signal:polished-villa-trap",
+        "Platform": "tiktok_video",
+        "Raw text": "The polished villa trap. Cheap-looking risk usually hides in structure, management, and exit logic. A buyer who checks price first misses the part of the deal that decides whether the asset can actually perform.",
+        "External item ID": "polished-villa-trap",
+        "Dedupe key": "tiktok:polished-villa-trap",
+        "Content hash": "0ba887129a3b9298",
+        "Ingestion status": "collected"
+      }
+    ],
+    "insights": [
+      {
+        "Topic": "boutique_hotels",
+        "Angle": "Bali buyers are now evaluating investments on management depth, legal structure, occupancy logic, and guest experience before price enters the conversation. Developers who lead with operational intelligence win deals that villa-first competitors never see.",
+        "Audience portrait": "developer_investor",
+        "Narrative type": "market_observation",
+        "Emotional trigger": "Status anxiety — the fear of being positioned in a commoditized asset class while smarter capital moves into structurally superior products",
+        "Reuse score": 4
+      },
+      {
+        "Topic": "boutique_hotels",
+        "Angle": "A visually polished villa can mask fatal weaknesses in structural integrity, operational management, and exit liquidity — the three factors that actually determine whether an asset performs or traps capital. Buyers who lead with price never reach the analysis that matters.",
+        "Audience portrait": "developer_investor",
+        "Narrative type": "professional_lesson",
+        "Emotional trigger": "Status anxiety and downside protection — the fear of being the sophisticated investor who got fooled by surface aesthetics",
+        "Reuse score": 4
+      }
+    ],
+    "ideas": [
+      {
+        "Title": "Boutique Hotels — instagram_professional",
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Show where premium positioning beats cheap inventory logic. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Save this for the next deal review.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Boutique Hotels — linkedin_b2b",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Expose the hidden cost logic behind hospitality yield. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Invite qualified market discussion.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Boutique Hotels — instagram_professional",
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Show where premium positioning beats cheap inventory logic. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Save this for the next deal review.",
+        "Gate passed": true,
+        "Status": "ready"
+      },
+      {
+        "Title": "Boutique Hotels — linkedin_b2b",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Audience portrait": "developer_investor",
+        "Emotional hook": "Expose the hidden cost logic behind hospitality yield. Status and downside protection matter more than surface ROI talk.",
+        "Desired reaction": "Invite qualified market discussion.",
+        "Gate passed": true,
+        "Status": "ready"
+      }
+    ],
+    "briefs": [
+      {
+        "Brief ID": "brief_telegram_1001_instagram_professional",
+        "Title": "Boutique Hotels -> instagram professional",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://t.me/wellstate/1001#source\nhttps://t.me/wellstate/1001#context\nhttps://t.me/wellstate/1001#ops"
+      },
+      {
+        "Brief ID": "brief_telegram_1001_linkedin_b2b",
+        "Title": "Boutique Hotels -> linkedin b2b",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://t.me/wellstate/1001#source\nhttps://t.me/wellstate/1001#context\nhttps://t.me/wellstate/1001#ops"
+      },
+      {
+        "Brief ID": "brief_tiktok_polished-villa-trap_instagram_professional",
+        "Title": "Boutique Hotels -> instagram professional",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://example.com/controlled-video-source/polished-villa-trap#source\nhttps://example.com/controlled-video-source/polished-villa-trap#context\nhttps://example.com/controlled-video-source/polished-villa-trap#ops"
+      },
+      {
+        "Brief ID": "brief_tiktok_polished-villa-trap_linkedin_b2b",
+        "Title": "Boutique Hotels -> linkedin b2b",
+        "Audience portrait": "developer_investor",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Funnel role": "authority",
+        "Workflow stage": "brief_ready",
+        "Review decision": "pending",
+        "Linked draft": null,
+        "Revision requested at": null,
+        "Review notes": null,
+        "Source rigor": "expert",
+        "Reference sources": "https://example.com/controlled-video-source/polished-villa-trap#source\nhttps://example.com/controlled-video-source/polished-villa-trap#context\nhttps://example.com/controlled-video-source/polished-villa-trap#ops"
+      }
+    ],
+    "drafts": [
+      {
+        "Draft ID": "draft_telegram_1001_instagram_professional",
+        "Title": "developer_investor — instagram_professional",
+        "Draft text RU": "Дешёвый вход на Бали часто оказывается самым дорогим решением на выходе.\n\nПокупатели больше не начинают разговор с цены. Они начинают с вопросов: как устроено управление, какова правовая структура, как работает логика загрузки, что получает гость. Цена появляется позже — если продукт вообще проходит этот фильтр.\n\nГенерические виллы проигрывают не потому, что дороже. Они проигрывают потому, что не могут ответить на эти вопросы убедительно.\n\nБутик-отель с выстроенной операционной логикой закрывает сделки, которые вилла даже не видит. Не за счёт маркетинга — за счёт структуры.\n\nПравовая конструкция меняет сделку сильнее, чем любой брошюрный текст. Глубина управления определяет, кто вообще сядет за стол переговоров.\n\nРынок уже сместился. Вопрос в том, на какой стороне этого сдвига находится ваш продукт.",
+        "Draft text EN": null,
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "ru",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T07:00:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_telegram_1001_instagram_professional",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: Сохрани это перед следующей проверкой объекта.\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_telegram_1001_instagram_professional\n**Title:** developer_investor — instagram_professional\n**Platform:** instagram\n**Pillar:** expertise_proof\n**Format:** carousel_caption\n**Approval Status:** pending\n\n### Final Text\nДешёвый вход на Бали часто оказывается самым дорогим решением на выходе.\n\nПокупатели больше не начинают разговор с цены. Они начинают с вопросов: как устроено управление, какова правовая структура, как работает логика загрузки, что получает гость. Цена появляется позже — если продукт вообще проходит этот фильтр.\n\nГенерические виллы проигрывают не потому, что дороже. Они проигрывают потому, что не могут ответить на эти вопросы убедительно.\n\nБутик-отель с выстроенной операционной логикой закрывает сделки, которые вилла даже не видит. Не за счёт маркетинга — за счёт структуры.\n\nПравовая конструкция меняет сделку сильнее, чем любой брошюрный текст. Глубина управления определяет, кто вообще сядет за стол переговоров.\n\nРынок уже сместился. Вопрос в том, на какой стороне этого сдвига находится ваш продукт."
+      },
+      {
+        "Draft ID": "draft_telegram_1001_linkedin_b2b",
+        "Title": "developer_investor — linkedin_b2b",
+        "Draft text RU": "Самая дешёвая строка в балийском проекте нередко оказывается самой дорогой стратегической ошибкой.\n\nРынок Бали изменил логику принятия решений. Покупатели, которые раньше открывали разговор с цены, теперь начинают с другого: какова глубина управления объектом, как выстроена юридическая структура, на чём держится загрузка, и что именно получает гость. Цена появляется позже — если вообще появляется как первый фильтр.\n\nЭто означает одно: девелоперы, которые продолжают выходить на рынок с поверхностной дифференциацией — красивой картинкой, локацией и обещанием доходности — проигрывают сделки ещё до того, как успевают их начать. Не потому что продукт плохой. Потому что разговор уже идёт на другом уровне.\n\nБутик-отели в этом контексте выигрывают не за счёт формата. Они выигрывают потому, что за ними стоит операционная логика, которую можно объяснить и защитить: структура владения, модель управления, понятная механика загрузки, контролируемый гостевой опыт. Это то, что серьёзный покупатель проверяет до подписания — и то, чего у типовой виллы, как правило, нет.\n\nЮридическая структура меняет сделку значительно сильнее, чем любой брошюрный язык. И девелоперы, которые это понимают, ведут переговоры иначе — они отвечают на вопросы, которые конкуренты ещё не слышали.\n\nРынок не стал сложнее. Он стал точнее. И это разница, которую стоит учитывать при следующем решении о позиционировании.",
+        "Draft text EN": "The cheapest line item in a Bali project is often the most expensive strategic mistake.\n\nBuyer behavior in Bali has shifted in a way that most developers have not yet priced into their positioning. Serious capital no longer opens with price. It opens with questions: How deep is the management structure? How is ownership legally held? What drives occupancy, and how is the guest experience controlled? Price enters the conversation later — if it leads at all.\n\nDevelopers still leading with surface differentiation — renderings, location, projected yield — are losing deals before the conversation starts. Not because the product is weak. Because the evaluation is happening on a different level entirely.\n\nBoutique hotels are winning in this environment not because of format, but because they carry an operational logic that can be explained and defended: ownership structure, management model, occupancy mechanics, guest experience design. These are the criteria a qualified buyer stress-tests before signing. Generic villas rarely have coherent answers.\n\nLegal structure changes the deal far more than brochure language suggests. Developers who understand this compete differently — they answer questions that villa-first competitors have not heard yet.\n\nThe Bali market has not become more complex. It has become more precise. That distinction matters when the next positioning decision is on the table.",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "en",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T07:00:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_telegram_1001_linkedin_b2b",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: What do you check first before trusting a market opportunity?\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_telegram_1001_linkedin_b2b\n**Title:** developer_investor — linkedin_b2b\n**Platform:** linkedin\n**Pillar:** expertise_proof\n**Format:** thought_leadership_post\n**Approval Status:** pending\n\n### Final Text\nBoutique hospitality wins when beauty becomes an operator reality.\n\nThe cheapest line item in a Bali project is often the most expensive strategic mistake.\n\nBuyer behavior in Bali has shifted in a way that most developers have not yet priced into their positioning. Serious capital no longer opens with price. It opens with questions: How deep is the management structure? How is ownership legally held? What drives occupancy, and how is the guest experience controlled? Price enters the conversation later — if it leads at all.\n\nDevelopers still leading with surface differentiation — renderings, location, projected yield — are losing deals before the conversation starts. Not because the product is weak. Because the evaluation is happening on a different level entirely.\n\nBoutique hotels are winning in this environment not because of format, but because they carry an operational logic that can be explained and defended: ownership structure, management model, occupancy mechanics, guest experience design. These are the criteria a qualified buyer stress-tests before signing. Generic villas rarely have coherent answers.\n\nLegal structure changes the deal far more than brochure language suggests. Developers who understand this compete differently — they answer questions that villa-first competitors have not heard yet.\n\nThe Bali market has not become more complex. It has become more precise. That distinction matters when the next positioning decision is on the table."
+      },
+      {
+        "Draft ID": "draft_tiktok_polished-villa-trap_instagram_professional",
+        "Title": "developer_investor — instagram_professional",
+        "Draft text RU": "Дешёвый риск почти никогда не выглядит дёшево.\n\nПолированная вилла с правильным светом и хорошим рендером — не гарантия актива. Это гарантия того, что покупатель задаст не те вопросы.\n\nТри слоя, которые решают судьбу сделки:\n\n**Структура.** Юридическая конструкция меняет экономику объекта сильнее, чем любой брокерский меморандум. Форма владения, разрешения, земельный статус — это не детали, это фундамент.\n\n**Управление.** Без операционной глубины даже хорошо расположенный объект не выходит на целевую загрузку. Гостевой опыт не строится на красивом лобби.\n\n**Логика выхода.** Если актив нельзя продать по понятной цене в понятные сроки — это не инвестиция. Это заморозка капитала с красивым фасадом.\n\nПокупатель, который начинает с цены, никогда не добирается до анализа, который имеет значение.\n\nСохраните перед следующим разбором сделки.",
+        "Draft text EN": null,
+        "Platform": "instagram",
+        "Platform lane": "instagram_professional",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "ru",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T07:00:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_tiktok_polished-villa-trap_instagram_professional",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: Сохрани это перед следующей проверкой объекта.\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_tiktok_polished-villa-trap_instagram_professional\n**Title:** developer_investor — instagram_professional\n**Platform:** instagram\n**Pillar:** expertise_proof\n**Format:** carousel_caption\n**Approval Status:** pending\n\n### Final Text\nДешёвый риск почти никогда не выглядит дёшево.\n\nПолированная вилла с правильным светом и хорошим рендером — не гарантия актива. Это гарантия того, что покупатель задаст не те вопросы.\n\nТри слоя, которые решают судьбу сделки:\n\n**Структура.** Юридическая конструкция меняет экономику объекта сильнее, чем любой брокерский меморандум. Форма владения, разрешения, земельный статус — это не детали, это фундамент.\n\n**Управление.** Без операционной глубины даже хорошо расположенный объект не выходит на целевую загрузку. Гостевой опыт не строится на красивом лобби.\n\n**Логика выхода.** Если актив нельзя продать по понятной цене в понятные сроки — это не инвестиция. Это заморозка капитала с красивым фасадом.\n\nПокупатель, который начинает с цены, никогда не добирается до анализа, который имеет значение.\n\nСохраните перед следующим разбором сделки."
+      },
+      {
+        "Draft ID": "draft_tiktok_polished-villa-trap_linkedin_b2b",
+        "Title": "developer_investor — linkedin_b2b",
+        "Draft text RU": "Самая дешёвая строка в балийской сделке нередко оказывается самой дорогой стратегической ошибкой.\n\nВизуально безупречная вилла — это не аргумент в пользу актива. Это первый фильтр, который отсекает покупателей, не готовых копать глубже. Риск в сегменте бутик-отелей на Бали редко лежит на поверхности: он прячется в структуре сделки, в качестве операционного управления и в логике выхода.\n\nТри слоя, которые решают всё:\n\nСтруктура. Правовая форма владения меняет экономику актива сильнее, чем любой брошюрный текст. Один и тот же объект под разными юридическими конструкциями — это разные риски, разная ликвидность, разный горизонт.\n\nУправление. Глубина операционной команды определяет реальную загрузку, качество гостевого опыта и устойчивость денежного потока. Красивый рендер не управляет бронированиями.\n\nВыход. Актив, который невозможно продать по справедливой цене в нужный момент, — это не инвестиция. Это замороженный капитал с красивым фасадом.\n\nПокупатель, который начинает анализ с цены, никогда не добирается до анализа, который имеет значение. Он оценивает обёртку — и пропускает всё, что внутри.\n\nВ бутик-сегменте Бали разрыв между презентацией и реальностью особенно высок. Именно здесь цена входа выглядит привлекательно, а структурные слабости остаются невидимыми до момента, когда выйти уже сложно.\n\nКакой из трёх слоёв чаще всего остаётся вне фокуса при первичной оценке сделки в вашей практике?",
+        "Draft text EN": "The cheapest line item in a Bali deal is often the most expensive strategic mistake.\n\nA polished villa is not evidence of a sound asset. It is a filter — one that removes buyers who stop at aesthetics and never reach the analysis that actually determines performance. In Bali's boutique hotel segment, risk rarely announces itself. It hides in three places.\n\nStructure. The legal ownership framework reshapes the economics of an asset more than any brochure language ever will. The same property under different legal constructions carries different risk profiles, different liquidity, and a different exit horizon.\n\nManagement. Operational depth drives real occupancy, guest experience quality, and cash flow stability. A compelling render does not manage bookings or retain staff.\n\nExit logic. An asset that cannot be sold at a fair price when the moment demands it is not an investment — it is capital locked behind a beautiful facade.\n\nBuyers who lead with price never reach the layer of analysis that decides the outcome. They evaluate the surface and miss everything underneath.\n\nThe gap between presentation quality and structural reality is particularly wide in Bali's boutique segment. Entry price looks attractive. Structural weaknesses stay invisible — until the exit window has already closed.\n\nWhich of these three layers receives the least scrutiny in early-stage deal evaluation in your market?",
+        "Platform": "linkedin",
+        "Platform lane": "linkedin_b2b",
+        "Language mode": "ru",
+        "Audience portrait": "developer_investor",
+        "Voice register": "register_3",
+        "Funnel role": "authority",
+        "Version": 1,
+        "Working language": "ru",
+        "Publish language": "en",
+        "Workflow stage": "awaiting_review",
+        "Review decision": "pending",
+        "Review Notes": null,
+        "Parent draft": null,
+        "Review requested at": "2026-04-26T07:00:00Z",
+        "Approval decided at": null,
+        "AI edited": true,
+        "7-point test passed": true,
+        "Factual safety": "clean",
+        "Linked brief": "brief_tiktok_polished-villa-trap_linkedin_b2b",
+        "Linked calendar": null,
+        "Archived": false,
+        "Writer preflight status": "ready",
+        "Writer risk flags": null,
+        "Writer selected idea": "boutique hotels: hidden risk",
+        "Hook options": "hook_01: boutique hotels: hidden risk\nhook_02: The attractive entry point can hide the expensive mistake.\nhook_03: The reader will know what to check before trusting the opportunity.",
+        "CTA options": "cta_01: What do you check first before trusting a market opportunity?\ncta_02: Что ты проверяешь первым делом?\ncta_03: Сохрани как pre-check перед следующим объектом.",
+        "Writer QA Report": "passed: True\nfinal_risk_level: high\nhuman_review_required: True\nissues: -\nfixes_applied: Checked opening sentence strength, Removed generic AI phrasing, Checked fact and privacy boundaries",
+        "Writer human review required": true,
+        "Final Content Asset": "## Final Content Asset\n**Content ID:** content_draft_tiktok_polished-villa-trap_linkedin_b2b\n**Title:** developer_investor — linkedin_b2b\n**Platform:** linkedin\n**Pillar:** expertise_proof\n**Format:** thought_leadership_post\n**Approval Status:** pending\n\n### Final Text\nBoutique hospitality wins when beauty becomes an operator reality.\n\nThe cheapest line item in a Bali deal is often the most expensive strategic mistake.\n\nA polished villa is not evidence of a sound asset. It is a filter — one that removes buyers who stop at aesthetics and never reach the analysis that actually determines performance. In Bali's boutique hotel segment, risk rarely announces itself. It hides in three places.\n\nStructure. The legal ownership framework reshapes the economics of an asset more than any brochure language ever will. The same property under different legal constructions carries different risk profiles, different liquidity, and a different exit horizon.\n\nManagement. Operational depth drives real occupancy, guest experience quality, and cash flow stability. A compelling render does not manage bookings or retain staff.\n\nExit logic. An asset that cannot be sold at a fair price when the moment demands it is not an investment — it is capital locked behind a beautiful facade.\n\nBuyers who lead with price never reach the layer of analysis that decides the outcome. They evaluate the surface and miss everything underneath.\n\nThe gap between presentation quality and structural reality is particularly wide in Bali's boutique segment. Entry price looks attractive. Structural weaknesses stay invisible — until the exit window has already closed.\n\nWhich of these three layers receives the least scrutiny in early-stage deal evaluation in your market?"
+      }
+    ],
+    "events": [
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_telegram_1001_instagram_professional",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T07:00:00Z",
+        "Draft ID": "draft_telegram_1001_instagram_professional",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_telegram_1001_linkedin_b2b",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T07:00:00Z",
+        "Draft ID": "draft_telegram_1001_linkedin_b2b",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_tiktok_polished-villa-trap_instagram_professional",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T07:00:00Z",
+        "Draft ID": "draft_tiktok_polished-villa-trap_instagram_professional",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      },
+      {
+        "Event name": "draft_submitted_for_review",
+        "Entity type": "draft",
+        "Entity ID": "draft_tiktok_polished-villa-trap_linkedin_b2b",
+        "Status": "completed",
+        "Triggered at": "2026-04-26T07:00:00Z",
+        "Draft ID": "draft_tiktok_polished-villa-trap_linkedin_b2b",
+        "Brief ID": null,
+        "Calendar item ID": null,
+        "Payload ref": null
+      }
+    ],
+    "scripts": [
+      {
+        "Title": "The polished villa trap",
+        "Hook": "A boutique hotel does not win on beauty. It wins on the reason to return.",
+        "Platform": "tiktok",
+        "Script text": "A boutique hotel does not win on beauty. It wins on the reason to return.\n\nAnd that distinction is exactly what separates a performing asset from a polished trap.\n\nHere is what most developer-investors get wrong. They open a deal with the price. But price is the last thing that tells you whether this asset can actually work. The real exposure is buried deeper — in how the legal structure is built, in whether the operations can hold under pressure, and in whether there is a credible exit when you need one.\n\nA villa that photographs well is not a business. A business needs a reason guests come back, a management layer that does not collapse without the owner in the room, and a structure that a future buyer can actually step into.\n\nThe market logic has to come before the object. If you cannot explain why this location, this format, and this operator create repeat demand — the tile selection does not matter.\n\nCheap-looking risk rarely announces itself. It sits inside the documents, the management agreement, and the assumptions nobody challenged at the beginning.\n\nThat is the polished villa trap. Everything visible looks right. Everything invisible is where the deal breaks.\n\nSave this before your next Bali property review.",
+        "Filming priority": 1,
+        "Status": "scripted"
+      }
+    ],
+    "filming_cards": [
+      {
+        "Linked script": "scr_tiktok_polished-villa-trap_hook_1",
+        "Shoot date": null,
+        "Filmed": false,
+        "Raw file link": null
+      }
+    ]
+  }
+}
