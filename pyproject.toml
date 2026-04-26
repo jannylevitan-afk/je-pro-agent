@@ -18,9 +18,6 @@ dev = [
   "pytest>=8.2,<9",
 ]
 
-[project.scripts]
-content-engine-analyst = "content_engine.cli.analyst:main"
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 

@@ -28,3 +28,10 @@ Environment notes:
 - `APIFY_TOKEN` is required for the `apify` MCP server
 - `exa` is configured without a token by default
 - `playwright` runs locally through `npx @playwright/mcp@latest`
+
+Codex Analyst Instance:
+
+- The full Analyst Entity prompt lives at `.codex/agents/analyst_entity.md`
+- Launch it with `scripts/start_codex_analyst.sh`
+- This is a dedicated Codex instance for Workflow B Phase 1/2 handoff, not a Python CLI product command
+- Its destination is the Admin Operating Hub handoff format, not Notion

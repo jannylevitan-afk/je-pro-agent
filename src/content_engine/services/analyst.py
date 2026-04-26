@@ -49,7 +49,6 @@ class WriterSpec:
 class AnalystReport:
     """Full analyst output: Phase 1 structure + Phase 2 insight + per-lane Writer specs."""
 
-    source_item_id: str
     source_note: SourceNote
     insight: InsightCard
     writer_specs: list[WriterSpec]
@@ -99,7 +98,6 @@ def run_analyst(
     ]
 
     return AnalystReport(
-        source_item_id=item.item_id,
         source_note=note,
         insight=insight,
         writer_specs=writer_specs,
