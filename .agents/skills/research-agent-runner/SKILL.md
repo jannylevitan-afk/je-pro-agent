@@ -1,6 +1,6 @@
 ---
 name: research-agent-runner
-description: Use when running the full Layer 0 research flow from source collection through evidence logging, routing, workflow handoff, and Notion-ready outputs.
+description: Use when running the full Layer 0 research flow from source collection through evidence logging, routing, workflow handoff, and Admin Operating Hub outputs.
 ---
 
 # Research Agent Runner
@@ -15,7 +15,7 @@ It owns the full Layer 0 path:
 3. apply compliance gate
 4. enforce evidence log rules
 5. route signals into Workflow A, Workflow B, both, or drop
-6. hand valid items into the pipeline and write Notion-ready artifacts
+6. hand valid items into the pipeline and write Admin Operating Hub-ready artifacts
 
 ## When to Use
 
@@ -30,8 +30,31 @@ It owns the full Layer 0 path:
 - Run `source-discovery-skill` when the source pool must be expanded
 - Run `video-intake-skill` for video-native inputs
 - Run `insight-extraction-skill` for text-heavy inputs
-- Run `evidence-log-skill` before any write to Notion
+- Run `evidence-log-skill` before any write to downstream artifacts
 - Run `routing-skill` before workflow handoff
+
+## Required Research Payload
+
+Every accepted source item must carry:
+
+- source URL
+- timestamp or collection date
+- raw excerpt
+- confidence score
+- canonical upstream item
+- immutable raw payload snapshot
+
+For Workflow A or `both` routes, the Research Agent must also collect:
+
+- video refs and source links
+- video title
+- caption text and spoken transcript when public/API-provided
+- transcript source
+- metadata
+- first 3 seconds / source hook / opening line
+- hook pattern, hook tension, hook promise, CTA, visual device, repeatable formula
+- public comments / reactions when available and compliant
+- public metrics: views, likes, comments, saves, shares
 
 ## Current Project Mapping
 

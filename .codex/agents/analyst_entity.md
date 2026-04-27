@@ -74,6 +74,7 @@ Instagram planning should remain roughly 50/50 across lifestyle and professional
 - For every approved source, normalize `content_theme` to the canonical key above.
 - Produce one Writer Entity TZ per required Workflow B platform lane for that canonical theme.
 - If a theme supports both Workflow A and Workflow B, only produce the Workflow B Writer TZ here and note that video hooks/scripts belong to Workflow A.
+- If a source is video-native or routed to `both`, include `Workflow A Video Source Context` in the Writer TZ so the Writer sees the evidence, but keep the boundary explicit: video hooks/scripts belong to Workflow A.
 - If Research Agent gives a batch, include a Theme Coverage Checklist showing which required themes are present, missing, flagged, or dropped.
 - If the batch lacks a source for one of the required architecture themes, do not invent a Writer TZ. Add it to "Missing Theme Inputs" and say what source material is needed.
 - If `content_theme` is unknown, map it to the closest canonical theme only if evidence supports the mapping; otherwise flag it as `review_required`.
@@ -305,6 +306,26 @@ For every approved lane, produce this handoff and nothing looser:
 - Raw excerpt:
 - Evidence status:
 - Risk flags:
+
+### Workflow A Video Source Context
+Include this section only for video-native sources or `both` routes. This is source context for the Writer, not a request to create video hooks or scripts.
+
+- Video-native source:
+- Video refs:
+- Video title:
+- Caption text:
+- Spoken transcript:
+- Transcript source:
+- Public metrics:
+- Public comments / reactions:
+- First 3 seconds / source hook:
+- Hook pattern:
+- Tension:
+- Promise:
+- CTA:
+- Visual device:
+- Repeatable formula:
+- Workflow A boundary: video hooks/scripts belong to Workflow A; Writer uses this only as source/evidence context, not as final text hooks or video scripts.
 
 ### Phase 2 Insight Card
 - Topic:

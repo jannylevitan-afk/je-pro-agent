@@ -27,4 +27,10 @@ def test_markdown_knowledge_store_includes_video_intake_for_workflow_a(tmp_path,
     assert "## Video Intake" in body
     assert "title: What cheap villas hide" in body
     assert "spoken transcript: Cheap villas are never actually cheap" in body
+    assert "first 3 seconds: A villa price flashes on screen" in body
+    assert "source hook: Cheap villas are never actually cheap." in body
+    assert "visual device: price tag cut to legal documents" in body
+    assert "hook pattern: cheap surface -> hidden structural cost" in body
+    assert "repeatable formula: Show the attractive surface" in body
+    assert "public comments / reactions: I wish someone told me this before my first viewing." in body
     assert "views=5200" in body

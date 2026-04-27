@@ -202,3 +202,22 @@ def test_run_analyst_brief_key_points_use_ai_extracted_lesson(source_item) -> No
         "Boutique hotel ROI" in point
         for point in instagram_spec.brief.key_points
     )
+
+
+def test_run_analyst_writer_tz_contains_video_source_context_boundary(video_source_item) -> None:
+    item = video_source_item.model_copy(update={"routing_decision": "both"})
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(item, analyst)
+
+    for spec in report.writer_specs:
+        assert "### Workflow A Video Source Context" in spec.writer_tz
+        assert "Video refs: https://instagram.com/reel/1; https://cdn.example.com/reel.mp4" in spec.writer_tz
+        assert "First 3 seconds / source hook: A villa price flashes on screen" in spec.writer_tz
+        assert "Hook pattern: cheap surface -> hidden structural cost" in spec.writer_tz
+        assert "Tension: beautiful entry price vs expensive legal reality" in spec.writer_tz
+        assert "Promise: learn what to check before trusting the price" in spec.writer_tz
+        assert "Visual device: price tag cut to legal documents" in spec.writer_tz
+        assert "Repeatable formula: Show the attractive surface" in spec.writer_tz
+        assert "Public comments / reactions: I wish someone told me this before my first viewing." in spec.writer_tz
+        assert "Workflow A boundary: video hooks/scripts belong to Workflow A" in spec.writer_tz

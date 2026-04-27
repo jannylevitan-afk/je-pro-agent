@@ -48,6 +48,54 @@ def build_video_intake_record(item: SourceItem) -> VideoIntakeRecord:
         raw_payload.get("transcript_source"),
         "source_text",
     )
+    first_3_seconds = _first_text(
+        raw_payload.get("first_3_seconds"),
+        raw_payload.get("opening_visual"),
+        raw_payload.get("opening_moment"),
+        raw_payload.get("source_hook"),
+    )
+    source_hook = _first_text(
+        raw_payload.get("source_hook"),
+        raw_payload.get("detected_hook"),
+        raw_payload.get("opening_line"),
+        raw_payload.get("hook"),
+    )
+    visual_device = _first_text(
+        raw_payload.get("visual_device"),
+        raw_payload.get("visual_hint"),
+        raw_payload.get("visual_hints"),
+    )
+    hook_pattern = _first_text(
+        raw_payload.get("hook_pattern"),
+        raw_payload.get("pattern"),
+    )
+    hook_tension = _first_text(
+        raw_payload.get("hook_tension"),
+        raw_payload.get("tension"),
+    )
+    hook_promise = _first_text(
+        raw_payload.get("hook_promise"),
+        raw_payload.get("promise"),
+    )
+    hook_cta = _first_text(
+        raw_payload.get("hook_cta"),
+        raw_payload.get("cta"),
+    )
+    repeatable_formula = _first_text(
+        raw_payload.get("repeatable_formula"),
+        raw_payload.get("formula"),
+    )
+    hook_modality = _first_text(
+        raw_payload.get("hook_modality"),
+        raw_payload.get("modality"),
+        raw_payload.get("hook_format"),
+    )
+    comments_sample = _text_list(
+        raw_payload.get("comments_sample"),
+        raw_payload.get("public_comments"),
+        raw_payload.get("comments"),
+        raw_payload.get("reactions"),
+    )
 
     return VideoIntakeRecord(
         source_item_id=item.item_id,
@@ -57,6 +105,16 @@ def build_video_intake_record(item: SourceItem) -> VideoIntakeRecord:
         caption_text=caption_text,
         spoken_transcript=spoken_transcript,
         transcript_source=transcript_source,
+        first_3_seconds=first_3_seconds,
+        source_hook=source_hook,
+        visual_device=visual_device,
+        hook_pattern=hook_pattern,
+        hook_tension=hook_tension,
+        hook_promise=hook_promise,
+        hook_cta=hook_cta,
+        repeatable_formula=repeatable_formula,
+        hook_modality=hook_modality,
+        comments_sample=comments_sample,
         video_refs=_dedupe([item.source_url, *item.media_urls]),
         metrics=dict(item.engagement_signals),
         audience_segment=item.audience_segment,
@@ -410,6 +468,16 @@ def _nested_text(payload: dict, outer_key: str, inner_key: str) -> str:
     if not isinstance(value, str):
         return ""
     return value
+
+
+def _text_list(*values: object) -> list[str]:
+    items: list[str] = []
+    for value in values:
+        if isinstance(value, str) and value.strip():
+            items.append(_normalize_space(value))
+        elif isinstance(value, list):
+            items.extend(_normalize_space(str(item)) for item in value if str(item).strip())
+    return _dedupe(items)
 
 
 def _dedupe(values: list[str]) -> list[str]:

@@ -25,6 +25,16 @@ class VideoIntakeRecord(BaseModel):
     caption_text: str
     spoken_transcript: str
     transcript_source: str
+    first_3_seconds: str
+    source_hook: str
+    visual_device: str
+    hook_pattern: str
+    hook_tension: str
+    hook_promise: str
+    hook_cta: str
+    repeatable_formula: str
+    hook_modality: str
+    comments_sample: list[str]
     video_refs: list[str]
     metrics: dict[str, int]
     audience_segment: str

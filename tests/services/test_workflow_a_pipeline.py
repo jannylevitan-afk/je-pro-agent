@@ -29,6 +29,16 @@ def make_video_source_item() -> SourceItem:
                 "Cheap villas are never actually cheap when legal, design, and management costs arrive."
             ),
             "transcript_source": "caption_or_transcript",
+            "first_3_seconds": "A villa price flashes on screen, then the permit folder appears.",
+            "source_hook": "Cheap villas are never actually cheap.",
+            "visual_device": "price tag cut to legal documents",
+            "hook_pattern": "cheap surface -> hidden structural cost",
+            "hook_tension": "beautiful entry price vs expensive legal reality",
+            "hook_promise": "learn what to check before trusting the price",
+            "hook_cta": "save before you inspect a villa",
+            "repeatable_formula": "Show the attractive surface, then reveal the hidden operating risk.",
+            "hook_modality": "hybrid",
+            "comments_sample": ["I wish someone told me this before my first viewing."],
         },
         transcript_text="Cheap villas are never actually cheap when legal, design, and management costs arrive.",
         media_urls=["https://cdn.example.com/reel.mp4"],
@@ -53,6 +63,21 @@ def test_build_video_intake_record_extracts_title_transcript_refs_and_metrics() 
     ]
     assert intake.metrics == {"views": 5200, "saves": 140}
     assert intake.content_theme == "boutique_hotels"
+
+
+def test_build_video_intake_record_exposes_hook_mining_context() -> None:
+    intake = build_video_intake_record(make_video_source_item())
+
+    assert intake.first_3_seconds == "A villa price flashes on screen, then the permit folder appears."
+    assert intake.source_hook == "Cheap villas are never actually cheap."
+    assert intake.visual_device == "price tag cut to legal documents"
+    assert intake.hook_pattern == "cheap surface -> hidden structural cost"
+    assert intake.hook_tension == "beautiful entry price vs expensive legal reality"
+    assert intake.hook_promise == "learn what to check before trusting the price"
+    assert intake.hook_cta == "save before you inspect a villa"
+    assert intake.repeatable_formula == "Show the attractive surface, then reveal the hidden operating risk."
+    assert intake.hook_modality == "hybrid"
+    assert intake.comments_sample == ["I wish someone told me this before my first viewing."]
 
 
 def test_develop_video_hooks_returns_five_candidates() -> None:

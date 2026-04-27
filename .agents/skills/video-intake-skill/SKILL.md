@@ -34,12 +34,26 @@ Turn public video signals into a normalized source item that can feed the Video 
 - `raw_payload.caption_text`
 - `raw_payload.spoken_transcript`
 - `raw_payload.transcript_source`
+- `raw_payload.first_3_seconds`
+- `raw_payload.source_hook`
+- `raw_payload.detected_hook` or `raw_payload.opening_line` when a native source hook is detected
+- `raw_payload.visual_device`
+- `raw_payload.hook_pattern`
+- `raw_payload.hook_tension`
+- `raw_payload.hook_promise`
+- `raw_payload.hook_cta`
+- `raw_payload.repeatable_formula`
+- `raw_payload.hook_modality` as `visual-first`, `text-first`, or `hybrid`
+- `raw_payload.comments_sample` for safe public comments / reactions
+- `raw_payload.metadata` for source-native metadata
 
 ## Rules
 
 - Do not skip the raw payload snapshot
+- Treat the raw payload as an immutable raw payload snapshot for downstream evidence
 - Prefer public metadata and transcript layers before deeper scraping
 - If the item has video and enough text, it can route to `both`
+- Do not invent spoken transcript, comments, metrics, or source hooks when the public source/API does not provide them
 
 ## Current Project Mapping
 

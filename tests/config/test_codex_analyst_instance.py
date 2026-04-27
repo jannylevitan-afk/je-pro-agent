@@ -99,3 +99,23 @@ def test_codex_analyst_instance_defines_writer_assignment_outcome_contract() -> 
 
     for lane_pair in required_lane_pairs:
         assert lane_pair in prompt
+
+
+def test_codex_analyst_instance_includes_workflow_a_video_source_context_boundary() -> None:
+    prompt = PROMPT.read_text(encoding="utf-8")
+
+    required_phrases = [
+        "Workflow A Video Source Context",
+        "Video refs",
+        "First 3 seconds / source hook",
+        "Hook pattern",
+        "Tension",
+        "Promise",
+        "Visual device",
+        "Repeatable formula",
+        "Public comments / reactions",
+        "Workflow A boundary",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in prompt

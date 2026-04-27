@@ -120,12 +120,41 @@ _THEME_ALIASES = {
     "bali_real_estate": "expert_pain_bali",
 }
 
-_BASE_EVIDENCE = ["source URL", "timestamp", "raw excerpt", "confidence score"]
+_BASE_EVIDENCE = ["source URL", "timestamp", "raw excerpt", "confidence score", "canonical upstream item"]
 
-_WORKFLOW_A_FIELDS = ["video refs", "caption/transcript", "first 3 seconds", "hook pattern", "visual device", "CTA"]
+_WORKFLOW_A_FIELDS = [
+    "video refs",
+    "source links",
+    "video title",
+    "caption/transcript",
+    "spoken transcript",
+    "transcript source",
+    "metadata",
+    "first 3 seconds",
+    "source hook",
+    "hook pattern",
+    "hook tension",
+    "hook promise",
+    "CTA",
+    "visual device",
+    "repeatable formula",
+    "hook modality",
+    "public comments / reactions",
+    "public metrics",
+    "immutable raw payload snapshot",
+]
 _WORKFLOW_B_FIELDS = ["source note", "topic", "angle", "emotional trigger", "proof", "reusable angle"]
 
-_WORKFLOW_A_INTAKE = ["video reference", "hook pattern", "tension/promise", "visual device", "shooting cue"]
+_WORKFLOW_A_INTAKE = [
+    "video reference",
+    "source hook / first 3 seconds",
+    "hook pattern",
+    "tension/promise",
+    "visual device",
+    "repeatable formula",
+    "hook quality gate",
+    "shooting cue",
+]
 _WORKFLOW_B_INTAKE = ["structured source note", "audience pain and trigger", "narrative type", "fact boundary", "reuse score"]
 
 
@@ -134,6 +163,7 @@ def resolve_research_dependencies(item: SourceItem, *, workflow: WorkflowName) -
     theme_profile = _THEME_PROFILES.get(theme_key, _THEME_PROFILES["boutique_hotels"])
     workflow_fields = _WORKFLOW_A_FIELDS if workflow == "workflow_a" else _WORKFLOW_B_FIELDS
     workflow_intake = _WORKFLOW_A_INTAKE if workflow == "workflow_a" else _WORKFLOW_B_INTAKE
+    video_context = _has_video_context(item)
 
     return ResearchDependencyProfile(
         workflow=workflow,
@@ -146,11 +176,19 @@ def resolve_research_dependencies(item: SourceItem, *, workflow: WorkflowName) -
         suggested_registers=list(theme_profile["suggested_registers"]),
         collect_fields=[*list(theme_profile["collect_fields"]), *workflow_fields],
         evidence_required=list(_BASE_EVIDENCE),
-        workflow_intake=list(workflow_intake),
+        workflow_intake=[
+            *workflow_intake,
+            *(["video-source context boundary"] if workflow == "workflow_b" and video_context else []),
+        ],
         writer_context=[
             "Use the source note as the factual boundary.",
             "Use the audience context before choosing hook, tone, and CTA.",
             "If a claim is not in evidence or verified facts, write it as an observation or omit it.",
+            *(
+                ["Use video hooks only as source/evidence context, not as Workflow B final hooks or scripts."]
+                if workflow == "workflow_b" and video_context
+                else []
+            ),
         ],
     )
 
@@ -158,3 +196,12 @@ def resolve_research_dependencies(item: SourceItem, *, workflow: WorkflowName) -
 def _normalize_theme(content_theme: str) -> str:
     normalized = content_theme.strip().lower().replace(" ", "_")
     return _THEME_ALIASES.get(normalized, normalized)
+
+
+def _has_video_context(item: SourceItem) -> bool:
+    source_type = item.source_type.lower()
+    return (
+        bool(item.media_urls)
+        or item.routing_decision == "both"
+        or any(marker in source_type for marker in ("video", "reel", "tiktok", "youtube", "short"))
+    )

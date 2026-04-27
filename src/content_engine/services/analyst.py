@@ -299,6 +299,7 @@ def _format_writer_tz(
             f"- Content theme: {insight.content_theme}",
             f"- Raw excerpt: {_excerpt(item.transcript_text)}",
             "",
+            *_workflow_a_video_context_section(item),
             "### Phase 2 Insight Card",
             f"- Topic: {insight.topic}",
             f"- Angle: {insight.angle}",
@@ -387,11 +388,94 @@ def _format_writer_tz(
     )
 
 
+def _workflow_a_video_context_section(item: SourceItem) -> list[str]:
+    if not _has_video_context(item):
+        return []
+
+    raw = item.raw_payload
+    first_3_seconds = _raw_text(raw, "first_3_seconds", "opening_visual", "opening_moment")
+    source_hook = _raw_text(raw, "source_hook", "detected_hook", "opening_line", "hook")
+    first_and_hook = _join_parts([first_3_seconds, f"source hook: {source_hook}" if source_hook else ""])
+    comments = _raw_list(raw, "comments_sample", "public_comments", "comments", "reactions")
+    return [
+        "### Workflow A Video Source Context",
+        f"- Video-native source: {'yes' if _has_video_context(item) else 'no'}",
+        f"- Video refs: {_join_parts([item.source_url, *item.media_urls]) or item.source_url}",
+        f"- Video title: {_raw_text(raw, 'video_title', 'title') or item.source_name}",
+        f"- Caption text: {_raw_text(raw, 'caption_text', 'caption', 'description') or _excerpt(item.transcript_text)}",
+        f"- Spoken transcript: {_raw_text(raw, 'spoken_transcript', 'transcript', 'video_transcript') or _excerpt(item.transcript_text)}",
+        f"- Transcript source: {_raw_text(raw, 'transcript_source') or 'source_text'}",
+        f"- Public metrics: {_format_dict(item.engagement_signals) or 'n/a'}",
+        f"- Public comments / reactions: {_join_parts(comments) or 'n/a'}",
+        f"- First 3 seconds / source hook: {first_and_hook or 'n/a'}",
+        f"- Hook pattern: {_raw_text(raw, 'hook_pattern', 'pattern') or 'n/a'}",
+        f"- Tension: {_raw_text(raw, 'hook_tension', 'tension') or 'n/a'}",
+        f"- Promise: {_raw_text(raw, 'hook_promise', 'promise') or 'n/a'}",
+        f"- CTA: {_raw_text(raw, 'hook_cta', 'cta') or 'n/a'}",
+        f"- Visual device: {_raw_text(raw, 'visual_device', 'visual_hint', 'visual_hints') or 'n/a'}",
+        f"- Repeatable formula: {_raw_text(raw, 'repeatable_formula', 'formula') or 'n/a'}",
+        "- Workflow A boundary: video hooks/scripts belong to Workflow A; Writer uses this only as source/evidence context, not as final text hooks or video scripts.",
+        "",
+    ]
+
+
 def _excerpt(text: str, limit: int = 260) -> str:
     normalized = " ".join(text.split()).strip()
     if len(normalized) <= limit:
         return normalized
     return normalized[: limit - 1].rstrip() + "…"
+
+
+def _has_video_context(item: SourceItem) -> bool:
+    source_type = item.source_type.lower()
+    return (
+        bool(item.media_urls)
+        or item.routing_decision == "both"
+        or any(marker in source_type for marker in ("video", "reel", "tiktok", "youtube", "short"))
+    )
+
+
+def _raw_text(raw: dict[str, object], *keys: str) -> str:
+    for key in keys:
+        value = raw.get(key)
+        if isinstance(value, str) and value.strip():
+            return " ".join(value.split()).strip()
+        if isinstance(value, list):
+            for item in value:
+                if str(item).strip():
+                    return " ".join(str(item).split()).strip()
+    return ""
+
+
+def _raw_list(raw: dict[str, object], *keys: str) -> list[str]:
+    values: list[str] = []
+    for key in keys:
+        value = raw.get(key)
+        if isinstance(value, str) and value.strip():
+            values.append(" ".join(value.split()).strip())
+        elif isinstance(value, list):
+            values.extend(" ".join(str(item).split()).strip() for item in value if str(item).strip())
+    return _dedupe_text(values)
+
+
+def _join_parts(parts: list[str]) -> str:
+    return "; ".join(part for part in _dedupe_text(parts) if part)
+
+
+def _dedupe_text(parts: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for part in parts:
+        normalized = " ".join(part.split()).strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    return deduped
+
+
+def _format_dict(values: dict[str, int]) -> str:
+    return ", ".join(f"{key}={value}" for key, value in values.items())
 
 
 def _secondary_audience(insight: InsightCard) -> str:
