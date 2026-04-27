@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jane Superstar</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --bg-soft: #fbf8f1;
+      --card: #fffdf8;
+      --ink: #25221d;
+      --muted: #6f675d;
+      --line: #e4d9ca;
+      --gold: #b99554;
+      --gold-dark: #7b612f;
+      --charcoal: #31302c;
+      --sand: #eadcc7;
+      --green-bg: #eef5ed;
+      --green: #426c45;
+      --shadow: 0 18px 45px rgba(59, 46, 28, 0.10);
+      --radius: 24px;
+      --radius-sm: 14px;
+      --transition: 180ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(185, 149, 84, 0.20), transparent 34rem),
+        radial-gradient(circle at 80% 10%, rgba(49, 48, 44, 0.08), transparent 28rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      padding: 32px;
+      border: 1px solid rgba(185, 149, 84, 0.24);
+      border-radius: 32px;
+      background: linear-gradient(135deg, rgba(255, 253, 248, 0.92), rgba(246, 241, 232, 0.80));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--gold-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 6vw, 5.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.065em;
+    }
+
+    .subtitle {
+      max-width: 680px;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    .hero-note {
+      max-width: 300px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 253, 248, 0.72);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .stat-card {
+      min-height: 118px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, 0.88);
+      box-shadow: 0 14px 34px rgba(59, 46, 28, 0.07);
+    }
+
+    .stat-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stat-value {
+      margin: 0;
+      font-size: 2.1rem;
+      font-weight: 850;
+      letter-spacing: -0.05em;
+    }
+
+    .panel {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 16px 0;
+      background: linear-gradient(180deg, rgba(246, 241, 232, 0.96), rgba(246, 241, 232, 0.78));
+      backdrop-filter: blur(16px);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .tab-button {
+      flex: 0 1 auto;
+      padding: 12px 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.72);
+      color: var(--charcoal);
+      font-weight: 800;
+      transition: background var(--transition), color var(--transition), border var(--transition), transform var(--transition);
+    }
+
+    .tab-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .tab-button.active {
+      border-color: var(--charcoal);
+      background: var(--charcoal);
+      color: #fff8ec;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(160px, 220px) minmax(160px, 220px);
+      gap: 12px;
+    }
+
+    .toolbar input,
+    .toolbar select {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 253, 248, 0.95);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .toolbar input:focus,
+    .toolbar select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(185, 149, 84, 0.16);
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin: 24px 0 16px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      letter-spacing: -0.03em;
+    }
+
+    .result-count {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 18px;
+    }
+
+    .asset-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid rgba(228, 217, 202, 0.92);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .asset-title {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.25;
+      letter-spacing: -0.025em;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      max-width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg-soft);
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      white-space: nowrap;
+    }
+
+    .badge.ready,
+    .badge.approved,
+    .badge.filmed,
+    .badge.published {
+      border-color: rgba(66, 108, 69, 0.24);
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .badge.draft {
+      border-color: rgba(185, 149, 84, 0.30);
+      background: #fbf2df;
+      color: var(--gold-dark);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-item {
+      padding: 10px 12px;
+      border: 1px solid rgba(228, 217, 202, 0.80);
+      border-radius: var(--radius-sm);
+      background: #fffaf0;
+      min-width: 0;
+    }
+
+    .meta-label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .meta-value {
+      display: block;
+      color: var(--ink);
+      font-weight: 750;
+      word-break: break-word;
+    }
+
+    .hook-box {
+      padding: 14px 16px;
+      border-left: 4px solid var(--gold);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff8eb, #fffdf8);
+      font-weight: 760;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffaf0;
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 14px 16px;
+      color: var(--charcoal);
+      font-weight: 850;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      float: right;
+      color: var(--gold-dark);
+      font-weight: 900;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    .long-text {
+      max-height: 520px;
+      overflow: auto;
+      margin: 0;
+      padding: 0 16px 16px;
+      color: #332f28;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .mini-section {
+      padding: 14px 16px;
+      border: 1px solid rgba(228, 217, 202, 0.82);
+      border-radius: 18px;
+      background: #fffaf0;
+    }
+
+    .mini-section h4 {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+      letter-spacing: -0.01em;
+    }
+
+    .mini-section p {
+      margin: 4px 0;
+      color: var(--muted);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: auto;
+    }
+
+    .action-button {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fffaf0;
+      color: var(--charcoal);
+      font-weight: 800;
+      transition: background var(--transition), border var(--transition), transform var(--transition);
+    }
+
+    .action-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--gold);
+      background: #fff3d9;
+    }
+
+    .action-button.primary {
+      border-color: var(--charcoal);
+      background: var(--charcoal);
+      color: #fff8ec;
+    }
+
+    .action-button.success {
+      border-color: rgba(66, 108, 69, 0.30);
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    .empty-state {
+      display: none;
+      padding: 42px;
+      border: 1px dashed var(--gold);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, 0.74);
+      color: var(--muted);
+      text-align: center;
+      font-weight: 750;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 100;
+      max-width: min(420px, calc(100% - 40px));
+      padding: 14px 16px;
+      border: 1px solid rgba(185, 149, 84, 0.34);
+      border-radius: 16px;
+      background: var(--charcoal);
+      color: #fff8ec;
+      box-shadow: 0 18px 40px rgba(37, 34, 29, 0.22);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity var(--transition), transform var(--transition);
+      font-weight: 800;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 840px) {
+      .app-shell {
+        width: min(100% - 22px, 720px);
+        padding-top: 12px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .stats-grid,
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab-button {
+        width: 100%;
+      }
+
+      .hero {
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Content operating hub</p>
+        <h1>Jane Superstar</h1>
+        <p class="subtitle">Final content operating hub for ready video and text assets. Review, copy, approve, film, and publish without seeing the internal machinery.</p>
+      </div>
+      <aside class="hero-note">Local-only dashboard. Your review, filmed, and published states stay in this browser via localStorage.</aside>
+    </header>
+
+    <section class="stats-grid" aria-label="Content summary">
+      <article class="stat-card">
+        <p class="stat-label">Video assets</p>
+        <p class="stat-value" id="videoTotal">0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Text assets</p>
+        <p class="stat-value" id="textTotal">0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Ready for review</p>
+        <p class="stat-value" id="reviewTotal">0</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Platforms</p>
+        <p class="stat-value" id="platformTotal">0</p>
+      </article>
+    </section>
+
+    <section class="panel" aria-label="Controls">
+      <nav class="tabs" aria-label="Workflow tabs">
+        <button class="tab-button active" type="button" data-tab="video">Workflow A — Video</button>
+        <button class="tab-button" type="button" data-tab="text">Workflow B — Text</button>
+      </nav>
+      <div class="toolbar">
+        <input id="searchInput" type="search" placeholder="Search title, platform, text, hook, script..." aria-label="Search assets">
+        <select id="platformFilter" aria-label="Filter by platform"></select>
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="all">All statuses</option>
+          <option value="ready">Ready</option>
+          <option value="approved">Approved</option>
+          <option value="not-approved">Not approved</option>
+          <option value="filmed">Filmed</option>
+          <option value="unfilmed">Unfilmed</option>
+          <option value="published">Published</option>
+          <option value="unpublished">Unpublished</option>
+        </select>
+      </div>
+    </section>
+
+    <main>
+      <div class="section-heading">
+        <h2 id="sectionTitle">Workflow A — Video Assets</h2>
+        <span class="result-count" id="resultCount">0 assets</span>
+      </div>
+      <section class="cards-grid" id="cardsGrid" aria-live="polite"></section>
+      <section class="empty-state" id="emptyState">No assets match the current search or filters.</section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "janeSuperstarState";
+
+    const videoAssets = [
+      {
+        id: "wfa-video-001",
+        title: "Founder morning: family and project pressure",
+        platform: "Instagram",
+        audience: "dreamer_woman",
+        theme: "founder_journey",
+        status: "ready",
+        selectedHook: "A founder can look calm while the whole morning is negotiating with her.",
+        script: `A founder can look calm while the whole morning is negotiating with her.
+
+The school bag is by the door. The call starts in four minutes. The coffee is still hot, barely.
+
+She's not performing balance. She's just moving through it.
+
+[Split-screen: a child's water bottle on a Bali tile floor, a laptop screen mid-call, a motorbike passing a rice field in early light, her voice low and steady over all of it]
+
+Building something real in Bali doesn't erase the weight of a Tuesday morning. It just gives the weight a better backdrop.
+
+Save this for the kind of Bali life that feels real, not staged.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_founder_morning_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "Instagram",
+          status: "ready",
+          caption: "A founder can look calm while the whole morning is negotiating with her."
+        }
+      },
+      {
+        id: "wfa-video-002",
+        title: "Everyone sees the villa, almost nobody checks the permit layer",
+        platform: "Instagram",
+        audience: "developer_investor",
+        theme: "land_and_legal",
+        status: "ready",
+        selectedHook: "Everyone sees the villa. Almost nobody checks the permit layer.",
+        script: `Everyone sees the villa. Almost nobody checks the permit layer.
+
+The price on the listing is rarely where the expensive mistake lives.
+
+Zoning classification, building permits, and whether the stated commercial use actually matches the paperwork — that's the layer most buyers skip.
+
+Lease extension mechanics matter too. A 25-year lease with no documented renewal pathway is a different asset than it looks on day one.
+
+[Hard cut from villa pool shot to close-up of permit documents and the access road — hold on the road for two seconds]
+
+Before you move on price, move on the paper stack.
+
+Save this before your next Bali property review.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_villa_permit_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "Instagram",
+          status: "ready",
+          caption: "Everyone sees the villa. Almost nobody checks the permit layer."
+        }
+      },
+      {
+        id: "wfa-video-003",
+        title: "The ROI question comes too late",
+        platform: "TikTok",
+        audience: "developer_investor",
+        theme: "expert_pain_bali",
+        status: "ready",
+        selectedHook: "If ROI is your first question, you may already be late.",
+        script: `If ROI is your first question, you may already be late.
+
+Most buyers open the brochure, fall in love with the render, then ask about returns.
+
+By that point the emotional decision is done — the due diligence is just decoration.
+
+Before the visuals pull you in, you need answers on five things: management structure, real demand depth, maintenance load, lease terms, and your exit path.
+
+[Filming cue: show villa render on screen, slowly draw red marks over each unchecked assumption as the voiceover names them]
+
+If any of those five are vague or missing, the ROI number someone quotes you is a guess dressed as a projection.
+
+The brochure is built to create attachment. Your checklist should exist to survive it.
+
+Save this before your next Bali property review.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_roi_brochure_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "TikTok",
+          status: "ready",
+          caption: "If ROI is your first question, you may already be late."
+        }
+      },
+      {
+        id: "wfa-video-004",
+        title: "Bali is not a postcard route",
+        platform: "Instagram",
+        audience: "lifestyle_expat",
+        theme: "bali_travel",
+        status: "ready",
+        selectedHook: "The postcard moment is easy. The honest route is harder to fake.",
+        script: `The postcard moment is easy. The honest route is harder to fake.
+
+This road into Ubud — you've seen it. But most people stop at the view and never show the decision that came before it.
+
+We skipped the waterfall. Too crowded, wrong light, not worth the hour. That choice made the rest of the day work.
+
+[POV cut: map overlay on the road, then a quiet pull into a side-street warung — close on a single dish, low light, no crowd]
+
+The dinner wasn't a reservation. It was the third place we walked past before one felt right.
+
+That's the rhythm. Not a checklist. A series of small edits that add up to something that actually feels like living here.
+
+Save this for the kind of Bali life that feels real, not staged.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_bali_route_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "Instagram",
+          status: "ready",
+          caption: "The postcard moment is easy. The honest route is harder to fake."
+        }
+      },
+      {
+        id: "wfa-video-005",
+        title: "Wellness is not a moodboard",
+        platform: "YouTube",
+        audience: "architect_designer",
+        theme: "wellness_architecture",
+        status: "ready",
+        selectedHook: "Wellness is not a moodboard anymore. It is a product decision.",
+        script: `Wellness is not a moodboard anymore. It is a product decision.
+
+A guest does not leave remembering the word you used in the brochure. They leave remembering a state their body was in.
+
+That state is designed. Light sequence. Material temperature. The moment sound drops between two spaces.
+
+[Cut to hand moving slowly across raw stone surface, then wide shot of corridor where ambient noise visibly disappears into stillness]
+
+Spa sequence is not decoration. It is choreography. Entry, transition, threshold, release. Each move either earns the next or breaks it.
+
+If your project cannot describe that sequence in physical terms, it is still a moodboard.
+
+Save this before you call a project wellness.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_wellness_architecture_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "YouTube",
+          status: "ready",
+          caption: "Wellness is not a moodboard anymore. It is a product decision."
+        }
+      },
+      {
+        id: "wfa-video-006",
+        title: "Boutique is not a label",
+        platform: "Instagram",
+        audience: "developer_investor",
+        theme: "boutique_hotels",
+        status: "ready",
+        selectedHook: "The guest remembers the feeling, not the expensive furniture.",
+        script: `The guest remembers the feeling, not the expensive furniture.
+
+Boutique is not a label you apply at the end. It is a chain of decisions made before the first guest arrives.
+
+Concept. Service model. Distribution strategy. How the property is maintained. Whether the guest comes back.
+
+[Film guest POV: slow arrival sequence, one object in the room held in frame, a staff gesture at breakfast, the same ritual repeated on return]
+
+Every operator can buy good furniture. Almost none of them build the rhythm that makes a guest rebook without checking the price.
+
+That rhythm is the asset. And it is either designed in from the start or retrofitted at a cost you will feel in your yield.
+
+Save this before your next Bali property review.`,
+        filmingCard: {
+          cardId: "film_scr_wfa_vid_boutique_guest_001_hook_1",
+          priority: 1,
+          filmed: false
+        },
+        publishQueue: {
+          platform: "Instagram",
+          status: "ready",
+          caption: "The guest remembers the feeling, not the expensive furniture."
+        }
+      }
+    ];
+
+    const textAssets = [
+      {
+        id: "wfb-20260426-01",
+        contentId: "wfb-20260426-01",
+        title: "The ordinary, interrupted hours inside a founder's ambitious life — Instagram Lifestyle",
+        platform: "Instagram Lifestyle",
+        pillar: "lifestyle_journey",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Утро началось раньше, чем закончились вчерашние мысли о проекте.
+
+Семейная логистика, звонок, пауза на кофе, снова звонок. Бали за окном — влажный, зелёный, совершенно равнодушный к тому, успеваю я или нет.
+
+Я давно перестала делить себя на «мама», «партнёр», «основатель». Это не три роли с отдельными расписаниями. Это одно утро, в котором всё существует одновременно.
+
+Амбиции не требуют идеальных, незаполненных часов. Они живут внутри обычных, прерванных, очень человеческих дней.
+
+И отказываться извиняться за то, что держишь всё это вместе — это тоже своего рода решение.`
+      },
+      {
+        id: "wfb-20260426-02",
+        contentId: "wfb-20260426-02",
+        title: "Bali villa investment failure: buying aesthetics instead of a functioning asset — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_proof",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Рендер продаёт быстрее, чем инвестор проверяет доходность.
+
+Красивая вилла — не бизнес-модель. Дизайн продаёт, но не управляет, не сдаёт, не выходит из сделки.
+
+Вопросы, которые инвестор не задаёт до подписания, определяют, выживет ли актив после запуска.
+
+Что должен объяснить объект до того, как вы открыли брошюру:
+
+— Кто управляет и на каких условиях
+— Какова реальная глубина спроса в этой локации
+— Что написано в договоре аренды земли — и что там не написано
+— На каких операционных допущениях построена модель
+— Как выглядит выход: кому, когда, по какой логике
+
+Если актив не отвечает на эти вопросы до того, как вы влюбились в картинку — разговор про ROI уже опоздал.`
+      },
+      {
+        id: "wfb-20260426-03",
+        contentId: "wfb-20260426-03",
+        title: "Bali villa investment failure: buying aesthetics instead of a functioning asset — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_proof",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Самый красивый объект на Бали — не всегда актив.
+
+Рынок перенасыщен визуально безупречными проектами. Именно поэтому вопрос «какой ROI?» — не отправная точка анализа, а сигнал тревоги: он появляется тогда, когда инвестор уже влюблён в рендеры и эмоционально закрыл сделку.
+
+Настоящая проверка начинается раньше — и она не про эстетику.
+
+Прежде чем капитал зафиксирован, объект должен уметь отвечать на конкретные вопросы: кто управляет активом после запуска и на каких условиях? Какова реальная глубина спроса в этой локации? Что написано в договоре аренды земли — и что там не написано? На каких операционных допущениях строится финансовая модель? Кто несёт расходы на обслуживание? Как выглядит выход?
+
+Если объект не может ответить на эти вопросы до подписания — дизайн не компенсирует структурные пробелы.
+
+Юридическая конструкция сделки меняет её суть значительно сильнее, чем брошюра. Форма владения, тип договора, срок аренды земли — это не детали, которые уточняются после. Это параметры, которые определяют, является ли объект работающим активом или дорогостоящим обязательством.
+
+Бали предлагает достаточно красивых вилл. Рабочих активов — значительно меньше. Разница между ними видна не в презентации, а в ответах на вопросы, которые большинство покупателей задают слишком поздно.`,
+        finalText: `The most photogenic villa in Bali is not automatically an asset.
+
+The market is saturated with visually compelling projects, which is precisely why "what's the ROI?" is a warning sign rather than a starting point — it tends to surface after the investor has already fallen for the renders and emotionally closed the deal.
+
+The real due diligence begins earlier, and it has nothing to do with aesthetics.
+
+Before capital is committed, the asset needs to answer a specific set of questions: Who manages it after launch, and under what terms? What is the actual depth of demand in this location? What does the land lease say — and what does it leave out? What operating assumptions underpin the financial model? Who carries maintenance costs? What does the exit look like?
+
+If the project cannot answer those questions before signing, design does not fill the structural gaps.
+
+Legal structure changes the deal far more than brochure language suggests. Ownership form, contract type, land lease duration — these are not details to clarify later. They determine whether the object is a functioning income asset or an expensive obligation.
+
+Bali has no shortage of beautiful villas. Working assets are considerably rarer. The difference between them is not visible in a presentation — it shows up in the answers to questions most buyers ask too late.`
+      },
+      {
+        id: "wfb-20260426-04",
+        contentId: "wfb-20260426-04",
+        title: "Legal structure as the true operating boundary of a Bali real estate asset — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_proof",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Сделка выглядит безупречно — именно это должно насторожить.
+
+На Бали визуально привлекательный объект с размытым правовым основанием — не выгодная возможность. Это неопределённое обязательство.
+
+Юридическая структура — не финальный шаг после того, как вы влюбились в локацию. Это граница, которая определяет, чем актив является на самом деле и что с ним можно делать по закону.
+
+До разговора о цене и дизайне нужно понять:
+— статус земли и зонирование
+— длину аренды и механику продления
+— риски номинальной или корпоративной структуры
+— соответствие коммерческого использования разрешительной документации
+— кто несёт ответственность, если что-то не совпадает
+
+Один структурный изъян способен обнулить всю инвестиционную логику.
+
+Брошюра описывает актив. Юридическая структура определяет его реальную стоимость.`
+      },
+      {
+        id: "wfb-20260426-05",
+        contentId: "wfb-20260426-05",
+        title: "Legal structure as the true operating boundary of a Bali real estate asset — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_proof",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Красивый рендер не закрывает дыру в правовой структуре.
+
+На Бали сделки с самым опасным профилем риска выглядят именно так: хорошая локация, убедительная цена, чистая презентация. Проблема не в том, что что-то выглядит подозрительно. Проблема в том, что всё выглядит нормально — а правовая основа при этом не проверена.
+
+Прежде чем обсуждать цену или концепцию, профессиональный покупатель обязан понять: каков статус земли, соответствует ли зонирование коммерческому использованию, какова длина аренды и механика её продления, есть ли номинальная структура или корпоративный риск, действительны ли разрешения, и кто несёт ответственность, если фактическое использование объекта расходится с документами.
+
+Это не административная рутина, которую можно отложить на финальный этап. Правовая структура — это операционная граница актива. Она определяет, чем актив является на самом деле и что с ним можно делать легально.
+
+Один структурный изъян способен полностью обесценить инвестиционный тезис — независимо от того, насколько убедительно выглядит брошюра.
+
+На зрелых рынках это называется базовым due diligence. На Бали это называется первым разговором — потому что земельный статус, зонирование и права на использование здесь не стандартизированы и часто представлены неточно.
+
+Визуально привлекательная сделка с размытой правовой основой — это не дисконтированная возможность. Это неопределённое обязательство.`,
+        finalText: `A clean presentation does not close a gap in legal structure.
+
+The most dangerous deals in Bali tend to look exactly right: strong location, credible pricing, polished materials. The risk is not that something appears suspicious. The risk is that everything appears in order — while the legal foundation has not been examined.
+
+Before any conversation about price or design, a serious buyer needs to understand land status, zoning compliance with intended commercial use, lease length and extension mechanics, nominee or corporate structure exposure, permit validity, and who carries liability if actual use does not match the paperwork.
+
+This is not administrative work to schedule after the asset decision. Legal structure is the operating boundary of the asset. It defines what the asset actually is and what you can legally do with it.
+
+A single structural flaw can invalidate the entire investment thesis — regardless of how well the brochure reads.
+
+In established markets, this is called basic due diligence. In Bali, it is called the first conversation — because land status, zoning, and use rights are non-standardized and frequently misrepresented.
+
+A visually attractive deal with vague legal foundations is not a discounted opportunity. It is an undefined liability.`
+      },
+      {
+        id: "wfb-20260426-06",
+        contentId: "wfb-20260426-06",
+        title: "Quality split inside the Bali real estate market: how serious operators distinguish defensible assets from overlaunched, hype-dependent inventory — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_proof",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Брошюра не обновляется в момент, когда рынок начинает расслаиваться.
+
+На Бали сейчас работает не один рынок — работают два. В одном: перезапуск локаций, давление на цену, слабая дифференциация, обещания, которые держатся на хайпе. В другом: активы с внятной локационной логикой, продуктом под реальный спрос и операционной прозрачностью.
+
+Профессиональный фильтр — не темп роста заголовков, а независимость спроса от хайпа. Актив, который работает только пока рынок разогрет, уже уязвим — даже если в презентации этого не видно.
+
+Три вопроса перед входом:
+— Почему именно эта локация, а не соседняя?
+— Кто реальный арендатор и почему он придёт без скидки?
+— Что держит актив, если интерес к рынку охладеет?
+
+Юридическая структура сделки меняет её смысл сильнее, чем любой текст в буклете.
+
+Коррекция не объявляет о себе заранее. Сигналы читаются сейчас.`
+      },
+      {
+        id: "wfb-20260426-07",
+        contentId: "wfb-20260426-07",
+        title: "Quality split inside the Bali real estate market: how serious operators distinguish defensible assets from overlaunched, hype-dependent inventory — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_proof",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Брошюра на Бали не обновляется в момент, когда актив становится уязвимым.
+
+Профессиональный сигнал сейчас — не общий рост интереса к рынку, а качественный разрыв внутри него. Одни зоны показывают признаки перезапуска: давление на цену, слабая дифференциация, агрессивные обещания доходности. Другие активы держатся — через логику локации, соответствие продукта спросу, операционную прозрачность и аудиторию, которая не зависит от хайпа.
+
+Серьёзный оператор читает рынок именно через этот фильтр — до того, как коррекция стала очевидной.
+
+Четыре вопроса, которые стоит задать до входа:
+
+Работает ли локация независимо от маркетинга? Если спрос держится только на промо-активности, это не актив — это позиция в очереди.
+
+Есть ли продуктовое соответствие реальному спросу? Не тому, что обещает презентация, а тому, что подтверждает операционная история аналогичных объектов.
+
+Понятна ли операционная модель до сделки? Управление, загрузка, структура расходов — это не детали, это основа оценки.
+
+Как оформлена юридическая структура? Язык брошюры и язык договора — разные языки. Структура меняет сделку сильнее, чем любое обещание в презентации.
+
+Рынок Бали не падает равномерно. Он расслаивается. Активы без внятной логики уже находятся под давлением — просто брошюры ещё не успели это отразить.
+
+Те, кто входит сейчас, делают ставку не на рынок в целом — а на конкретную сторону этого разрыва.`,
+        finalText: `The brochure does not update the moment an asset becomes exposed.
+
+The professional signal in Bali right now is not rising market interest — it is the quality split forming inside it. Certain areas are showing the early signs of overlaunching: price pressure, weak differentiation, and aggressive yield promises. Stronger assets are holding their position through location logic, genuine product fit, operating clarity, and demand that does not depend on promotional momentum.
+
+A serious operator reads that split before the correction becomes consensus.
+
+Four questions worth asking before committing capital:
+
+Does the location work without the marketing? If demand is driven by promotional activity rather than structural pull, that is not an asset — it is a queue position.
+
+Is there real product-market fit? Not what the deck promises, but what comparable operating assets confirm.
+
+Is the operating model legible before the deal closes? Management structure, occupancy assumptions, cost clarity — these are not footnotes, they are the basis of any honest valuation.
+
+How is the legal structure built? Brochure language and contract language are not the same language. Structure changes the deal more than any promise in a presentation.
+
+Bali is not declining uniformly. It is stratifying. Assets without location logic, product fit, and operating clarity are already under pressure — the brochures simply have not caught up yet.
+
+Capital placed today is not a bet on the market. It is a bet on which side of that split you are standing on.`
+      },
+      {
+        id: "wfb-20260426-08",
+        contentId: "wfb-20260426-08",
+        title: "How Bali rewires your daily rhythm before you ever think about buying or investing — Instagram Lifestyle",
+        platform: "Instagram Lifestyle",
+        pillar: "lifestyle_invitation",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Бали меняет расписание раньше, чем ты успеваешь это заметить.
+
+Сначала — кофе до первого звонка, и это кажется мелочью. Потом дорога, которая не торопит. Потом какая-то деталь в лобби отеля, и ты стоишь перед ней дольше, чем планировал.
+
+Потом маленький ритуал — утром, в тишине — и вдруг понимаешь: ты не отдыхаешь от жизни. Ты живёшь так, как хотел.
+
+Бали не убеждает красотой. Он меняет темп. А когда темп меняется — меняется и вопрос: не «съездить ли снова», а «зачем возвращаться».
+
+Это и есть момент, когда место становится решением.`
+      },
+      {
+        id: "wfb-20260426-09",
+        contentId: "wfb-20260426-09",
+        title: "Converting the global wellness travel trend into defensible product logic for Bali real estate development — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_market_signals",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Спа на крыше не делает объект велнес-продуктом.
+
+Глобальный спрос смещается: гости выбирают не пассивную роскошь, а приватность, восстановление и опыт, выстроенный вокруг их ритма жизни. Для Бали это не вопрос тренда — это вопрос продуктовой логики.
+
+Девелоперы, которые выиграют, встраивают велнес в архитектуру, операционную модель и сервисный ритм с первого чертежа. Те, кто добавляет его как маркетинговый слой поверх готового проекта, получают продукт, который выглядит премиально, но не удерживает гостя и не защищает доходность.
+
+Велнес как структура — это: планировки, работающие на восстановление; сервисный ритм, который не нарушает приватность; комьюнити, дающее причину вернуться.
+
+Велнес как декор — это дополнительная строка в смете и уязвимость в позиционировании.
+
+Прежде чем фиксировать концепцию, стоит проверить: где именно в проекте живёт эта логика.`
+      },
+      {
+        id: "wfb-20260426-10",
+        contentId: "wfb-20260426-10",
+        title: "Converting the global wellness travel trend into defensible product logic for Bali real estate development — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_market_signals",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Самая дешёвая строка в смете Бали нередко становится самой дорогой стратегической ошибкой.
+
+Глобальный спрос на путешествия смещается — не к более дорогому люксу, а к другому его типу. Гости выбирают приватность, восстановление, более длительные пребывания и опыт, который ощущается как созданный под их идентичность. Это не тренд сезона. Это структурный сдвиг в поведении, который уже переписывает, какие активы удерживают загрузку, а какие — нет.
+
+Для девелопера в Бали вопрос не в том, моден ли велнес. Вопрос в том, встроен ли он в продукт — или просто нарисован на брошюре.
+
+Разница критична. Велнес как маркетинговый слой — это спа в рендере и цитата про «баланс» в описании. Велнес как продуктовая логика — это архитектура, которая работает на восстановление, операционный ритм, который держит гостя, и причина, по которой он возвращается. Первое продаётся один раз. Второе формирует повторный спрос и защищает доходность актива.
+
+Девелоперы, которые выиграют следующий цикл, — не те, кто добавил бассейн с хлорофиллом. Это те, кто принял велнес как переменную due diligence: на уровне участка, архитектурного решения, сервисной модели и юридической структуры сделки.
+
+Юридическая структура, кстати, меняет сделку сильнее, чем любой текст в брошюре. Это отдельный разговор — но он начинается ещё до архитектора.`,
+        finalText: `Developers often cut the line item that protects yield.
+
+Global travel demand is not moving toward more expensive luxury — it is moving toward a different kind. Guests are choosing privacy, restoration, longer stays, and experiences that feel built around their identity. This is not a seasonal trend. It is a structural shift in behavior that is already separating assets with durable occupancy from those without it.
+
+For a Bali developer, the question is not whether wellness is popular. The question is whether it is embedded in the product — or only printed in the brochure.
+
+That distinction determines yield. Wellness as a marketing layer is a spa in the render and a "balance" tagline in the listing copy. Wellness as product logic is architecture designed for restoration, an operational cadence that retains the guest, and a reason they return. The first sells once. The second builds repeat demand and protects asset performance across market cycles.
+
+Developers who win the next cycle are not the ones who added a chlorophyll pool. They are the ones who treated wellness as a due-diligence variable — at the level of land selection, architectural brief, service model, and legal structure.
+
+Legal structure, for the record, changes the deal far more than brochure language ever will. That conversation starts before the architect does.`
+      },
+      {
+        id: "wfb-20260426-11",
+        contentId: "wfb-20260426-11",
+        title: "Wellness architecture as experience product design, not aesthetic decoration — Instagram Lifestyle",
+        platform: "Instagram Lifestyle",
+        pillar: "expertise_lifestyle",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Некоторые проекты меняют твоё состояние раньше, чем меняют цифры в таблице.
+
+Я думаю об этом каждый раз, когда выбираю материал для пространства, которое должно восстанавливать. Не украшать — восстанавливать. Разница принципиальная.
+
+Свет, который падает под нужным углом. Тишина, которую слышно. Текстура, к которой хочется прикоснуться. Последовательность комнат, которая ведёт тело — не глаз.
+
+Это не про эстетику. Это про то, что гость чувствует после — и почему он возвращается.
+
+AILLA строится именно так: каждое решение должно производить ощущение, а не просто фотографию. Когда дизайн можно объяснить через опыт — он становится защищаемым. И ценным.`
+      },
+      {
+        id: "wfb-20260426-12",
+        contentId: "wfb-20260426-12",
+        title: "Wellness architecture as experience product design, not aesthetic decoration — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_lifestyle",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Гость не запоминает отделку — он запоминает, как изменилось его состояние.
+
+Велнес-архитектура работает только тогда, когда каждое решение производит измеримый эффект: тишина, выстроенная акустикой, а не пожеланием; свет, рассчитанный под циркадный ритм, а не под фотографию; последовательность пространств, которая ведёт тело от напряжения к восстановлению.
+
+Это не эстетика. Это продуктовая логика.
+
+Когда архитектор может объяснить, почему конкретный материал меняет тактильный опыт, почему маршрут от входа до воды снижает тревогу, почему приватность зонирована именно так — его решения становятся защищаемыми перед девелопером и ценными для рынка.
+
+Красивый рендер продаёт один раз. Пространство, которое физически меняет гостя, продаёт снова и снова — через возвраты, рекомендации и ставку.
+
+Велнес нужно проектировать, а не стилизовать.`
+      },
+      {
+        id: "wfb-20260426-13",
+        contentId: "wfb-20260426-13",
+        title: "Wellness architecture as experience product design, not aesthetic decoration — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_lifestyle",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Гость не запоминает материал — он запоминает, как изменилось его состояние.
+
+Это разграничение определяет разницу между wellness-архитектурой как эстетикой и wellness-архитектурой как продуктом опыта. Первая производит красивые фотографии. Вторая производит верифицируемый результат: физиологический сдвиг, ощущение тишины, восстановление, которое гость осознаёт и за которое возвращается.
+
+Когда мы проектируем пространство через логику спа — последовательность зон, качество света, тактильность материала, акустику, приватность, ритуал движения — каждое решение становится функциональным, а не декоративным. Это меняет разговор с девелопером: дизайн перестаёт быть строкой расходов и становится аргументом коммерческой ценности.
+
+Именно здесь архитекторы теряют позицию в переговорах. Не потому что их решения слабые — а потому что они не переведены в язык результата. Девелопер и оператор всё чаще задают вопрос: гость действительно почувствовал что-то другое? Если дизайнер не может ответить — он уступает место тому, кто может.
+
+Методология, которая связывает конкретные архитектурные решения с эмоциональными и коммерческими исходами, — это не усложнение процесса. Это защита профессиональной позиции и инструмент для разговора с рынком на его языке.
+
+Wellness-архитектура зрелого рынка требует инженерии опыта, а не стилизации пространства. Чем раньше дизайнер выстраивает эту логику, тем сильнее его позиция — в проекте, в переговорах и в портфеле.`,
+        finalText: `A guest never remembers the material — they remember how their state of mind changed.
+
+That distinction separates wellness architecture as aesthetics from wellness architecture as an experience product. The first produces compelling photographs. The second produces a verifiable outcome: a physiological shift, a quality of silence, a restoration the guest recognises and returns for.
+
+When a space is designed through spa logic — zone sequencing, light quality, material texture, acoustics, privacy, the ritual of movement — every decision becomes functional rather than decorative. That reframes the conversation with developers: design stops being a cost line and becomes a commercial argument.
+
+This is precisely where architects lose ground in negotiations. Not because their decisions are weak — but because those decisions have not been translated into the language of outcome. Developers and operators are increasingly asking whether guests actually feel different after a stay. If the designer cannot answer that question, someone else will.
+
+A methodology that connects specific architectural choices — silence, light, material sequence, spatial ritual — to emotional and commercial results is not a complication of the design process. It is professional positioning, and it is the vocabulary that earns a seat at the table when market standards shift.
+
+The maturing wellness hospitality market is moving from styled spaces to engineered experiences. The architects who build that logic into their practice now will hold the stronger position — in the project, in the negotiation, and in the portfolio.`
+      },
+      {
+        id: "wfb-20260426-14",
+        contentId: "wfb-20260426-14",
+        title: "Boutique hotel positioning as a chain of operational and strategic decisions, not a branding label — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_proof",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `«Бутик» начинается с решений, а не с брошюры.
+
+Сильный проект знает, для какого гостя он построен. Какую эмоцию должно создать пребывание. Как операционная модель защищает это обещание. И почему продукт нельзя заменить более дешёвым соседом с похожим фасадом.
+
+Когда позиционирование держится только на фотографиях — оно не держится вообще. Рядом появляется объект дешевле, с похожей эстетикой, и ценовая премия начинает разрушаться.
+
+Защита доходности строится иначе: концепция → дизайн → сервис → дистрибуция → обслуживание → поведение гостя при повторном визите. Каждый уровень усиливает следующий или обнуляет всё предыдущее.
+
+На рынке с растущим предложением единственный реальный ров — это продукт, который невозможно скопировать по цене входа.`
+      },
+      {
+        id: "wfb-20260426-15",
+        contentId: "wfb-20260426-15",
+        title: "Boutique hotel positioning as a chain of operational and strategic decisions, not a branding label — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_proof",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Называть проект «бутиком» и строить бутик — это разные инвестиционные решения.
+
+В Бали рынок уплотняется быстрее, чем успевает сформироваться спрос на премиум. Новые объекты конкурируют не только ценой, но и визуальным языком: правильный свет, правильный бассейн, правильная фотография. Поверхностно — почти неотличимо. Именно здесь начинается ценовое давление, которое разрушает доходность.
+
+Сильный гостиничный проект знает три вещи до начала строительства: для какого гостя он создан, какую эмоцию должно оставить пребывание, и почему этот продукт нельзя заменить более дешёвым соседом. Это не маркетинговые вопросы — это архитектурные, операционные и дистрибуционные решения, принятые заранее.
+
+Бутиковое позиционирование — это цепочка: концепция, дизайн, сервис, дистрибуция, техническое обслуживание, поведение гостя при повторном визите. Если хотя бы одно звено выпадает, вся цепочка теряет ценовую защиту. Дешёвый конкурент рядом не обязан быть лучше — ему достаточно быть достаточно похожим.
+
+Инвесторы, которые воспринимают слово «бутик» как прилагательное для маркетинговых материалов, а не как системное решение, обнаруживают это на этапе операционного года — когда ставки не держатся, а заполняемость требует скидок.
+
+Диагностический вопрос прост: если убрать фотографию, что именно защищает цену вашего объекта?`,
+        finalText: `Labeling a project "boutique" and building one are two different capital decisions.
+
+Bali's hospitality market is densifying faster than premium demand can absorb new supply. Competing properties now share the same visual grammar — the right light, the right pool, the right photography. At surface level, the difference is nearly invisible. That is precisely where pricing power erodes.
+
+The strongest hospitality projects answer three questions before construction begins: which guest is this built for, what emotion must the stay produce, and why can this product not be replaced by cheaper inventory next door. These are not marketing questions. They are concept, design, operations, and distribution decisions made early and enforced consistently.
+
+Boutique positioning is a chain: concept, design, service, distribution, maintenance, and guest return behavior. Remove one link and the entire structure loses its price defense. A cheaper competitor does not need to be better — it only needs to be similar enough.
+
+Developers who treat "boutique" as an adjective for the brochure rather than a structural commitment discover the gap in year one of operations — when rate integrity breaks and occupancy requires discounting to compete.
+
+The diagnostic question is direct: remove the photography, and what specifically protects your asset's price?`
+      },
+      {
+        id: "wfb-20260426-16",
+        contentId: "wfb-20260426-16",
+        title: "Distinguishing marketing noise from commercial proof in real estate projects — Instagram Professional",
+        platform: "Instagram Professional",
+        pillar: "expertise_proof",
+        format: "caption",
+        approvalStatus: "Draft Ready — Human Review Required",
+        finalText: `Проект с рилсами, инфлюенсерами и рендерами всё равно может не продаваться.
+
+Маркетинговая активность — это не коммерческое доказательство. Красивый запуск отвечает на вопрос «заметили ли нас?», но не на вопрос покупателя: почему этот продукт, почему сейчас, кто реальный спрос и что защищает цену, когда внимание угаснет.
+
+Брокер, который не видит разницы между шумом и сигналом, тратит время на проекты, которые выглядят активными, но не закрываются.
+
+Три вопроса, которые стоит задать до того, как добавить проект в портфель:
+
+— Есть ли подтверждённый спрос, а не только трафик?
+— Есть ли логика защиты цены после старта продаж?
+— Есть ли внятный ответ на «почему сейчас» — без маркетингового тумана?
+
+Юридическая структура и фундаментал меняют сделку сильнее, чем любой брошюрный язык.
+
+Рекомендация, которую нельзя защитить перед клиентом, закрывает не сделку — она закрывает доверие.`
+      },
+      {
+        id: "wfb-20260426-17",
+        contentId: "wfb-20260426-17",
+        title: "Distinguishing marketing noise from commercial proof in real estate projects — LinkedIn B2B",
+        platform: "LinkedIn B2B",
+        pillar: "expertise_proof",
+        format: "thought leadership post",
+        approvalStatus: "Draft Ready — Human Review Required",
+        internalRuMaster: `Активный проект — это не то же самое, что продаваемый проект.
+
+Рилсы, инфлюенсеры, красивые рендеры, громкий запуск — всё это создаёт ощущение движения. Но ни один из этих элементов не отвечает на вопрос, который покупатель задаёт себе в момент принятия решения: почему именно этот продукт, почему сейчас, кто формирует спрос и что защищает цену после того, как внимание угаснет.
+
+Брокер, который не задаёт эти вопросы до того, как включить проект в свой портфель, берёт на себя чужой маркетинговый риск. Клиент оценивает рекомендацию — не активность девелопера. Если проект выглядит убедительно, но не закрывается, репутационные потери несёт брокер.
+
+Разница между шумом и коммерческим доказательством проявляется в трёх точках. Первая — наличие реального сигнала спроса, а не только охватов. Вторая — логика защиты цены: что происходит с ценой после старта продаж и почему. Третья — юридическая структура сделки, которая меняет её суть значительно сильнее, чем любой текст в брошюре.
+
+Маркетинговая активность — это не замена этим ответам. Она может привлечь внимание, но не создаёт фундамент для закрытия.
+
+Брокеры, которые умеют отделять сигнал от шума до начала работы с проектом, защищают не только свои сделки — они защищают доверие клиентов, которое и является их главным активом на любом рынке.`,
+        finalText: `A project with a full content calendar can still have nothing to sell.
+
+Reels, influencer visits, polished renders, a loud launch event — all of it creates the impression of momentum. None of it answers the question a buyer is actually asking at the moment of decision: why this product, why now, where is the real demand, and what protects the price once attention moves on.
+
+A broker who skips those questions before adding a project to their portfolio absorbs someone else's marketing risk. Clients evaluate the recommendation, not the developer's activity level. When a project looks credible but cannot close, the reputational cost lands with the broker.
+
+The gap between noise and commercial proof shows up in three places. First: is there a genuine demand signal, or only reach metrics? Second: what is the price protection logic after the launch window closes? Third: does the legal structure of the deal actually support what the brochure implies — because it rarely does to the same degree.
+
+Marketing activity is not a substitute for those answers. It can generate attention. It cannot generate a fundament for closing.
+
+Brokers who build the habit of separating signal from noise before committing to a project protect more than their pipeline. They protect the client trust that makes every future recommendation worth something.`
+      }
+    ];
+
+    let activeTab = "video";
+    let state = loadState();
+    let toastTimer;
+
+    const cardsGrid = document.getElementById("cardsGrid");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const platformFilter = document.getElementById("platformFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const sectionTitle = document.getElementById("sectionTitle");
+    const resultCount = document.getElementById("resultCount");
+
+    function loadState() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return {
+          videos: stored.videos || {},
+          texts: stored.texts || {}
+        };
+      } catch (error) {
+        return { videos: {}, texts: {} };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getVideoState(asset) {
+      const saved = state.videos[asset.id] || {};
+      return {
+        filmed: saved.filmed ?? asset.filmingCard.filmed,
+        published: saved.published ?? false
+      };
+    }
+
+    function getTextState(asset) {
+      const saved = state.texts[asset.id] || {};
+      return {
+        approved: saved.approved ?? false,
+        published: saved.published ?? false
+      };
+    }
+
+    function saveVideoState(id, patch) {
+      state.videos[id] = { ...(state.videos[id] || {}), ...patch };
+      saveState();
+      renderCurrentTab();
+    }
+
+    function saveTextState(id, patch) {
+      state.texts[id] = { ...(state.texts[id] || {}), ...patch };
+      saveState();
+      renderCurrentTab();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function searchableVideoText(asset) {
+      return [
+        asset.id,
+        asset.title,
+        asset.platform,
+        asset.audience,
+        asset.theme,
+        asset.status,
+        asset.selectedHook,
+        asset.script,
+        asset.filmingCard.cardId,
+        asset.publishQueue.platform,
+        asset.publishQueue.status,
+        asset.publishQueue.caption
+      ].join(" ").toLowerCase();
+    }
+
+    function searchableTextAsset(asset) {
+      return [
+        asset.id,
+        asset.contentId,
+        asset.title,
+        asset.platform,
+        asset.pillar,
+        asset.format,
+        asset.approvalStatus,
+        asset.finalText,
+        asset.internalRuMaster || ""
+      ].join(" ").toLowerCase();
+    }
+
+    function matchesStatus(asset, kind, statusValue) {
+      if (statusValue === "all") return true;
+      if (kind === "video") {
+        const current = getVideoState(asset);
+        if (statusValue === "ready") return asset.status === "ready" && !current.published;
+        if (statusValue === "filmed") return current.filmed;
+        if (statusValue === "unfilmed") return !current.filmed;
+        if (statusValue === "published") return current.published;
+        if (statusValue === "unpublished") return !current.published;
+        return false;
+      }
+
+      const current = getTextState(asset);
+      if (statusValue === "ready") return !current.published;
+      if (statusValue === "approved") return current.approved;
+      if (statusValue === "not-approved") return !current.approved;
+      if (statusValue === "published") return current.published;
+      if (statusValue === "unpublished") return !current.published;
+      return false;
+    }
+
+    function applyFilters(assets, kind) {
+      const query = searchInput.value.trim().toLowerCase();
+      const platform = platformFilter.value;
+      const status = statusFilter.value;
+      return assets.filter((asset) => {
+        const searchable = kind === "video" ? searchableVideoText(asset) : searchableTextAsset(asset);
+        const platformMatch = platform === "all" || asset.platform === platform;
+        const queryMatch = !query || searchable.includes(query);
+        const statusMatch = matchesStatus(asset, kind, status);
+        return platformMatch && queryMatch && statusMatch;
+      });
+    }
+
+    function populatePlatformFilter() {
+      const assets = activeTab === "video" ? videoAssets : textAssets;
+      const previous = platformFilter.value || "all";
+      const platforms = [...new Set(assets.map((asset) => asset.platform))].sort();
+      platformFilter.innerHTML = [
+        `<option value="all">All platforms</option>`,
+        ...platforms.map((platform) => `<option value="${escapeHtml(platform)}">${escapeHtml(platform)}</option>`)
+      ].join("");
+      platformFilter.value = platforms.includes(previous) ? previous : "all";
+    }
+
+    function updateStats() {
+      const allPlatforms = new Set([...videoAssets, ...textAssets].map((asset) => asset.platform));
+      const unfilmedVideos = videoAssets.filter((asset) => !getVideoState(asset).filmed && !getVideoState(asset).published).length;
+      const unapprovedTexts = textAssets.filter((asset) => !getTextState(asset).approved && !getTextState(asset).published).length;
+      document.getElementById("videoTotal").textContent = videoAssets.length;
+      document.getElementById("textTotal").textContent = textAssets.length;
+      document.getElementById("reviewTotal").textContent = unfilmedVideos + unapprovedTexts;
+      document.getElementById("platformTotal").textContent = allPlatforms.size;
+    }
+
+    function renderVideoCards() {
+      const filtered = applyFilters(videoAssets, "video");
+      sectionTitle.textContent = "Workflow A — Video Assets";
+      resultCount.textContent = `${filtered.length} ${filtered.length === 1 ? "asset" : "assets"}`;
+      cardsGrid.innerHTML = filtered.map((asset) => {
+        const current = getVideoState(asset);
+        const displayStatus = current.published ? "published" : current.filmed ? "filmed" : asset.status;
+        return `
+          <article class="asset-card">
+            <div class="card-top">
+              <h3 class="asset-title">${escapeHtml(asset.title)}</h3>
+              <span class="badge ${escapeHtml(displayStatus)}">${escapeHtml(displayStatus)}</span>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">${escapeHtml(asset.platform)}</span></div>
+              <div class="meta-item"><span class="meta-label">Audience</span><span class="meta-value">${escapeHtml(asset.audience)}</span></div>
+              <div class="meta-item"><span class="meta-label">Theme</span><span class="meta-value">${escapeHtml(asset.theme)}</span></div>
+              <div class="meta-item"><span class="meta-label">Asset ID</span><span class="meta-value">${escapeHtml(asset.id)}</span></div>
+            </div>
+            <div class="hook-box">${escapeHtml(asset.selectedHook)}</div>
+            <details>
+              <summary>Script</summary>
+              <pre class="long-text">${escapeHtml(asset.script)}</pre>
+            </details>
+            <div class="mini-section">
+              <h4>Filming Card</h4>
+              <p><strong>Card ID:</strong> ${escapeHtml(asset.filmingCard.cardId)}</p>
+              <p><strong>Priority:</strong> ${escapeHtml(asset.filmingCard.priority)}</p>
+              <p><strong>Filmed:</strong> ${current.filmed ? "true" : "false"}</p>
+            </div>
+            <div class="mini-section">
+              <h4>Publish Queue</h4>
+              <p><strong>Platform:</strong> ${escapeHtml(asset.publishQueue.platform)}</p>
+              <p><strong>Status:</strong> ${current.published ? "published" : escapeHtml(asset.publishQueue.status)}</p>
+              <details>
+                <summary>Caption</summary>
+                <pre class="long-text">${escapeHtml(asset.publishQueue.caption)}</pre>
+              </details>
+            </div>
+            <div class="action-row">
+              <button class="action-button" type="button" data-action="copy-video-hook" data-id="${escapeHtml(asset.id)}">Copy Hook</button>
+              <button class="action-button" type="button" data-action="copy-video-script" data-id="${escapeHtml(asset.id)}">Copy Script</button>
+              <button class="action-button" type="button" data-action="copy-video-caption" data-id="${escapeHtml(asset.id)}">Copy Caption</button>
+              <button class="action-button ${current.filmed ? "success" : ""}" type="button" data-action="toggle-video-filmed" data-id="${escapeHtml(asset.id)}">${current.filmed ? "Unmark Filmed" : "Mark Filmed"}</button>
+              <button class="action-button ${current.published ? "success" : "primary"}" type="button" data-action="toggle-video-published" data-id="${escapeHtml(asset.id)}">${current.published ? "Unmark Published" : "Mark Published"}</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+      emptyState.style.display = filtered.length ? "none" : "block";
+    }
+
+    function renderTextCards() {
+      const filtered = applyFilters(textAssets, "text");
+      sectionTitle.textContent = "Workflow B — Text Assets";
+      resultCount.textContent = `${filtered.length} ${filtered.length === 1 ? "asset" : "assets"}`;
+      cardsGrid.innerHTML = filtered.map((asset) => {
+        const current = getTextState(asset);
+        const displayStatus = current.published ? "published" : current.approved ? "approved" : "draft";
+        const hasRuMaster = asset.platform === "LinkedIn B2B" && Boolean(asset.internalRuMaster);
+        return `
+          <article class="asset-card">
+            <div class="card-top">
+              <h3 class="asset-title">${escapeHtml(asset.title)}</h3>
+              <span class="badge ${escapeHtml(displayStatus)}">${escapeHtml(displayStatus)}</span>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-item"><span class="meta-label">Content ID</span><span class="meta-value">${escapeHtml(asset.contentId)}</span></div>
+              <div class="meta-item"><span class="meta-label">Platform</span><span class="meta-value">${escapeHtml(asset.platform)}</span></div>
+              <div class="meta-item"><span class="meta-label">Pillar</span><span class="meta-value">${escapeHtml(asset.pillar)}</span></div>
+              <div class="meta-item"><span class="meta-label">Format</span><span class="meta-value">${escapeHtml(asset.format)}</span></div>
+            </div>
+            <span class="badge draft">${escapeHtml(asset.approvalStatus)}</span>
+            <details>
+              <summary>Final Text</summary>
+              <pre class="long-text">${escapeHtml(asset.finalText)}</pre>
+            </details>
+            ${hasRuMaster ? `
+              <details>
+                <summary>Internal RU Master</summary>
+                <pre class="long-text">${escapeHtml(asset.internalRuMaster)}</pre>
+              </details>
+            ` : ""}
+            <div class="action-row">
+              <button class="action-button" type="button" data-action="copy-text-final" data-id="${escapeHtml(asset.id)}">Copy Final Text</button>
+              ${hasRuMaster ? `<button class="action-button" type="button" data-action="copy-text-ru" data-id="${escapeHtml(asset.id)}">Copy Internal RU Master</button>` : ""}
+              <button class="action-button ${current.approved ? "success" : ""}" type="button" data-action="toggle-text-approved" data-id="${escapeHtml(asset.id)}">${current.approved ? "Unapprove" : "Approve"}</button>
+              <button class="action-button ${current.published ? "success" : "primary"}" type="button" data-action="toggle-text-published" data-id="${escapeHtml(asset.id)}">${current.published ? "Unmark Published" : "Mark Published"}</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+      emptyState.style.display = filtered.length ? "none" : "block";
+    }
+
+    function renderCurrentTab() {
+      updateStats();
+      populatePlatformFilter();
+      if (activeTab === "video") {
+        renderVideoCards();
+      } else {
+        renderTextCards();
+      }
+    }
+
+    async function copyToClipboard(text, label = "Copied") {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        }
+        showToast(label);
+      } catch (error) {
+        showToast("Copy failed. Select the text manually.");
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), 2200);
+    }
+
+    function handleCardAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const action = button.dataset.action;
+      const id = button.dataset.id;
+      const video = videoAssets.find((asset) => asset.id === id);
+      const text = textAssets.find((asset) => asset.id === id);
+
+      if (action === "copy-video-hook" && video) copyToClipboard(video.selectedHook, "Hook copied");
+      if (action === "copy-video-script" && video) copyToClipboard(video.script, "Script copied");
+      if (action === "copy-video-caption" && video) copyToClipboard(video.publishQueue.caption, "Caption copied");
+      if (action === "toggle-video-filmed" && video) {
+        const current = getVideoState(video);
+        saveVideoState(id, { filmed: !current.filmed });
+      }
+      if (action === "toggle-video-published" && video) {
+        const current = getVideoState(video);
+        saveVideoState(id, { published: !current.published });
+      }
+      if (action === "copy-text-final" && text) copyToClipboard(text.finalText, "Final text copied");
+      if (action === "copy-text-ru" && text?.internalRuMaster) copyToClipboard(text.internalRuMaster, "Internal RU Master copied");
+      if (action === "toggle-text-approved" && text) {
+        const current = getTextState(text);
+        saveTextState(id, { approved: !current.approved });
+      }
+      if (action === "toggle-text-published" && text) {
+        const current = getTextState(text);
+        saveTextState(id, { published: !current.published });
+      }
+    }
+
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeTab = button.dataset.tab;
+        document.querySelectorAll(".tab-button").forEach((tab) => tab.classList.toggle("active", tab === button));
+        searchInput.value = "";
+        statusFilter.value = "all";
+        platformFilter.value = "all";
+        renderCurrentTab();
+      });
+    });
+
+    searchInput.addEventListener("input", renderCurrentTab);
+    platformFilter.addEventListener("change", renderCurrentTab);
+    statusFilter.addEventListener("change", renderCurrentTab);
+    cardsGrid.addEventListener("click", handleCardAction);
+
+    renderCurrentTab();
+  </script>
+</body>
+</html>
