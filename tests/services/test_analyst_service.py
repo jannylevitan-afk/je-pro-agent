@@ -221,3 +221,43 @@ def test_run_analyst_writer_tz_contains_video_source_context_boundary(video_sour
         assert "Repeatable formula: Show the attractive surface" in spec.writer_tz
         assert "Public comments / reactions: I wish someone told me this before my first viewing." in spec.writer_tz
         assert "Workflow A boundary: video hooks/scripts belong to Workflow A" in spec.writer_tz
+
+
+def test_run_analyst_writer_tz_contains_jane_blog_rubric_and_review_loop(source_item) -> None:
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(source_item, analyst)
+
+    for spec in report.writer_specs:
+        assert "### Jane Blog Rubric Fit" in spec.writer_tz
+        assert "#experience" in spec.writer_tz
+        assert "narrow topic" in spec.writer_tz
+        assert "serial role" in spec.writer_tz
+        assert "info occasion" in spec.writer_tz
+        assert "### Audience Function Rules" in spec.writer_tz
+        assert "мотивация и энергия" in spec.writer_tz
+        assert "реальность жизни" in spec.writer_tz
+        assert "рефлексия / инсайт" in spec.writer_tz
+        assert "польза в форме опыта" in spec.writer_tz
+        assert "1 мысль / 1 эмоция / 1 сюжет" in spec.writer_tz
+        assert "якорь / интрига -> история / контекст -> умозаключение" in spec.writer_tz
+        assert "### Analyst Review Loop Before Human Review" in spec.writer_tz
+        assert "maximum 3 review passes" in spec.writer_tz
+        assert "return after the third pass" in spec.writer_tz
+
+
+def test_run_analyst_writer_tz_maps_relationship_source_to_relationship_rubric(source_item) -> None:
+    relationship_item = source_item.model_copy(
+        update={
+            "content_theme": "founder_journey",
+            "audience_segment": "dreamer_woman",
+            "transcript_text": "Личная история про мужа, бизнес-партнёра, ребёнка и роль матери на Бали.",
+        }
+    )
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(relationship_item, analyst)
+
+    assert len(report.writer_specs) == 1
+    assert "#отношения" in report.writer_specs[0].writer_tz
+    assert "мужем и бизнес-партнёром" in report.writer_specs[0].writer_tz

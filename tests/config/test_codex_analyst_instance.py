@@ -119,3 +119,25 @@ def test_codex_analyst_instance_includes_workflow_a_video_source_context_boundar
 
     for phrase in required_phrases:
         assert phrase in prompt
+
+
+def test_codex_analyst_instance_includes_jane_blog_rubrics_and_review_loop() -> None:
+    prompt = PROMPT.read_text(encoding="utf-8")
+
+    required_phrases = [
+        "#bali life",
+        "lifestyle",
+        "#недвижка",
+        "#отношения",
+        "#заметки фаундера",
+        "#experience",
+        "Only keep/search-rank sources that fit one approved Jane blog rubric",
+        "1 мысль / 1 эмоция / 1 сюжет",
+        "якорь / интрига -> история / контекст -> умозаключение",
+        "every Instagram post is an info occasion",
+        "maximum 3 review passes",
+        "return after the third pass",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in prompt

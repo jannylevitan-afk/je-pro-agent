@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 
+from content_engine.context.jane_blog_rubrics import resolve_jane_blog_rubric
 from content_engine.context.workflow_b_rules import WorkflowBDecision
 from content_engine.models.source_item import SourceItem
 from content_engine.models.workflow_b import InsightCard
@@ -114,6 +115,7 @@ PRIVATE_RISK_PATTERNS = (
 CLIENT_MARKERS = ("client name", "имя клиента", "клиент по имени", "closed deal with")
 WORKFLOW_B_OPENING_MIN_SCORE = 20
 WORKFLOW_B_FORBIDDEN_OPENING_STARTS = tuple(phrase.lower() for phrase in JANE_FORBIDDEN_PHRASES[:8])
+MAX_JANE_ANALYST_REVIEW_PASSES = 3
 
 
 def build_jane_levitan_voice_object() -> AuthorVoiceObject:
@@ -572,6 +574,54 @@ def edit_writer_draft(
     )
 
 
+def run_jane_analyst_review_loop(
+    *,
+    task: WriterTaskInput,
+    insight: WriterInsightCard,
+    brief: WriterContentBrief,
+    editing_result: EditingLayerResult,
+) -> EditingLayerResult:
+    current = editing_result
+    latest_issues: list[str] = []
+    for attempt in range(1, MAX_JANE_ANALYST_REVIEW_PASSES + 1):
+        latest_issues = _jane_blog_review_issues(task=task, insight=insight, brief=brief, edited=current.edited_version)
+        if not latest_issues:
+            return current.model_copy(
+                update={
+                    "changes_made": [
+                        *current.changes_made,
+                        f"Analyst review loop passed in {attempt} pass(es).",
+                    ]
+                }
+            )
+
+        current = current.model_copy(
+            update={
+                "edited_version": _rewrite_for_jane_blog_review(
+                    task=task,
+                    insight=insight,
+                    brief=brief,
+                    edited=current.edited_version,
+                    issues=latest_issues,
+                ),
+                "changes_made": [
+                    *current.changes_made,
+                    f"Analyst review loop rewrite pass {attempt}: {', '.join(latest_issues)}",
+                ],
+            }
+        )
+
+    return current.model_copy(
+        update={
+            "changes_made": [
+                *current.changes_made,
+                f"Analyst review loop returned after {MAX_JANE_ANALYST_REVIEW_PASSES} passes.",
+            ],
+            "final_score": min(current.final_score, 7) if latest_issues else current.final_score,
+        }
+    )
+
+
 def run_voice_qa(
     *,
     task: WriterTaskInput,
@@ -595,6 +645,7 @@ def run_voice_qa(
         issues.append("missing_cta")
     if _contains_forbidden_phrase(full_text, author_voice):
         issues.append("forbidden_phrase_present")
+    issues.extend(_jane_blog_review_issues(task=task, insight=insight, brief=brief, edited=edited))
     if classification.fact_verification_required and not brief.required_facts and classification.risk_level == "high":
         issues.append("high_risk_fact_needs_human_confirmation")
 
@@ -662,6 +713,12 @@ def run_writer_entity_workflow(
         draft=draft,
         brief=brief,
         author_voice=resolved_voice,
+    )
+    editing_result = run_jane_analyst_review_loop(
+        task=task,
+        insight=insight_result.insight_card,
+        brief=brief,
+        editing_result=editing_result,
     )
     qa = run_voice_qa(
         task=task,
@@ -1179,6 +1236,8 @@ def _hook_theme_key(context: str) -> str:
         return "bali_travel"
     if _contains_any(context, ("wellness_architecture", "wellness architecture")):
         return "wellness_design"
+    if _contains_any(context, ("marketing_cases", "marketing cases")):
+        return "marketing_signal"
     if _contains_any(context, ("boutique_hotels", "boutique hotels")):
         return "boutique_hospitality"
     if _contains_any(context, ("expert_pain_bali", "expert pain bali", "market_reports", "market reports")):
@@ -1192,6 +1251,8 @@ def _hook_theme_key(context: str) -> str:
         return "land_structure"
     if _contains_any(context, ("wellness", "spa", "biophilic", "restorative", "wellbeing")):
         return "wellness_design"
+    if _contains_any(context, ("marketing", "reels", "influencer", "renders", "launch", "content calendar", "коммерческ", "маркетинг")):
+        return "marketing_signal"
     if _contains_any(context, ("boutique", "hotel", "hospitality", "resort", "bensley", "guest")):
         return "boutique_hospitality"
     if _contains_any(context, ("travel", "itinerary", "beach", "restaurant", "balibible", "trip", "путеше")):
@@ -1208,8 +1269,14 @@ def _hook_subject_labels(context: str) -> tuple[str, str]:
         return _founder_hook_subject(context)
     if _contains_any(context, ("bali_travel", "bali travel")):
         return _bali_travel_hook_subject(context)
+    if _contains_any(context, ("wellness_architecture", "wellness architecture", "wellness travel", "global wellness")):
+        return "ощущение восстановления", "restorative feeling"
+    if _contains_any(context, ("global_trends", "global trends")) and _contains_any(context, ("wellness", "travel", "hospitality")):
+        return "сдвиг в поведении гостей", "guest behavior shift"
     if _contains_any(context, ("boutique_hotels", "boutique hotels")):
         return _boutique_hook_subject(context)
+    if _contains_any(context, ("marketing_cases", "marketing cases", "marketing", "reels", "influencer", "renders")):
+        return "коммерческое доказательство", "commercial proof"
 
     subjects = [
         (("zoning", "permit", "разреш"), "разрешения и зонинг", "zoning and permit layer"),
@@ -1221,6 +1288,7 @@ def _hook_subject_labels(context: str) -> tuple[str, str]:
         (("family", "child", "mother", "сем", "реб", "мама"), "семейные ритуалы", "family rituals"),
         (("ambition", "founder", "entrepreneur", "амбици"), "амбиция без идеальной картинки", "ambition without a perfect image"),
         (("wellness", "spa", "biophilic"), "ощущение восстановления", "restorative feeling"),
+        (("marketing", "reels", "influencer", "renders", "коммерческ", "маркетинг"), "коммерческий сигнал", "commercial proof"),
         (("boutique", "hotel", "hospitality", "resort"), "причина вернуться", "reason to return"),
         (("travel", "itinerary", "trip", "beach", "путеше"), "честный опыт места", "honest experience of place"),
         (("trend", "report", "market", "рын"), "рыночный сигнал", "market signal"),
@@ -1277,6 +1345,7 @@ def _russian_hook_direction(theme: str, subject: str, *, goal: str, voice_regist
         "bali_travel": f"Бали легко снять красиво, сложнее поймать: {subject}.",
         "founder_life": f"Жизнь предпринимателя ломается, когда исчезает: {subject}.",
         "market_structure": f"На Бали важна не цена, а слой проверки: {subject}.",
+        "marketing_signal": "Маркетинг может шуметь громче коммерческого доказательства.",
     }
     return _guard_opening_sentence(hooks.get(theme, f"За красивой поверхностью прячется решение: {subject}."))
 
@@ -1291,6 +1360,7 @@ def _linkedin_hook_direction(theme: str, subject: str) -> str:
         "bali_travel": f"Bali is easy to film and harder to read through {subject}.",
         "founder_life": f"A founder's life breaks when {subject} looks effortless.",
         "market_structure": f"The real Bali signal sits inside the {subject}.",
+        "marketing_signal": f"Marketing volume is not the same as {subject}.",
     }
     return _guard_opening_sentence(hooks.get(theme, f"The real signal sits behind the {subject}."))
 
@@ -1380,6 +1450,9 @@ def _has_specific_opening_signal(lower: str) -> bool:
             "operator",
             "market",
             "signal",
+            "маркетинг",
+            "коммерческ",
+            "proof",
             "spa",
         )
     )
@@ -1404,6 +1477,8 @@ def _has_tension_signal(lower: str) -> bool:
             "breaks",
             "not ",
             "behind",
+            "шум",
+            "доказ",
         )
     )
 
@@ -1423,6 +1498,8 @@ def _has_continuation_pull(lower: str) -> bool:
             "harder",
             "hides",
             "signal",
+            "доказ",
+            "proof",
         )
     )
 
@@ -1499,6 +1576,135 @@ def _draft_body(brief: WriterContentBrief) -> str:
     )
 
 
+def _jane_blog_review_issues(
+    *,
+    task: WriterTaskInput,
+    insight: WriterInsightCard,
+    brief: WriterContentBrief,
+    edited: EditedVersion,
+) -> list[str]:
+    issues: list[str] = []
+    combined = _normalize_space(" ".join([edited.hook, edited.body, edited.cta])).lower()
+    resolve_jane_blog_rubric(task.raw_topic, task.source_material)
+
+    if _opening_sentence_score(edited.hook) < WORKFLOW_B_OPENING_MIN_SCORE:
+        issues.append("jane_blog_weak_opening_sentence")
+    if task.platform == "instagram" and not _has_jane_info_occasion(combined):
+        issues.append("jane_blog_missing_info_occasion")
+    if not _has_one_story_shape(combined):
+        issues.append("jane_blog_missing_one_thought_one_emotion_one_plot")
+    if not _has_lived_expertise_function(combined, insight, brief):
+        issues.append("jane_blog_missing_audience_function")
+
+    return issues
+
+
+def _rewrite_for_jane_blog_review(
+    *,
+    task: WriterTaskInput,
+    insight: WriterInsightCard,
+    brief: WriterContentBrief,
+    edited: EditedVersion,
+    issues: list[str],
+) -> EditedVersion:
+    if not issues:
+        return edited
+
+    theme = _brief_theme_key(brief)
+    if task.platform == "linkedin":
+        cue = _english_source_specific_cue(brief, theme)
+        body = (
+            f"Source cue: {cue}.\n\n"
+            f"The strategic question is not the surface topic. It is whether {insight.promise.lower()}\n\n"
+            "This matters because strong operators do not buy a story first. They test the system behind the story: demand, structure, positioning, and the decision risk no brochure wants to explain.\n\n"
+            "The useful lesson is simple: if the source cannot support the claim, the claim is not strategy. It is decoration."
+        )
+    else:
+        cue = _source_specific_cue(brief, theme)
+        body = (
+            f"Сначала цепляет конкретный повод: {cue}.\n\n"
+            "Но важнее не картинка, а то, какую мысль она запускает.\n\n"
+            "Эмоция здесь простая: ты узнаёшь не идеальную жизнь, а момент, где приходится выбирать внимательнее.\n\n"
+            f"Контекст в том, что {_ru_theme_claim(theme)}\n\n"
+            "Мой вывод: хороший пост не должен объяснять всё. Он должен дать одну мысль, одну эмоцию и один сюжет, который хочется досмотреть внутри своей жизни."
+        )
+
+    return EditedVersion(
+        hook=edited.hook,
+        body=_tighten_spacing(body),
+        cta=edited.cta,
+    )
+
+
+def _has_jane_info_occasion(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "конкрет",
+            "деталь",
+            "мест",
+            "событ",
+            "истори",
+            "сегодня",
+            "сейчас",
+            "повестк",
+            "подсказ",
+            "ритуал",
+            "проект",
+            "продукт",
+            "source cue",
+            "source detail",
+        )
+    )
+
+
+def _has_one_story_shape(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "истори",
+            "контекст",
+            "деталь",
+            "сначала",
+            "потом",
+            "подсказ",
+            "маршрут",
+            "ритуал",
+            "проект",
+            "продукт",
+            "source cue",
+            "story",
+            "context",
+        )
+    )
+
+
+def _has_lived_expertise_function(
+    text: str,
+    insight: WriterInsightCard,
+    brief: WriterContentBrief,
+) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "ты",
+            "вопрос",
+            "вывод",
+            "решен",
+            "провер",
+            "ощущ",
+            "риск",
+            "ошиб",
+            "source cue",
+            "signal",
+            "operator",
+            "decision",
+            "lesson",
+            "strategy",
+        )
+    ) or bool(insight.promise and (brief.core_message or brief.source_excerpt))
+
+
 def _brief_theme_key(brief: WriterContentBrief) -> str:
     context = _normalize_space(
         " ".join(
@@ -1559,6 +1765,14 @@ def _instagram_body(brief: WriterContentBrief, theme: str) -> str:
             "Когда этого нет, дизайн становится декорацией.\n\n"
             "Когда это есть, объект начинает работать как история, а не как набор комнат."
         )
+    if theme == "marketing_signal":
+        return (
+            "Маркетинг может создать ощущение движения за один день.\n\n"
+            "Но коммерческий сигнал появляется только там, где есть доказательство спроса: причина купить, понятная логика цены и ответ на вопрос «почему сейчас».\n\n"
+            f"В этой истории важна деталь: {cue}.\n\n"
+            "Красивый запуск легко перепутать с сильным продуктом.\n\n"
+            "А потом рынок очень быстро показывает, где была энергия, а где было доказательство."
+        )
     return (
         "Сначала видишь картинку.\n\n"
         f"Потом появляется главный вопрос: {_ru_theme_claim(theme)}\n\n"
@@ -1589,6 +1803,7 @@ def _linkedin_body(brief: WriterContentBrief, theme: str) -> str:
         return (
             "Wellness is becoming less of an amenity and more of a product thesis.\n\n"
             "The question is not whether a project has a spa, greenery, or quiet corners. The question is whether the whole spatial logic helps people recover, stay longer, and remember the place.\n\n"
+            f"The useful source cue is this: {cue}.\n\n"
             "For experience-led real estate, that changes the brief.\n\n"
             "Design has to carry feeling and business logic at the same time."
         )
@@ -1605,6 +1820,14 @@ def _linkedin_body(brief: WriterContentBrief, theme: str) -> str:
             "The more useful version shows the cost of that momentum: family choices, identity pressure, ambition, and the parts of life that cannot be optimized like a dashboard.\n\n"
             "That tension is why the story works.\n\n"
             "It is not inspiration. It is a better read of what building actually requires."
+        )
+    if theme == "marketing_signal":
+        return (
+            "A full content calendar can create momentum without creating proof.\n\n"
+            f"The useful source cue is this: {cue}.\n\n"
+            "For brokers and developers, the question is not whether the market noticed the project. The question is whether the project can explain demand, price logic, timing, and buyer trust after the launch noise fades.\n\n"
+            "Marketing is useful when it reveals commercial truth.\n\n"
+            "Without that layer, it is just activity."
         )
     return (
         "The surface signal is rarely enough.\n\n"
@@ -1671,6 +1894,13 @@ def _source_specific_cue(brief: WriterContentBrief, theme: str) -> str:
             (("dezeen", "architecture", "interiors"), "архитектурный сигнал помогает отличаться до продажи"),
         ]
         return _first_matching_cue(text, cues, "причина вернуться должна быть встроена в операционную модель")
+    if theme == "marketing_signal":
+        cues = [
+            (("reels", "influencer", "renders", "launch", "content"), "активность не доказывает коммерческий спрос"),
+            (("why this product", "why now", "buyer", "demand"), "покупательский вопрос важнее громкости запуска"),
+            (("broker", "client", "trust"), "репутация брокера держится на качестве рекомендации"),
+        ]
+        return _first_matching_cue(text, cues, "сигнал сильнее маркетингового шума")
     return "из исходника нужно забрать не пересказ, а применимый вывод"
 
 
@@ -1713,6 +1943,13 @@ def _english_source_specific_cue(brief: WriterContentBrief, theme: str) -> str:
             (("dezeen", "architecture", "interiors"), "architecture can become differentiation before sales"),
         ]
         return _first_matching_cue(text, cues, "the reason to return must be built into the operating model")
+    if theme == "marketing_signal":
+        cues = [
+            (("reels", "influencer", "renders", "launch", "content"), "activity is not the same as commercial demand"),
+            (("why this product", "why now", "buyer", "demand"), "the buyer question matters more than launch volume"),
+            (("broker", "client", "trust"), "broker trust depends on recommendation quality"),
+        ]
+        return _first_matching_cue(text, cues, "commercial signal matters more than marketing noise")
     return "the source needs to become an applicable decision, not a summary"
 
 
@@ -1732,6 +1969,7 @@ def _ru_theme_claim(theme: str) -> str:
         "bali_travel": "какое ощущение места человек захочет повторить?",
         "wellness_design": "восстанавливает ли пространство человека или только выглядит дорого?",
         "boutique_hospitality": "почему гость должен вернуться именно сюда?",
+        "marketing_signal": "где здесь коммерческий сигнал, а где просто шум запуска?",
     }
     return claims.get(theme, "какой вывод из этого source можно забрать без выдуманных фактов?")
 

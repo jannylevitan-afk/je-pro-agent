@@ -1,0 +1,446 @@
+{
+  "assets": [
+    {
+      "content_id": "wfb-20260427-01",
+      "title": "The ordinary, interrupted hours inside a founder's ambitious life — Instagram Lifestyle",
+      "platform": "Instagram Lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "pillar": "lifestyle_journey",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "founder_journey",
+      "source_id": "src_founder_journey_001",
+      "writer_assignment_id": "wa_src_founder_journey_001_instagram_lifestyle",
+      "internal_ru_master": null,
+      "final_text": "Жизнь предпринимателя ломается, когда исчезает: семейная память.\n\nСнаружи это может выглядеть как красивая жизнь предпринимателя.\nНо внутри всё держится на конкретной вещи: семейная память.\nВ этой истории цепляет деталь: амбиция работает только тогда, когда внутри остаётся место живой жизни.\nБизнес, ребёнок, планы, картинка, где будто всё держится само. А потом ты понимаешь: амбиции не отменяют семью, усталость и свои желания.\nЕсли эту часть вырезать, получится не сильная женщина, а аккуратно упакованная функция.",
+      "opening_sentence": "Жизнь предпринимателя ломается, когда исчезает: семейная память.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-02",
+      "title": "Bali villa investment failure: buying aesthetics instead of a functioning asset — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_proof",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "expert_pain_bali",
+      "source_id": "src_expert_pain_bali_001",
+      "writer_assignment_id": "wa_src_expert_pain_bali_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "На Бали важна не цена, а слой проверки: операторская реальность.\n\nЯ бы здесь смотрела не на фасад.\nСначала операторская реальность. Потом операторская логика. Потом ликвидность, если первая эмоция прошла.\nКонкретная зацепка здесь: операторская модель решает судьбу красивого объекта.\nКрасивый объект может быть слабым решением, если за ним нет нормального ответа на простые вопросы.\nИменно там обычно прячется дорогая ошибка.",
+      "opening_sentence": "На Бали важна не цена, а слой проверки: операторская реальность.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-03",
+      "title": "Bali villa investment failure: buying aesthetics instead of a functioning asset — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_proof",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "expert_pain_bali",
+      "source_id": "src_expert_pain_bali_001",
+      "writer_assignment_id": "wa_src_expert_pain_bali_001_linkedin_b2b",
+      "internal_ru_master": "Самый красивый объект на Бали — не всегда актив.\n\nРынок перенасыщен визуально безупречными проектами. Именно поэтому вопрос «какой ROI?» — не отправная точка анализа, а сигнал тревоги: он появляется тогда, когда инвестор уже влюблён в рендеры и эмоционально закрыл сделку.\n\nНастоящая проверка начинается раньше — и она не про эстетику.\n\nПрежде чем капитал зафиксирован, объект должен уметь отвечать на конкретные вопросы: кто управляет активом после запуска и на каких условиях? Какова реальная глубина спроса в этой локации? Что написано в договоре аренды земли — и что там не написано? На каких операционных допущениях строится финансовая модель? Кто несёт расходы на обслуживание? Как выглядит выход?\n\nЕсли объект не может ответить на эти вопросы до подписания — дизайн не компенсирует структурные пробелы.\n\nЮридическая конструкция сделки меняет её суть значительно сильнее, чем брошюра. Форма владения, тип договора, срок аренды земли — это не детали, которые уточняются после. Это параметры, которые определяют, является ли объект работающим активом или дорогостоящим обязательством.\n\nБали предлагает достаточно красивых вилл. Рабочих активов — значительно меньше. Разница между ними видна не в презентации, а в ответах на вопросы, которые большинство покупателей задают слишком поздно.",
+      "final_text": "The real Bali signal sits inside the operator reality.\n\nThe first layer is usually attractive: price, design, location, projected upside.\nThe second layer is where the decision becomes serious: the decision layer, permits, operator logic, liquidity, and who carries the downside if the story does not perform.\nThe useful source cue is this: the operating model decides whether the asset can perform.\nFor developers and investors, the useful move is to slow the narrative down before it becomes too easy to believe.\nGood opportunities survive that check.",
+      "opening_sentence": "The real Bali signal sits inside the operator reality.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-04",
+      "title": "Legal structure as the true operating boundary of a Bali real estate asset — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_proof",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "land_and_legal",
+      "source_id": "src_land_legal_001",
+      "writer_assignment_id": "wa_src_land_legal_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "На Бали дорогой риск часто прячется в слое: разрешения и зонинг.\n\nЯ бы здесь смотрела не на фасад.\nСначала разрешения и зонинг. Потом операторская логика. Потом ликвидность, если первая эмоция прошла.\nКонкретная зацепка здесь: правовой слой важнее первого впечатления.\nКрасивый объект может быть слабым решением, если за ним нет нормального ответа на простые вопросы.\nИменно там обычно прячется дорогая ошибка.",
+      "opening_sentence": "На Бали дорогой риск часто прячется в слое: разрешения и зонинг.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-05",
+      "title": "Legal structure as the true operating boundary of a Bali real estate asset — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_proof",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "land_and_legal",
+      "source_id": "src_land_legal_001",
+      "writer_assignment_id": "wa_src_land_legal_001_linkedin_b2b",
+      "internal_ru_master": "Красивый рендер не закрывает дыру в правовой структуре.\n\nНа Бали сделки с самым опасным профилем риска выглядят именно так: хорошая локация, убедительная цена, чистая презентация. Проблема не в том, что что-то выглядит подозрительно. Проблема в том, что всё выглядит нормально — а правовая основа при этом не проверена.\n\nПрежде чем обсуждать цену или концепцию, профессиональный покупатель обязан понять: каков статус земли, соответствует ли зонирование коммерческому использованию, какова длина аренды и механика её продления, есть ли номинальная структура или корпоративный риск, действительны ли разрешения, и кто несёт ответственность, если фактическое использование объекта расходится с документами.\n\nЭто не административная рутина, которую можно отложить на финальный этап. Правовая структура — это операционная граница актива. Она определяет, чем актив является на самом деле и что с ним можно делать легально.\n\nОдин структурный изъян способен полностью обесценить инвестиционный тезис — независимо от того, насколько убедительно выглядит брошюра.\n\nНа зрелых рынках это называется базовым due diligence. На Бали это называется первым разговором — потому что земельный статус, зонирование и права на использование здесь не стандартизированы и часто представлены неточно.\n\nВизуально привлекательная сделка с размытой правовой основой — это не дисконтированная возможность. Это неопределённое обязательство.",
+      "final_text": "In Bali, expensive risk hides inside the zoning and permit layer.\n\nThe first layer is usually attractive: price, design, location, projected upside.\nThe second layer is where the decision becomes serious: the decision layer, permits, operator logic, liquidity, and who carries the downside if the story does not perform.\nThe useful source cue is this: legal structure matters more than the first impression.\nFor developers and investors, the useful move is to slow the narrative down before it becomes too easy to believe.\nGood opportunities survive that check.",
+      "opening_sentence": "In Bali, expensive risk hides inside the zoning and permit layer.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-06",
+      "title": "Quality split inside the Bali real estate market: how serious operators distinguish defensible assets from overlaunched, hype-dependent inventory — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_proof",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "market_reports",
+      "source_id": "src_market_reports_001",
+      "writer_assignment_id": "wa_src_market_reports_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "На Бали важна не цена, а слой проверки: операторская реальность.\n\nЯ бы здесь смотрела не на фасад.\nСначала операторская реальность. Потом операторская логика. Потом ликвидность, если первая эмоция прошла.\nКонкретная зацепка здесь: рыночный сигнал нужно читать до эмоции покупки.\nКрасивый объект может быть слабым решением, если за ним нет нормального ответа на простые вопросы.\nИменно там обычно прячется дорогая ошибка.",
+      "opening_sentence": "На Бали важна не цена, а слой проверки: операторская реальность.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-07",
+      "title": "Quality split inside the Bali real estate market: how serious operators distinguish defensible assets from overlaunched, hype-dependent inventory — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_proof",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "market_reports",
+      "source_id": "src_market_reports_001",
+      "writer_assignment_id": "wa_src_market_reports_001_linkedin_b2b",
+      "internal_ru_master": "Брошюра на Бали не обновляется в момент, когда актив становится уязвимым.\n\nПрофессиональный сигнал сейчас — не общий рост интереса к рынку, а качественный разрыв внутри него. Одни зоны показывают признаки перезапуска: давление на цену, слабая дифференциация, агрессивные обещания доходности. Другие активы держатся — через логику локации, соответствие продукта спросу, операционную прозрачность и аудиторию, которая не зависит от хайпа.\n\nСерьёзный оператор читает рынок именно через этот фильтр — до того, как коррекция стала очевидной.\n\nЧетыре вопроса, которые стоит задать до входа:\n\nРаботает ли локация независимо от маркетинга? Если спрос держится только на промо-активности, это не актив — это позиция в очереди.\n\nЕсть ли продуктовое соответствие реальному спросу? Не тому, что обещает презентация, а тому, что подтверждает операционная история аналогичных объектов.\n\nПонятна ли операционная модель до сделки? Управление, загрузка, структура расходов — это не детали, это основа оценки.\n\nКак оформлена юридическая структура? Язык брошюры и язык договора — разные языки. Структура меняет сделку сильнее, чем любое обещание в презентации.\n\nРынок Бали не падает равномерно. Он расслаивается. Активы без внятной логики уже находятся под давлением — просто брошюры ещё не успели это отразить.\n\nТе, кто входит сейчас, делают ставку не на рынок в целом — а на конкретную сторону этого разрыва.",
+      "final_text": "The real Bali signal sits inside the operator reality.\n\nThe first layer is usually attractive: price, design, location, projected upside.\nThe second layer is where the decision becomes serious: the decision layer, permits, operator logic, liquidity, and who carries the downside if the story does not perform.\nThe useful source cue is this: market signals should be read before the buying emotion starts.\nFor developers and investors, the useful move is to slow the narrative down before it becomes too easy to believe.\nGood opportunities survive that check.",
+      "opening_sentence": "The real Bali signal sits inside the operator reality.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-08",
+      "title": "How Bali rewires your daily rhythm before you ever think about buying or investing — Instagram Lifestyle",
+      "platform": "Instagram Lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "pillar": "lifestyle_invitation",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "bali_travel",
+      "source_id": "src_bali_travel_001",
+      "writer_assignment_id": "wa_src_bali_travel_001_instagram_lifestyle",
+      "internal_ru_master": null,
+      "final_text": "Бали легко снять красиво, сложнее поймать: честный опыт места.\n\nТакие места работают не потому, что они просто красивые.\nОни дают маленький ритуал: честный опыт места, воздух, свет, ощущение, что ты на секунду попала в другую версию своей жизни.\nВ исходной детали важно именно это: Бали работает через телесное ощущение места.\nДля Бали это сильнее очередного списка мест.\nТы либо чувствуешь место телом, либо просто пролистываешь ещё одну картинку.",
+      "opening_sentence": "Бали легко снять красиво, сложнее поймать: честный опыт места.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-09",
+      "title": "Converting the global wellness travel trend into defensible product logic for Bali real estate development — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_market_signals",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "global_trends",
+      "source_id": "src_global_trends_001",
+      "writer_assignment_id": "wa_src_global_trends_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "Wellness в архитектуре перестал быть красивым бонусом: сдвиг в поведении гостей.\n\nWellness тут не про спа в углу.\nЭто про сдвиг в поведении гостей: свет, тишина, вода, маршрут тела внутри дома.\nЗдесь ценно не слово wellness, а конкретная подсказка: wellness уже читается как рынок, а не настроение.\nДля девелопера это уже не декор. Это продуктовая логика.\nЕсли место не восстанавливает, оно просто красиво выглядит.",
+      "opening_sentence": "Wellness в архитектуре перестал быть красивым бонусом: сдвиг в поведении гостей.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-10",
+      "title": "Converting the global wellness travel trend into defensible product logic for Bali real estate development — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_market_signals",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "global_trends",
+      "source_id": "src_global_trends_001",
+      "writer_assignment_id": "wa_src_global_trends_001_linkedin_b2b",
+      "internal_ru_master": "Самая дешёвая строка в смете Бали нередко становится самой дорогой стратегической ошибкой.\n\nГлобальный спрос на путешествия смещается — не к более дорогому люксу, а к другому его типу. Гости выбирают приватность, восстановление, более длительные пребывания и опыт, который ощущается как созданный под их идентичность. Это не тренд сезона. Это структурный сдвиг в поведении, который уже переписывает, какие активы удерживают загрузку, а какие — нет.\n\nДля девелопера в Бали вопрос не в том, моден ли велнес. Вопрос в том, встроен ли он в продукт — или просто нарисован на брошюре.\n\nРазница критична. Велнес как маркетинговый слой — это спа в рендере и цитата про «баланс» в описании. Велнес как продуктовая логика — это архитектура, которая работает на восстановление, операционный ритм, который держит гостя, и причина, по которой он возвращается. Первое продаётся один раз. Второе формирует повторный спрос и защищает доходность актива.\n\nДевелоперы, которые выиграют следующий цикл, — не те, кто добавил бассейн с хлорофиллом. Это те, кто принял велнес как переменную due diligence: на уровне участка, архитектурного решения, сервисной модели и юридической структуры сделки.\n\nЮридическая структура, кстати, меняет сделку сильнее, чем любой текст в брошюре. Это отдельный разговор — но он начинается ещё до архитектора.",
+      "final_text": "Wellness is becoming a sharper signal of guest behavior shift.\n\nWellness is becoming less of an amenity and more of a product thesis.\nThe question is not whether a project has a spa, greenery, or quiet corners. The question is whether the whole spatial logic helps people recover, stay longer, and remember the place.\nThe useful source cue is this: wellness reads like a market signal, not a mood.\nFor experience-led real estate, that changes the brief.\nDesign has to carry feeling and business logic at the same time.",
+      "opening_sentence": "Wellness is becoming a sharper signal of guest behavior shift.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-11",
+      "title": "Wellness architecture as experience product design, not aesthetic decoration — using spa logic, silence, materials, ritual, privacy, movement, and light to produce measurable emotional and commercial outcomes — Instagram Lifestyle",
+      "platform": "Instagram Lifestyle",
+      "platform_lane": "instagram_lifestyle",
+      "pillar": "expertise_lifestyle",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "wellness_architecture",
+      "source_id": "src_wellness_architecture_001",
+      "writer_assignment_id": "wa_src_wellness_architecture_001_instagram_lifestyle",
+      "internal_ru_master": null,
+      "final_text": "Wellness-проект продаёт не спа, а состояние: ощущение восстановления.\n\nWellness тут не про спа в углу.\nЭто про ощущение восстановления: свет, тишина, вода, маршрут тела внутри дома.\nЗдесь ценно не слово wellness, а конкретная подсказка: вода и ритуал восстановления становятся частью продукта.\nДля девелопера это уже не декор. Это продуктовая логика.\nЕсли место не восстанавливает, оно просто красиво выглядит.",
+      "opening_sentence": "Wellness-проект продаёт не спа, а состояние: ощущение восстановления.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-12",
+      "title": "Wellness architecture as experience product design, not aesthetic decoration — using spa logic, silence, materials, ritual, privacy, movement, and light to produce measurable emotional and commercial outcomes — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_lifestyle",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "wellness_architecture",
+      "source_id": "src_wellness_architecture_001",
+      "writer_assignment_id": "wa_src_wellness_architecture_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "Wellness в архитектуре перестал быть красивым бонусом: ощущение восстановления.\n\nWellness тут не про спа в углу.\nЭто про ощущение восстановления: свет, тишина, вода, маршрут тела внутри дома.\nЗдесь ценно не слово wellness, а конкретная подсказка: вода и ритуал восстановления становятся частью продукта.\nДля девелопера это уже не декор. Это продуктовая логика.\nЕсли место не восстанавливает, оно просто красиво выглядит.",
+      "opening_sentence": "Wellness в архитектуре перестал быть красивым бонусом: ощущение восстановления.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-13",
+      "title": "Wellness architecture as experience product design, not aesthetic decoration — using spa logic, silence, materials, ritual, privacy, movement, and light to produce measurable emotional and commercial outcomes — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_lifestyle",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "wellness_architecture",
+      "source_id": "src_wellness_architecture_001",
+      "writer_assignment_id": "wa_src_wellness_architecture_001_linkedin_b2b",
+      "internal_ru_master": "Гость не запоминает материал — он запоминает, как изменилось его состояние.\n\nЭто разграничение определяет разницу между wellness-архитектурой как эстетикой и wellness-архитектурой как продуктом опыта. Первая производит красивые фотографии. Вторая производит верифицируемый результат: физиологический сдвиг, ощущение тишины, восстановление, которое гость осознаёт и за которое возвращается.\n\nКогда мы проектируем пространство через логику спа — последовательность зон, качество света, тактильность материала, акустику, приватность, ритуал движения — каждое решение становится функциональным, а не декоративным. Это меняет разговор с девелопером: дизайн перестаёт быть строкой расходов и становится аргументом коммерческой ценности.\n\nИменно здесь архитекторы теряют позицию в переговорах. Не потому что их решения слабые — а потому что они не переведены в язык результата. Девелопер и оператор всё чаще задают вопрос: гость действительно почувствовал что-то другое? Если дизайнер не может ответить — он уступает место тому, кто может.\n\nМетодология, которая связывает конкретные архитектурные решения с эмоциональными и коммерческими исходами, — это не усложнение процесса. Это защита профессиональной позиции и инструмент для разговора с рынком на его языке.\n\nWellness-архитектура зрелого рынка требует инженерии опыта, а не стилизации пространства. Чем раньше дизайнер выстраивает эту логику, тем сильнее его позиция — в проекте, в переговорах и в портфеле.",
+      "final_text": "Wellness is becoming a sharper signal of restorative feeling.\n\nWellness is becoming less of an amenity and more of a product thesis.\nThe question is not whether a project has a spa, greenery, or quiet corners. The question is whether the whole spatial logic helps people recover, stay longer, and remember the place.\nThe useful source cue is this: water and recovery rituals are becoming part of the product.\nFor experience-led real estate, that changes the brief.\nDesign has to carry feeling and business logic at the same time.",
+      "opening_sentence": "Wellness is becoming a sharper signal of restorative feeling.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-14",
+      "title": "Boutique hotel positioning as a chain of operational and strategic decisions, not a branding label — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_proof",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "boutique_hotels",
+      "source_id": "src_boutique_hotels_001",
+      "writer_assignment_id": "wa_src_boutique_hotels_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "Бутик-отель выигрывает не картинкой, а логикой: точка зрения в дизайне.\n\nБутик-отель держится не на красивом лобби.\nОн держится на причине вернуться: точка зрения в дизайне, сценарии, детали, оператор, ощущение, что место не случайное.\nВ этой находке главное: причина вернуться должна быть встроена в операционную модель.\nКогда этого нет, дизайн становится декорацией.\nКогда это есть, объект начинает работать как история, а не как набор комнат.",
+      "opening_sentence": "Бутик-отель выигрывает не картинкой, а логикой: точка зрения в дизайне.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-15",
+      "title": "Boutique hotel positioning as a chain of operational and strategic decisions, not a branding label — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_proof",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "boutique_hotels",
+      "source_id": "src_boutique_hotels_001",
+      "writer_assignment_id": "wa_src_boutique_hotels_001_linkedin_b2b",
+      "internal_ru_master": "Называть проект «бутиком» и строить бутик — это разные инвестиционные решения.\n\nВ Бали рынок уплотняется быстрее, чем успевает сформироваться спрос на премиум. Новые объекты конкурируют не только ценой, но и визуальным языком: правильный свет, правильный бассейн, правильная фотография. Поверхностно — почти неотличимо. Именно здесь начинается ценовое давление, которое разрушает доходность.\n\nСильный гостиничный проект знает три вещи до начала строительства: для какого гостя он создан, какую эмоцию должно оставить пребывание, и почему этот продукт нельзя заменить более дешёвым соседом. Это не маркетинговые вопросы — это архитектурные, операционные и дистрибуционные решения, принятые заранее.\n\nБутиковое позиционирование — это цепочка: концепция, дизайн, сервис, дистрибуция, техническое обслуживание, поведение гостя при повторном визите. Если хотя бы одно звено выпадает, вся цепочка теряет ценовую защиту. Дешёвый конкурент рядом не обязан быть лучше — ему достаточно быть достаточно похожим.\n\nИнвесторы, которые воспринимают слово «бутик» как прилагательное для маркетинговых материалов, а не как системное решение, обнаруживают это на этапе операционного года — когда ставки не держатся, а заполняемость требует скидок.\n\nДиагностический вопрос прост: если убрать фотографию, что именно защищает цену вашего объекта?",
+      "final_text": "Boutique hospitality wins when beauty becomes a design point of view.\n\nA boutique hotel is not a smaller version of a large hotel.\nIt needs a sharper reason to exist: design point of view, operating rhythm, repeatable guest memory, and a commercial logic behind the beauty.\nThe useful source cue is this: the reason to return must be built into the operating model.\nThe projects worth studying are the ones where design is not decoration. It is positioning.\nThat is where hospitality becomes an asset strategy, not just an aesthetic choice.",
+      "opening_sentence": "Boutique hospitality wins when beauty becomes a design point of view.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-16",
+      "title": "Distinguishing marketing noise from commercial proof in real estate projects — Instagram Professional",
+      "platform": "Instagram Professional",
+      "platform_lane": "instagram_professional",
+      "pillar": "expertise_proof",
+      "format": "caption",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "marketing_cases",
+      "source_id": "src_marketing_cases_001",
+      "writer_assignment_id": "wa_src_marketing_cases_001_instagram_professional",
+      "internal_ru_master": null,
+      "final_text": "Маркетинг может шуметь громче коммерческого доказательства.\n\nМаркетинг может создать ощущение движения за один день.\nНо коммерческий сигнал появляется только там, где есть доказательство спроса: причина купить, понятная логика цены и ответ на вопрос «почему сейчас».\nВ этой истории важна деталь: активность не доказывает коммерческий спрос.\nКрасивый запуск легко перепутать с сильным продуктом.\nА потом рынок очень быстро показывает, где была энергия, а где было доказательство.",
+      "opening_sentence": "Маркетинг может шуметь громче коммерческого доказательства.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    },
+    {
+      "content_id": "wfb-20260427-17",
+      "title": "Distinguishing marketing noise from commercial proof in real estate projects — LinkedIn B2B",
+      "platform": "LinkedIn B2B",
+      "platform_lane": "linkedin_b2b",
+      "pillar": "expertise_proof",
+      "format": "thought leadership post",
+      "approval_status": "Draft Ready — Analyst Reviewed",
+      "canonical_theme": "marketing_cases",
+      "source_id": "src_marketing_cases_001",
+      "writer_assignment_id": "wa_src_marketing_cases_001_linkedin_b2b",
+      "internal_ru_master": "Активный проект — это не то же самое, что продаваемый проект.\n\nРилсы, инфлюенсеры, красивые рендеры, громкий запуск — всё это создаёт ощущение движения. Но ни один из этих элементов не отвечает на вопрос, который покупатель задаёт себе в момент принятия решения: почему именно этот продукт, почему сейчас, кто формирует спрос и что защищает цену после того, как внимание угаснет.\n\nБрокер, который не задаёт эти вопросы до того, как включить проект в свой портфель, берёт на себя чужой маркетинговый риск. Клиент оценивает рекомендацию — не активность девелопера. Если проект выглядит убедительно, но не закрывается, репутационные потери несёт брокер.\n\nРазница между шумом и коммерческим доказательством проявляется в трёх точках. Первая — наличие реального сигнала спроса, а не только охватов. Вторая — логика защиты цены: что происходит с ценой после старта продаж и почему. Третья — юридическая структура сделки, которая меняет её суть значительно сильнее, чем любой текст в брошюре.\n\nМаркетинговая активность — это не замена этим ответам. Она может привлечь внимание, но не создаёт фундамент для закрытия.\n\nБрокеры, которые умеют отделять сигнал от шума до начала работы с проектом, защищают не только свои сделки — они защищают доверие клиентов, которое и является их главным активом на любом рынке.",
+      "final_text": "Marketing volume is not the same as commercial proof.\n\nA full content calendar can create momentum without creating proof.\nThe useful source cue is this: activity is not the same as commercial demand.\nFor brokers and developers, the question is not whether the market noticed the project. The question is whether the project can explain demand, price logic, timing, and buyer trust after the launch noise fades.\nMarketing is useful when it reveals commercial truth.\nWithout that layer, it is just activity.",
+      "opening_sentence": "Marketing volume is not the same as commercial proof.",
+      "writer_review": {
+        "passed": true,
+        "issues": [],
+        "fixes_applied": [
+          "Checked opening sentence strength",
+          "Removed generic AI phrasing",
+          "Checked fact and privacy boundaries",
+          "Analyst review loop passed in 1 pass(es)."
+        ],
+        "max_review_passes": 3
+      }
+    }
+  ]
+}

@@ -43,3 +43,17 @@ def test_resolve_research_dependencies_adds_video_context_boundary_for_workflow_
 
     assert "video-source context boundary" in profile.workflow_intake
     assert "Use video hooks only as source/evidence context, not as Workflow B final hooks or scripts." in profile.writer_context
+
+
+def test_resolve_research_dependencies_adds_jane_blog_rubric_search_rules(source_item) -> None:
+    item = source_item.model_copy(update={"content_theme": "bali_travel"})
+
+    profile = resolve_research_dependencies(item, workflow="workflow_b")
+
+    assert "Jane blog rubric fit" in profile.collect_fields
+    assert "narrow topic" in profile.collect_fields
+    assert "info occasion" in profile.collect_fields
+    assert "serial angle" in profile.collect_fields
+    assert "Only keep sources that fit one approved Jane blog rubric." in profile.workflow_intake
+    assert "Rubric: #bali life" in profile.writer_context
+    assert "1 мысль / 1 эмоция / 1 сюжет" in profile.writer_context

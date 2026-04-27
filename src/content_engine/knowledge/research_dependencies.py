@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from content_engine.context.jane_blog_rubrics import (
+    JANE_STORY_STRUCTURE_RULES,
+    resolve_jane_blog_rubric,
+)
 from content_engine.models.source_item import SourceItem
 
 
@@ -144,6 +148,13 @@ _WORKFLOW_A_FIELDS = [
     "immutable raw payload snapshot",
 ]
 _WORKFLOW_B_FIELDS = ["source note", "topic", "angle", "emotional trigger", "proof", "reusable angle"]
+_JANE_BLOG_SEARCH_FIELDS = [
+    "Jane blog rubric fit",
+    "narrow topic",
+    "info occasion",
+    "serial angle",
+    "1 thought / 1 emotion / 1 plot cue",
+]
 
 _WORKFLOW_A_INTAKE = [
     "video reference",
@@ -156,11 +167,13 @@ _WORKFLOW_A_INTAKE = [
     "shooting cue",
 ]
 _WORKFLOW_B_INTAKE = ["structured source note", "audience pain and trigger", "narrative type", "fact boundary", "reuse score"]
+_JANE_BLOG_SEARCH_RULE = "Only keep sources that fit one approved Jane blog rubric."
 
 
 def resolve_research_dependencies(item: SourceItem, *, workflow: WorkflowName) -> ResearchDependencyProfile:
     theme_key = _normalize_theme(item.content_theme)
     theme_profile = _THEME_PROFILES.get(theme_key, _THEME_PROFILES["boutique_hotels"])
+    rubric = resolve_jane_blog_rubric(theme_key, item.transcript_text)
     workflow_fields = _WORKFLOW_A_FIELDS if workflow == "workflow_a" else _WORKFLOW_B_FIELDS
     workflow_intake = _WORKFLOW_A_INTAKE if workflow == "workflow_a" else _WORKFLOW_B_INTAKE
     video_context = _has_video_context(item)
@@ -174,15 +187,24 @@ def resolve_research_dependencies(item: SourceItem, *, workflow: WorkflowName) -
         content_pillars=list(theme_profile["content_pillars"]),
         narrative_types=list(theme_profile["narrative_types"]),
         suggested_registers=list(theme_profile["suggested_registers"]),
-        collect_fields=[*list(theme_profile["collect_fields"]), *workflow_fields],
+        collect_fields=[
+            *list(theme_profile["collect_fields"]),
+            *workflow_fields,
+            *(_JANE_BLOG_SEARCH_FIELDS if workflow == "workflow_b" else []),
+        ],
         evidence_required=list(_BASE_EVIDENCE),
         workflow_intake=[
             *workflow_intake,
+            *([_JANE_BLOG_SEARCH_RULE] if workflow == "workflow_b" else []),
             *(["video-source context boundary"] if workflow == "workflow_b" and video_context else []),
         ],
         writer_context=[
             "Use the source note as the factual boundary.",
             "Use the audience context before choosing hook, tone, and CTA.",
+            f"Rubric: {rubric.label}",
+            f"Rubric source fit: {rubric.source_fit}",
+            f"Serial angle: {rubric.serial_role}",
+            *JANE_STORY_STRUCTURE_RULES,
             "If a claim is not in evidence or verified facts, write it as an observation or omit it.",
             *(
                 ["Use video hooks only as source/evidence context, not as Workflow B final hooks or scripts."]

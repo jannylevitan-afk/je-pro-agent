@@ -1,5 +1,6 @@
 from content_engine.models.writer_entity import AvailableContext, WriterTaskInput
 from content_engine.services.writer_entity import (
+    MAX_JANE_ANALYST_REVIEW_PASSES,
     build_final_content_asset,
     build_jane_levitan_voice_object,
     format_final_content_asset_markdown,
@@ -461,3 +462,54 @@ def test_video_hooks_topics_generator_applies_quality_gate() -> None:
     assert output.best_hook.hook_id == output.top_hooks[0].hook_id
     assert all(gate.verdict in {"keep", "rewrite", "kill"} for gate in output.hook_quality_gate)
     assert "3 tips" not in output.top_hooks[0].hook_text.lower()
+
+
+def test_writer_entity_runs_jane_analyst_review_loop_before_human_review() -> None:
+    result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="bali travel",
+            source_material=(
+                "A Bali source mentions a new Ubud restaurant, an art event, and a day-plan "
+                "that works as a real island-life occasion."
+            ),
+            target_audience="lifestyle_expat",
+            platform="instagram",
+            goal="engagement",
+            tone_of_voice="personal",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers a new Ubud restaurant and art event."],
+        reference_sources=["https://example.com/bali-life"],
+    )
+
+    assert MAX_JANE_ANALYST_REVIEW_PASSES == 3
+    assert any("Analyst review loop" in fix for fix in result.qa_report.fixes_applied)
+    assert not any(issue.startswith("jane_blog_") for issue in result.qa_report.issues)
+    assert any(
+        marker in result.edited_final.body.lower()
+        for marker in ("истори", "контекст", "деталь", "ощущ", "мест")
+    )
+
+
+def test_writer_entity_keeps_marketing_cases_separate_from_boutique_hotels() -> None:
+    result = run_writer_entity_workflow(
+        task=make_task(
+            raw_topic="marketing cases",
+            source_material=(
+                "A real estate marketing case has reels, influencer visits, renders, and a loud launch, "
+                "but cannot answer the buyer's real question: why this product, why now, and what demand proves it."
+            ),
+            target_audience="broker",
+            platform="instagram",
+            goal="authority",
+            tone_of_voice="analytical",
+        ),
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=["Source note covers marketing activity versus commercial proof."],
+        reference_sources=["https://example.com/marketing-case"],
+    )
+
+    assert "маркетинг" in result.edited_final.hook.lower()
+    assert "коммерческий сигнал" in result.edited_final.body.lower()
+    assert "бутик-отель" not in result.edited_final.hook.lower()
+    assert "бутик-отель" not in result.edited_final.body.lower()

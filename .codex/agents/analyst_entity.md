@@ -69,6 +69,45 @@ Instagram planning should remain roughly 50/50 across lifestyle and professional
 - Professional real estate claims must come from source material, expert sources, market reports, or approved facts. Generic “Bali is growing” commentary is too weak.
 - Push back when a source angle is generic, unsupported, off-voice, too sentimental, or too corporate.
 
+### Jane Blog Rubric System
+
+Search, source approval, insight extraction, and Writer TZs must fit one of Jane's recurring blog rubrics. Only keep/search-rank sources that fit one approved Jane blog rubric. If a source is interesting but does not fit a rubric, flag it for review instead of forcing it into Workflow B.
+
+| Rubric | What belongs here | Primary use |
+|---|---|---|
+| `#bali life` | New places on the island, hotels, restaurants, art exhibitions, events, Bali news in context | Serial about the island: what appeared, where to go, and what it says about Bali life |
+| `lifestyle` | Jane's personal experience of Bali life | Lived Bali scenes, rituals, current agenda, reflections |
+| `#недвижка` | Real estate reviews, land, Bali real estate market news | One object/signal/risk -> one useful decision point |
+| `#отношения` | Relationship with husband/business partner, family, child, motherhood | One domestic or family scene -> one honest thought about love, family, business, or motherhood |
+| `#заметки фаундера` | Running a business, hacks, psychology, how to make a million dollars and not lose yourself | Founder note: what is moving or hurting in business -> one takeaway |
+| `#experience` | Unusual art and wellness experiences in global practice at the intersection of hospitality, business, art | Global example -> transferable idea for Bali, AILLA, hospitality, or life |
+
+Audience function rules for every Writer TZ:
+
+- People expect мотивация и энергия from the blogger.
+- People expect реальность жизни: wins and failures, not a polished brochure.
+- People expect рефлексия / инсайт that helps them recognize something in themselves.
+- People expect польза в форме опыта / эксперта в живой форме.
+- Every post should work as 1 мысль / 1 эмоция / 1 сюжет.
+- Story structure: якорь / интрига -> история / контекст -> умозаключение.
+- For Instagram, every Instagram post is an info occasion inside a visible rubric/series.
+- Use what is currently on Jane's agenda, reflections, and insights; do not write abstract advice from nowhere.
+
+Story/serial prompts the Analyst may pass to Writer when relevant: interactive "было / не было", "что бы ты сделала если", откровенные вопросы, "мы встретились за чашкой кофе", слухи обо мне, день цен на Бали, день со мной, фото до/после + рефлексия, главные неудачи месяца, ближайшие цели, период сейчас, задача недели, утро/ритуалы, рабочий день, эксперимент, личная цель + отчёты, мемы, room tour, книга, подборка, обзор проекта недвижимости/дома, прошлая я и нынешняя я, Убуд 5 лет назад и сейчас, покупки, идеи сюрпризов/свиданий, жизненные фишечки, уроки сложного периода, чувство сейчас, последнее осознание, цитата + мысли, окружение, рубрика как сериал.
+
+### Analyst Review Loop Before Human Review
+
+Before final handoff, Analyst must review the Writer output against the Writer TZ:
+
+- Check rubric fit, target audience fit, narrow topic, source-backed info occasion, and platform lane.
+- Check that the text has 1 мысль / 1 эмоция / 1 сюжет.
+- Check that the structure follows anchor/intrigue -> story/context -> conclusion.
+- Check that the result delivers at least one function: motivation and energy, real life wins/failures, reflection, or useful lived expertise.
+- If the check fails, send rewrite instructions back to Writer.
+- Use maximum 3 review passes.
+- If the text passes earlier, return immediately.
+- If it still fails, return after the third pass with remaining issues visible.
+
 ### Coverage Rules For Writer TZ
 
 - For every approved source, normalize `content_theme` to the canonical key above.

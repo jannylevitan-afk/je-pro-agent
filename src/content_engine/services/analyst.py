@@ -3,6 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from content_engine.context.jane_blog_rubrics import (
+    JANE_ANALYST_REVIEW_LOOP_RULES,
+    JANE_AUDIENCE_FUNCTION_RULES,
+    JANE_STORIES_PROMPTS,
+    JANE_STORY_STRUCTURE_RULES,
+    resolve_jane_blog_rubric,
+)
 from content_engine.context.workflow_b_rules import WorkflowBDecision, expand_workflow_b_decisions
 from content_engine.llm.analyst import InsightExtractionResult
 from content_engine.models.source_item import SourceItem
@@ -271,6 +278,7 @@ def _format_writer_tz(
     extraction: InsightExtractionResult,
     brief: ContentBrief,
 ) -> str:
+    rubric = resolve_jane_blog_rubric(insight.content_theme, item.transcript_text)
     return "\n".join(
         [
             "## Writer Assignment",
@@ -328,6 +336,22 @@ def _format_writer_tz(
             f"- Expert narrative: {_expert_narrative(insight, decision)}",
             f"- Why this belongs on this platform: {_platform_fit_reason(decision)}",
             "",
+            "### Jane Blog Rubric Fit",
+            f"- Rubric: {rubric.label}",
+            f"- Rubric source fit: {rubric.source_fit}",
+            f"- Search rule: {rubric.search_rule}",
+            f"- Platform lane fit: {_rubric_lane_fit(rubric.platform_lanes, decision.platform_lane)}",
+            f"- narrow topic: {_narrow_topic(insight, item)}",
+            f"- serial role: {rubric.serial_role}",
+            f"- info occasion: {_info_occasion(item, insight, decision)}",
+            f"- Story prompts to consider: {_story_prompts_for_rubric(rubric.story_prompts)}",
+            "",
+            "### Audience Function Rules",
+            *_bullet_lines(JANE_AUDIENCE_FUNCTION_RULES),
+            *_bullet_lines(JANE_STORY_STRUCTURE_RULES),
+            "- The Writer must make the post useful as lived expertise, not as abstract advice.",
+            "- For Instagram, every post must feel like an info occasion inside a recurring rubric/series.",
+            "",
             "### Voice/Register Direction",
             f"- Primary Jane register: {brief.tone}",
             f"- Secondary register, if any: {_secondary_register(decision)}",
@@ -351,6 +375,9 @@ def _format_writer_tz(
             f"- Publish language: {brief.publish_language}",
             f"- Canonical content theme: {insight.content_theme}",
             f"- Required theme lanes: {_required_theme_lanes(insight.content_theme)}",
+            f"- Jane blog rubric: {rubric.label}",
+            f"- Narrow topic required: {_narrow_topic(insight, item)}",
+            f"- Serial/info occasion required: {_info_occasion(item, insight, decision)}",
             f"- This TZ lane: {decision.platform_lane}",
             f"- Purpose: {brief.purpose}",
             f"- Tone/Register: {brief.tone}",
@@ -369,6 +396,12 @@ def _format_writer_tz(
             "- Banned weak examples: Дешёвый вход на Бали..., Дешёвый риск почти никогда не выглядит дешево, Cheap risk rarely looks cheap.",
             "- If an opening can fit any post, merely restates the topic, or repeats the same semantic hit twice, regenerate it.",
             "- Do not end Final Text with a standalone CTA question; keep review-facing output as final text only.",
+            "",
+            "### Analyst Review Loop Before Human Review",
+            *_bullet_lines(JANE_ANALYST_REVIEW_LOOP_RULES),
+            "- Analyst must check the Writer result against rubric, audience, narrow topic, source-backed info occasion, and platform lane.",
+            "- Analyst must reject/rewrite if the text does not contain one clear thought, one emotion, and one plot.",
+            "- Analyst must reject/rewrite if the text does not deliver motivation/energy, reality of life, reflection, or useful lived expertise.",
             "",
             "### Required Output Format",
             "```markdown",
@@ -551,6 +584,33 @@ def _platform_fit_reason(decision: WorkflowBDecision) -> str:
     if decision.platform_lane == "instagram_professional":
         return "The lane turns expert insight into concrete, saveable Instagram content."
     return "The lane builds recognition, emotional affinity, and lived context around the founder brand."
+
+
+def _rubric_lane_fit(platform_lanes: tuple[str, ...], platform_lane: str) -> str:
+    if platform_lane in platform_lanes:
+        return f"{platform_lane} is native for this rubric"
+    return f"{platform_lane} is allowed only if source evidence makes the rubric useful for this lane"
+
+
+def _narrow_topic(insight: InsightCard, item: SourceItem) -> str:
+    topic = insight.topic.strip() or insight.content_theme.replace("_", " ")
+    excerpt = _excerpt(item.transcript_text, limit=120)
+    return f"{topic} through one concrete source detail: {excerpt}"
+
+
+def _info_occasion(item: SourceItem, insight: InsightCard, decision: WorkflowBDecision) -> str:
+    if decision.platform_lane.startswith("instagram"):
+        return f"Instagram post must use this source as the current occasion: {item.source_name} / {insight.content_theme}"
+    return f"Use this source as a B2B signal, not a generic opinion: {item.source_name} / {insight.content_theme}"
+
+
+def _story_prompts_for_rubric(prompts: tuple[str, ...]) -> str:
+    selected = list(prompts[:5]) or list(JANE_STORIES_PROMPTS[:5])
+    return "; ".join(selected)
+
+
+def _bullet_lines(lines: tuple[str, ...]) -> list[str]:
+    return [f"- {line}" for line in lines]
 
 
 def _secondary_register(decision: WorkflowBDecision) -> str:
