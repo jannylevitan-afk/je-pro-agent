@@ -130,6 +130,55 @@ TIKTOK_HTML = """
 """
 
 
+TIKTOK_PROFILE_HTML = """
+<html>
+  <body>
+    <script id="SIGI_STATE" type="application/json">
+      {
+        "ItemModule": {
+          "quiet111": {
+            "id": "quiet111",
+            "desc": "quiet Bali note without strong proof",
+            "createTime": "1777027200",
+            "stats": {
+              "playCount": 1200,
+              "diggCount": 120,
+              "commentCount": 6,
+              "shareCount": 2,
+              "collectCount": 7
+            },
+            "video": {
+              "cover": "https://cdn.example.com/quiet.jpg",
+              "playAddr": "https://cdn.example.com/quiet.mp4"
+            },
+            "author": {"uniqueId": "jepro"}
+          },
+          "viral777": {
+            "id": "viral777",
+            "desc": "Why the new Bali cafe launch worked: people saved the route, argued in comments, and shared it with friends.",
+            "createTime": "1777113600",
+            "stats": {
+              "playCount": 48000,
+              "diggCount": 5400,
+              "commentCount": 380,
+              "shareCount": 260,
+              "collectCount": 920
+            },
+            "video": {
+              "cover": "https://cdn.example.com/viral.jpg",
+              "playAddr": "https://cdn.example.com/viral.mp4"
+            },
+            "author": {"uniqueId": "jepro"},
+            "imageText": ["On-screen text: this is why people saved the place"]
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
+"""
+
+
 WEB_HTML = """
 <html>
   <head>
@@ -423,6 +472,43 @@ def test_collect_native_source_items_parses_html_meta_platforms(
         assert items[0].raw_payload["caption_text"] == "Cheap villas are never actually cheap."
         assert "Speaker says" in items[0].raw_payload["spoken_transcript"]
         assert items[0].engagement_signals == {"views": 5200, "likes": 410, "comments": 38}
+
+
+def test_tiktok_profile_scan_selects_best_performing_video_and_extracts_post_text() -> None:
+    target = NativeSourceTarget(
+        platform="tiktok",
+        handle="@jepro",
+        audience_segment="dreamer_woman",
+        content_theme="bali_life",
+        source_name="Jane TikTok",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: TIKTOK_PROFILE_HTML,
+        collected_at="2026-04-26T08:00:00Z",
+    )
+
+    assert len(items) == 1
+    item = items[0]
+    assert item.source_type == "tiktok_video"
+    assert item.source_url == "https://www.tiktok.com/@jepro/video/viral777"
+    assert item.external_item_id == "viral777"
+    assert item.engagement_signals == {
+        "views": 48000,
+        "likes": 5400,
+        "comments": 380,
+        "shares": 260,
+        "saves": 920,
+    }
+    assert item.raw_payload["monitoring_selection"] == "best_performing_post"
+    assert item.raw_payload["engagement_rank"] == 1
+    assert item.raw_payload["scanned_posts_count"] == 2
+    assert item.raw_payload["caption_text"].startswith("Why the new Bali cafe launch worked")
+    assert "On-screen text" in item.raw_payload["image_text"]
+    assert "Why the new Bali cafe launch worked" in item.transcript_text
+    assert "On-screen text" in item.transcript_text
+    assert item.routing_decision == "both"
 
 
 def test_native_source_collector_dispatches_multiple_platform_targets() -> None:

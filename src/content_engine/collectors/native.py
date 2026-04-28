@@ -71,6 +71,9 @@ def collect_native_source_items(
         elif target.platform == "youtube":
             target_items = _parse_youtube_feed(target, target_url, raw_text, collected_timestamp)
             items.extend(_select_top_performing_items(target_items))
+        elif target.platform == "tiktok":
+            item = _parse_tiktok_public_page(target, target_url, raw_text, collected_timestamp)
+            items.append(item)
         else:
             try:
                 item = _parse_html_meta_page(target, target_url, raw_text, collected_timestamp)
@@ -348,6 +351,88 @@ def _parse_html_meta_page(
             "transcript_source": transcript_source,
             "meta": parser.meta,
             "json_ld": parser.json_ld,
+        },
+        transcript_text=transcript_text,
+        media_urls=media_urls,
+        engagement_signals=engagement_signals,
+        routing_decision=route,
+        routing_reason=reason,
+        routing_confidence=confidence,
+        processing_state="collected",
+    )
+
+
+def _parse_tiktok_public_page(
+    target: NativeSourceTarget,
+    target_url: str,
+    html: str,
+    collected_at: str,
+) -> SourceItem:
+    posts = _extract_tiktok_posts_from_html(html)
+    if not posts:
+        return _parse_html_meta_page(target, target_url, html, collected_at)
+
+    best_post = _select_top_tiktok_post(posts)
+    external_item_id = _tiktok_post_id(best_post)
+    caption_text = _tiktok_post_caption(best_post)
+    post_title = _tiktok_post_title(best_post)
+    image_text = _tiktok_post_image_text(best_post)
+    spoken_transcript = _tiktok_post_spoken_transcript(best_post)
+    transcript_parts = [
+        post_title,
+        caption_text,
+        image_text,
+        spoken_transcript,
+    ]
+    transcript_text = ". ".join(part for part in transcript_parts if part).strip()
+    if not transcript_text:
+        raise ValueError("TikTok profile payload did not contain usable text")
+
+    media_urls = _tiktok_post_media_urls(best_post)
+    engagement_signals = _tiktok_post_engagement_signals(best_post)
+    engagement_score = _engagement_score(engagement_signals)
+    source_url = _tiktok_post_url(best_post, target)
+    published_at = _normalize_tiktok_timestamp(best_post.get("createTime"), collected_at)
+    source_type = "tiktok_video"
+    route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
+    content_hash = _content_hash(transcript_text, media_urls)
+
+    return SourceItem(
+        item_id=f"tiktok_{external_item_id}",
+        source_type=source_type,
+        source_name=target.source_name or f"@{target.handle.lstrip('@')}",
+        source_url=source_url,
+        external_item_id=external_item_id,
+        collected_at=collected_at,
+        published_at=published_at,
+        content_hash=content_hash,
+        dedupe_key=build_dedupe_key(
+            platform="tiktok",
+            external_item_id=external_item_id,
+            source_url=source_url,
+            published_at=published_at,
+            content_hash=content_hash,
+        ),
+        audience_segment=target.audience_segment,
+        content_theme=target.content_theme,
+        raw_payload={
+            "platform": "tiktok",
+            "target_url": target_url,
+            "source_post_url": source_url,
+            "post_title": post_title,
+            "video_title": post_title or caption_text,
+            "caption_text": caption_text,
+            "post_text": transcript_text,
+            "image_text": image_text,
+            "spoken_transcript": spoken_transcript or caption_text,
+            "transcript_source": "caption_or_description",
+            "public_metrics": engagement_signals,
+            "engagement_score": engagement_score,
+            "engagement_rank": 1,
+            "scanned_posts_count": len(posts),
+            "engagement_selection_reason": _engagement_selection_reason(engagement_score),
+            "monitoring_selection": "best_performing_post",
+            "selected_post_payload": best_post,
         },
         transcript_text=transcript_text,
         media_urls=media_urls,
@@ -731,6 +816,221 @@ def _instagram_post_source_type(post: dict[str, Any]) -> str:
     if "video" in post_type or "reel" in post_type or "/reel/" in post_url:
         return "instagram_reel"
     return "instagram_post"
+
+
+def _extract_tiktok_posts_from_html(html: str) -> list[dict[str, Any]]:
+    posts: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"<script\b([^>]*)>(.*?)</script>", html, flags=re.DOTALL | re.IGNORECASE):
+        attrs = match.group(1)
+        script_body = unescape(match.group(2)).strip()
+        if not script_body:
+            continue
+        should_parse = any(
+            marker in attrs or marker in script_body
+            for marker in ("SIGI_STATE", "__UNIVERSAL_DATA_FOR_REHYDRATION__", "__NEXT_DATA__", "ItemModule")
+        )
+        if not should_parse:
+            continue
+        try:
+            payload = json.loads(script_body)
+        except json.JSONDecodeError:
+            continue
+        for post in _collect_tiktok_post_candidates(payload):
+            post_id = _tiktok_post_id(post)
+            if not post_id or post_id in seen:
+                continue
+            seen.add(post_id)
+            posts.append(post)
+    return posts
+
+
+def _collect_tiktok_post_candidates(value: Any) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    if isinstance(value, dict):
+        if _looks_like_tiktok_post(value):
+            candidates.append(value)
+        for nested in value.values():
+            candidates.extend(_collect_tiktok_post_candidates(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            candidates.extend(_collect_tiktok_post_candidates(nested))
+    return candidates
+
+
+def _looks_like_tiktok_post(value: dict[str, Any]) -> bool:
+    return bool(
+        _tiktok_post_id(value)
+        and _tiktok_post_engagement_signals(value)
+        and (_tiktok_post_caption(value) or _tiktok_post_media_urls(value) or _tiktok_post_image_text(value))
+    )
+
+
+def _select_top_tiktok_post(posts: list[dict[str, Any]]) -> dict[str, Any]:
+    return max(posts, key=lambda post: _engagement_score(_tiktok_post_engagement_signals(post)))
+
+
+def _tiktok_post_id(post: dict[str, Any]) -> str:
+    for key in ("id", "itemId", "awemeId"):
+        value = post.get(key)
+        if isinstance(value, (str, int)) and str(value).strip():
+            return str(value).strip()
+    video = post.get("video")
+    if isinstance(video, dict):
+        value = video.get("id")
+        if isinstance(value, (str, int)) and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def _tiktok_post_url(post: dict[str, Any], target: NativeSourceTarget) -> str:
+    for key in ("webVideoUrl", "url", "shareUrl", "videoUrl"):
+        value = post.get(key)
+        if isinstance(value, str) and value.startswith("https://"):
+            return value
+    handle = _tiktok_author_handle(post) or target.handle.lstrip("@").strip("/")
+    return f"https://www.tiktok.com/@{handle}/video/{_tiktok_post_id(post)}"
+
+
+def _tiktok_author_handle(post: dict[str, Any]) -> str:
+    author = post.get("author")
+    if isinstance(author, dict):
+        for key in ("uniqueId", "nickname", "name"):
+            value = author.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip().lstrip("@")
+    for key in ("author", "authorUniqueId", "authorUsername"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip().lstrip("@")
+    return ""
+
+
+def _tiktok_post_title(post: dict[str, Any]) -> str:
+    for key in ("title", "headline", "name"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return _normalize_text_fragment(value)
+    return _first_line(_tiktok_post_caption(post))
+
+
+def _tiktok_post_caption(post: dict[str, Any]) -> str:
+    for key in ("desc", "description", "caption", "text"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return _normalize_text_fragment(value)
+    return ""
+
+
+def _tiktok_post_image_text(post: dict[str, Any]) -> str:
+    values: list[str] = []
+    for key in ("imageText", "imageTexts", "ocrText", "ocrTexts", "onScreenText", "overlayText"):
+        values.extend(_coerce_text_values(post.get(key)))
+    image_post = post.get("imagePost")
+    if isinstance(image_post, dict):
+        values.extend(_coerce_text_values(image_post.get("title")))
+        images = image_post.get("images")
+        if isinstance(images, list):
+            for image in images:
+                if isinstance(image, dict):
+                    values.extend(_coerce_text_values(image.get("alt")))
+                    values.extend(_coerce_text_values(image.get("caption")))
+                    values.extend(_coerce_text_values(image.get("ocrText")))
+    return _join_unique_text(values)
+
+
+def _tiktok_post_spoken_transcript(post: dict[str, Any]) -> str:
+    values: list[str] = []
+    for key in ("transcript", "transcriptText", "videoTranscript", "subtitleText", "speechText"):
+        values.extend(_coerce_text_values(post.get(key)))
+    subtitle_infos = post.get("subtitleInfos")
+    if isinstance(subtitle_infos, list):
+        for subtitle in subtitle_infos:
+            if isinstance(subtitle, dict):
+                values.extend(_coerce_text_values(subtitle.get("text")))
+    return _join_unique_text(values)
+
+
+def _tiktok_post_media_urls(post: dict[str, Any]) -> list[str]:
+    urls: list[str] = []
+    video = post.get("video")
+    if isinstance(video, dict):
+        for key in ("playAddr", "downloadAddr", "cover", "dynamicCover", "originCover"):
+            urls.extend(_coerce_url_values(video.get(key)))
+    image_post = post.get("imagePost")
+    if isinstance(image_post, dict):
+        images = image_post.get("images")
+        if isinstance(images, list):
+            for image in images:
+                urls.extend(_coerce_url_values(image))
+    for key in ("videoUrl", "coverUrl", "displayUrl", "thumbnailUrl"):
+        urls.extend(_coerce_url_values(post.get(key)))
+    return _unique_urls(urls)
+
+
+def _tiktok_post_engagement_signals(post: dict[str, Any]) -> dict[str, int]:
+    signals: dict[str, int] = {}
+    for stats in (post.get("stats"), post.get("statsV2"), post):
+        if not isinstance(stats, dict):
+            continue
+        for source_key, target_key in (
+            ("playCount", "views"),
+            ("viewCount", "views"),
+            ("views", "views"),
+            ("diggCount", "likes"),
+            ("likeCount", "likes"),
+            ("likes", "likes"),
+            ("commentCount", "comments"),
+            ("comments", "comments"),
+            ("shareCount", "shares"),
+            ("shares", "shares"),
+            ("collectCount", "saves"),
+            ("saveCount", "saves"),
+            ("saves", "saves"),
+        ):
+            value = stats.get(source_key)
+            if isinstance(value, (int, float)):
+                signals[target_key] = int(value)
+            elif isinstance(value, str) and value.strip():
+                signals[target_key] = _parse_metric_value(value)
+    return {key: value for key, value in signals.items() if value > 0}
+
+
+def _normalize_tiktok_timestamp(value: Any, fallback: str) -> str:
+    if isinstance(value, (int, float)):
+        return datetime.fromtimestamp(int(value), tz=timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    if isinstance(value, str) and value.strip().isdigit():
+        return datetime.fromtimestamp(int(value), tz=timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    if isinstance(value, str) and value.strip():
+        return _normalize_timestamp(value)
+    return fallback
+
+
+def _coerce_url_values(value: Any) -> list[str]:
+    if isinstance(value, str) and value.startswith("https://"):
+        return [value]
+    if isinstance(value, dict):
+        dict_urls: list[str] = []
+        for key in ("urlList", "urls", "url", "src"):
+            dict_urls.extend(_coerce_url_values(value.get(key)))
+        return dict_urls
+    if isinstance(value, list):
+        list_urls: list[str] = []
+        for item in value:
+            list_urls.extend(_coerce_url_values(item))
+        return list_urls
+    return []
+
+
+def _unique_urls(urls: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for url in urls:
+        if url in seen:
+            continue
+        seen.add(url)
+        result.append(url)
+    return result
 
 
 def _first_line(text: str) -> str:
