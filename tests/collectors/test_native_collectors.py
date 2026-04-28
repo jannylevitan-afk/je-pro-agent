@@ -26,6 +26,35 @@ TELEGRAM_HTML = """
 </html>
 """
 
+TELEGRAM_MULTI_POST_HTML = """
+<html>
+  <body>
+    <div class="tgme_widget_message_wrap js-widget_message_wrap">
+      <div class="tgme_widget_message" data-post="clearvisionary/101">
+        <a class="tgme_widget_message_date" href="https://t.me/clearvisionary/101">
+          <time datetime="2026-04-24T07:55:00+00:00"></time>
+        </a>
+        <div class="tgme_widget_message_text js-message_text" dir="auto">
+          Quiet post about Bali project notes.
+        </div>
+        <span class="tgme_widget_message_views">900</span>
+      </div>
+    </div>
+    <div class="tgme_widget_message_wrap js-widget_message_wrap">
+      <div class="tgme_widget_message" data-post="clearvisionary/102">
+        <a class="tgme_widget_message_date" href="https://t.me/clearvisionary/102">
+          <time datetime="2026-04-25T07:55:00+00:00"></time>
+        </a>
+        <div class="tgme_widget_message_text js-message_text" dir="auto">
+          Viral post about why a Bali villa launch worked: strong hook, proof, comments, and saves.
+        </div>
+        <span class="tgme_widget_message_views">4.8K</span>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
 
 YOUTUBE_RSS = """
 <feed xmlns="http://www.w3.org/2005/Atom"
@@ -151,6 +180,63 @@ APIFY_INSTAGRAM_PROFILE = {
 }
 
 
+APIFY_INSTAGRAM_PROFILE_WITH_MIXED_POSTS = {
+    "inputUrl": "https://www.instagram.com/annalutaeva",
+    "id": "204762173",
+    "username": "annalutaeva",
+    "url": "https://www.instagram.com/annalutaeva",
+    "fullName": "ANNA LUTAEVA ARCHITECT",
+    "biography": "anna lutaeva architect design spaces you want to touch bali",
+    "followersCount": 27476,
+    "followsCount": 4959,
+    "postsCount": 1573,
+    "latestPosts": [
+        {
+            "id": "low_latest",
+            "type": "Image",
+            "caption": "latest quiet note",
+            "url": "https://www.instagram.com/p/LOW/",
+            "displayUrl": "https://cdn.example.com/low.jpg",
+            "likesCount": 120,
+            "commentsCount": 4,
+            "timestamp": "2026-04-25T10:00:00.000Z",
+        },
+        {
+            "id": "viral_carousel",
+            "type": "Sidecar",
+            "caption": "caption: why Bali life content worked this week",
+            "url": "https://www.instagram.com/p/VIRAL/",
+            "displayUrl": "https://cdn.example.com/viral-cover.jpg",
+            "likesCount": 5400,
+            "commentsCount": 320,
+            "sharesCount": 190,
+            "savesCount": 870,
+            "timestamp": "2026-04-24T10:00:00.000Z",
+            "title": "Carousel title: Bali life hook",
+            "carouselText": [
+                "Slide 1: The Bali life post that made people save",
+                "Slide 2: Proof beats postcard content",
+            ],
+            "images": [
+                {"url": "https://cdn.example.com/slide1.jpg", "alt": "OCR: first slide text"},
+                {"url": "https://cdn.example.com/slide2.jpg", "alt": "OCR: second slide text"},
+            ],
+        },
+        {
+            "id": "views_only",
+            "type": "Video",
+            "caption": "views but weak comments",
+            "url": "https://www.instagram.com/reel/VIEWS/",
+            "videoUrl": "https://cdn.example.com/views.mp4",
+            "videoViewCount": 45000,
+            "likesCount": 300,
+            "commentsCount": 8,
+            "timestamp": "2026-04-23T10:00:00.000Z",
+        },
+    ],
+}
+
+
 def test_resolve_target_url_builds_public_platform_urls() -> None:
     assert (
         resolve_target_url(
@@ -219,6 +305,30 @@ def test_collect_native_source_items_parses_telegram_channel_page() -> None:
     assert items[0].external_item_id == "101"
     assert items[0].engagement_signals["views"] == 1800
     assert items[0].routing_decision == "workflow_b"
+
+
+def test_collect_native_source_items_selects_top_telegram_post_by_public_engagement() -> None:
+    target = NativeSourceTarget(
+        platform="telegram",
+        handle="@clearvisionary",
+        audience_segment="developer_investor",
+        content_theme="boutique_hotels",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: TELEGRAM_MULTI_POST_HTML,
+        collected_at="2026-04-25T08:00:00Z",
+    )
+
+    assert len(items) == 1
+    assert items[0].source_url == "https://t.me/clearvisionary/102"
+    assert items[0].external_item_id == "102"
+    assert items[0].engagement_signals["views"] == 4800
+    assert items[0].raw_payload["monitoring_selection"] == "best_performing_post"
+    assert items[0].raw_payload["engagement_rank"] == 1
+    assert items[0].raw_payload["scanned_posts_count"] == 2
+    assert "public engagement score" in items[0].raw_payload["engagement_selection_reason"]
 
 
 def test_collect_native_source_items_parses_youtube_feed() -> None:
@@ -376,11 +486,56 @@ def test_collect_native_source_items_falls_back_to_apify_for_instagram_profiles(
     )
 
     assert len(items) == 1
-    assert items[0].source_type == "instagram_profile"
-    assert items[0].external_item_id == "annalutaeva"
+    assert items[0].source_type == "instagram_reel"
+    assert items[0].source_url == "https://www.instagram.com/p/DK63Cl4PL3W/"
+    assert items[0].external_item_id == "3655476118233595350"
     assert items[0].published_at == "2025-06-15T11:28:54.000Z"
     assert items[0].engagement_signals["followers"] == 27476
     assert items[0].engagement_signals["video_views"] == 50191
-    assert "design spaces you want to touch" in items[0].transcript_text
     assert "больше рассказывать о своей жизни" in items[0].transcript_text
+    assert items[0].raw_payload["monitoring_selection"] == "best_performing_post"
     assert items[0].routing_decision == "both"
+
+
+def test_instagram_profile_fallback_selects_best_performing_post_and_extracts_all_post_text() -> None:
+    target = NativeSourceTarget(
+        platform="instagram",
+        handle="@annalutaeva",
+        source_url="https://www.instagram.com/annalutaeva/",
+        audience_segment="dreamer_woman",
+        content_theme="founder_journey",
+        source_name="Anna Lutaeva",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: INSTAGRAM_PROFILE_HTML,
+        collected_at="2026-04-25T09:00:00Z",
+        apify_profile_fetcher=lambda _target, _timeout: APIFY_INSTAGRAM_PROFILE_WITH_MIXED_POSTS,
+    )
+
+    assert len(items) == 1
+    item = items[0]
+    assert item.source_type == "instagram_post"
+    assert item.source_url == "https://www.instagram.com/p/VIRAL/"
+    assert item.external_item_id == "viral_carousel"
+    assert item.published_at == "2026-04-24T10:00:00.000Z"
+    assert item.engagement_signals == {
+        "followers": 27476,
+        "following": 4959,
+        "posts": 1573,
+        "likes": 5400,
+        "comments": 320,
+        "shares": 190,
+        "saves": 870,
+    }
+    assert item.raw_payload["monitoring_selection"] == "best_performing_post"
+    assert item.raw_payload["engagement_rank"] == 1
+    assert item.raw_payload["scanned_posts_count"] == 3
+    assert item.raw_payload["caption_text"] == "caption: why Bali life content worked this week"
+    assert item.raw_payload["post_title"] == "Carousel title: Bali life hook"
+    assert "Slide 1: The Bali life post" in item.raw_payload["carousel_text"]
+    assert "OCR: first slide text" in item.raw_payload["image_text"]
+    assert "Carousel title: Bali life hook" in item.transcript_text
+    assert "caption: why Bali life content worked this week" in item.transcript_text
+    assert "Slide 2: Proof beats postcard content" in item.transcript_text

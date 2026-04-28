@@ -44,6 +44,18 @@ Every accepted source item must carry:
 - canonical upstream item
 - immutable raw payload snapshot
 
+For approved monitored public accounts and channels, the Research Agent must scan recent public posts and select the best-performing post before workflow handoff. Best-performing post means the item with the strongest public engagement score from available public metrics: views, likes, comments, saves, shares. Comments, saves, and shares are stronger signals than passive views.
+
+For each selected post, collect:
+
+- post URL
+- post title, carousel headline, or visible first-line title when available
+- caption or description text
+- carousel/image OCR text when available from public/API extraction
+- public metrics: views, likes, comments, saves, shares
+- engagement score and selection reason
+- source post payload snapshot
+
 For Workflow A or `both` routes, the Research Agent must also collect:
 
 - video refs and source links

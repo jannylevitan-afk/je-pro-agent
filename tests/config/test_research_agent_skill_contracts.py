@@ -51,3 +51,21 @@ def test_research_agent_runner_documents_admin_hub_handoff_not_notion() -> None:
 
     assert "Admin Operating Hub-ready artifacts" in skill
     assert "Notion" not in skill
+
+
+def test_research_agent_runner_requires_best_performing_post_scan_contract() -> None:
+    skill = _read_skill("research-agent-runner")
+
+    required_phrases = [
+        "scan recent public posts",
+        "best-performing post",
+        "views, likes, comments, saves, shares",
+        "engagement score",
+        "post URL",
+        "caption or description text",
+        "carousel/image OCR text when available",
+        "source post payload snapshot",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in skill

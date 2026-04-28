@@ -66,9 +66,11 @@ def collect_native_source_items(
         target_url = resolve_target_url(target)
         raw_text = resolved_fetcher(target_url, timeout_seconds)
         if target.platform == "telegram":
-            items.extend(_parse_telegram_channel_page(target, target_url, raw_text, collected_timestamp))
+            target_items = _parse_telegram_channel_page(target, target_url, raw_text, collected_timestamp)
+            items.extend(_select_top_performing_items(target_items))
         elif target.platform == "youtube":
-            items.extend(_parse_youtube_feed(target, target_url, raw_text, collected_timestamp))
+            target_items = _parse_youtube_feed(target, target_url, raw_text, collected_timestamp)
+            items.extend(_select_top_performing_items(target_items))
         else:
             try:
                 item = _parse_html_meta_page(target, target_url, raw_text, collected_timestamp)
@@ -182,6 +184,11 @@ def _parse_telegram_channel_page(
                 "platform": "telegram",
                 "target_url": target_url,
                 "post_ref": post_match.group(1),
+                "source_post_url": source_url,
+                "caption_text": transcript_text,
+                "post_text": transcript_text,
+                "post_title": _first_line(transcript_text),
+                "public_metrics": engagement_signals,
             },
             transcript_text=transcript_text,
             media_urls=media_urls,
@@ -359,31 +366,37 @@ def _build_instagram_profile_item(
     profile_payload: dict[str, Any],
     collected_at: str,
 ) -> SourceItem:
-    source_url = str(profile_payload.get("url") or target_url).strip()
-    external_item_id = str(profile_payload.get("username") or target.handle.lstrip("@")).strip()
-
     latest_posts = [entry for entry in profile_payload.get("latestPosts", []) if isinstance(entry, dict)]
+    best_post = _select_top_instagram_post(latest_posts)
+    profile_url = str(profile_payload.get("url") or target_url).strip()
+    profile_username = str(profile_payload.get("username") or target.handle.lstrip("@")).strip()
+    source_url = _instagram_post_url(best_post) or profile_url
+    external_item_id = _instagram_post_id(best_post) or profile_username
+    caption_text = _instagram_post_caption(best_post)
+    post_title = _instagram_post_title(best_post)
+    carousel_text = _instagram_post_carousel_text(best_post)
+    image_text = _instagram_post_image_text(best_post)
     transcript_parts = [
-        _normalize_text_fragment(str(profile_payload.get("fullName", ""))),
-        _normalize_text_fragment(str(profile_payload.get("biography", ""))),
-        *[
-            _normalize_text_fragment(str(post.get("caption", "")))
-            for post in latest_posts[:3]
-            if str(post.get("caption", "")).strip()
-        ],
+        post_title,
+        caption_text,
+        carousel_text,
+        image_text,
     ]
     transcript_text = ". ".join(part for part in transcript_parts if part).strip()
     if not transcript_text:
         raise ValueError("Apify Instagram profile payload did not contain usable text")
 
-    media_urls = _collect_instagram_profile_media_urls(latest_posts[:3])
-    published_at = _normalize_timestamp(str(latest_posts[0].get("timestamp", collected_at))) if latest_posts else collected_at
-    route, reason, confidence = _infer_route("instagram_profile", transcript_text, media_urls)
+    media_urls = _collect_instagram_profile_media_urls([best_post])
+    published_at = _normalize_timestamp(str(best_post.get("timestamp", collected_at))) if best_post else collected_at
+    source_type = _instagram_post_source_type(best_post)
+    route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
     content_hash = _content_hash(transcript_text, media_urls)
+    engagement_signals = _build_instagram_profile_engagement_signals(profile_payload, [best_post] if best_post else [])
+    engagement_score = _engagement_score(engagement_signals)
 
     return SourceItem(
         item_id=f"instagram_{external_item_id}",
-        source_type="instagram_profile",
+        source_type=source_type,
         source_name=target.source_name or external_item_id,
         source_url=source_url,
         external_item_id=external_item_id,
@@ -402,15 +415,29 @@ def _build_instagram_profile_item(
         raw_payload={
             "platform": "instagram",
             "target_url": target_url,
-            "video_title": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
-            "caption_text": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
-            "spoken_transcript": _normalize_text_fragment(str(latest_posts[0].get("caption", ""))) if latest_posts else "",
+            "profile_url": profile_url,
+            "profile_username": profile_username,
+            "source_post_url": source_url,
+            "post_title": post_title,
+            "video_title": post_title or caption_text,
+            "caption_text": caption_text,
+            "post_text": transcript_text,
+            "carousel_text": carousel_text,
+            "image_text": image_text,
+            "spoken_transcript": caption_text,
             "transcript_source": "caption_or_description",
+            "public_metrics": engagement_signals,
+            "engagement_score": engagement_score,
+            "engagement_rank": 1,
+            "scanned_posts_count": len(latest_posts),
+            "engagement_selection_reason": _engagement_selection_reason(engagement_score),
+            "monitoring_selection": "best_performing_post",
+            "selected_post_payload": best_post,
             "apify_profile": profile_payload,
         },
         transcript_text=transcript_text,
         media_urls=media_urls,
-        engagement_signals=_build_instagram_profile_engagement_signals(profile_payload, latest_posts),
+        engagement_signals=engagement_signals,
         routing_decision=route,
         routing_reason=reason,
         routing_confidence=confidence,
@@ -514,7 +541,13 @@ def _collect_instagram_profile_media_urls(posts: list[dict[str, Any]]) -> list[s
                 urls.append(value)
         images = post.get("images", [])
         if isinstance(images, list):
-            urls.extend(image for image in images if isinstance(image, str) and image.startswith("https://"))
+            for image in images:
+                if isinstance(image, str) and image.startswith("https://"):
+                    urls.append(image)
+                elif isinstance(image, dict):
+                    image_url = image.get("url") or image.get("src") or image.get("displayUrl")
+                    if isinstance(image_url, str) and image_url.startswith("https://"):
+                        urls.append(image_url)
     return urls
 
 
@@ -537,12 +570,174 @@ def _build_instagram_profile_engagement_signals(
         for source_key, target_key in (
             ("likesCount", "likes"),
             ("commentsCount", "comments"),
+            ("sharesCount", "shares"),
+            ("savesCount", "saves"),
             ("videoViewCount", "video_views"),
+            ("videoPlayCount", "video_views"),
+            ("viewsCount", "views"),
+            ("viewCount", "views"),
         ):
             value = first.get(source_key)
             if isinstance(value, (int, float)):
                 signals[target_key] = int(value)
     return signals
+
+
+def _select_top_performing_items(items: list[SourceItem]) -> list[SourceItem]:
+    if len(items) <= 1:
+        return [_with_engagement_selection_metadata(item, rank=1, scanned_count=len(items)) for item in items]
+
+    ranked = sorted(items, key=lambda item: _engagement_score(item.engagement_signals), reverse=True)
+    return [_with_engagement_selection_metadata(ranked[0], rank=1, scanned_count=len(items))]
+
+
+def _with_engagement_selection_metadata(item: SourceItem, *, rank: int, scanned_count: int) -> SourceItem:
+    engagement_score = _engagement_score(item.engagement_signals)
+    raw_payload = {
+        **item.raw_payload,
+        "monitoring_selection": "best_performing_post",
+        "engagement_rank": rank,
+        "scanned_posts_count": scanned_count,
+        "engagement_score": engagement_score,
+        "engagement_selection_reason": _engagement_selection_reason(engagement_score),
+        "public_metrics": item.engagement_signals,
+    }
+    return item.model_copy(update={"raw_payload": raw_payload})
+
+
+def _select_top_instagram_post(posts: list[dict[str, Any]]) -> dict[str, Any]:
+    if not posts:
+        return {}
+    return max(posts, key=lambda post: _engagement_score(_instagram_post_engagement_signals(post)))
+
+
+def _instagram_post_engagement_signals(post: dict[str, Any]) -> dict[str, int]:
+    signals: dict[str, int] = {}
+    for source_key, target_key in (
+        ("likesCount", "likes"),
+        ("commentsCount", "comments"),
+        ("sharesCount", "shares"),
+        ("savesCount", "saves"),
+        ("videoViewCount", "video_views"),
+        ("videoPlayCount", "video_views"),
+        ("viewsCount", "views"),
+        ("viewCount", "views"),
+    ):
+        value = post.get(source_key)
+        if isinstance(value, (int, float)):
+            signals[target_key] = int(value)
+    return signals
+
+
+def _engagement_score(signals: dict[str, int]) -> float:
+    return (
+        signals.get("likes", 0)
+        + signals.get("comments", 0) * 4
+        + signals.get("shares", 0) * 5
+        + signals.get("saves", 0) * 5
+        + signals.get("views", 0) * 0.02
+        + signals.get("video_views", 0) * 0.02
+        + signals.get("ratings", 0) * 0.5
+    )
+
+
+def _engagement_selection_reason(score: float) -> str:
+    return f"selected as best-performing post by public engagement score={score:.2f}"
+
+
+def _instagram_post_id(post: dict[str, Any]) -> str:
+    for key in ("id", "shortCode", "shortcode", "code"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return ""
+
+
+def _instagram_post_url(post: dict[str, Any]) -> str:
+    value = post.get("url") or post.get("postUrl") or post.get("link")
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _instagram_post_title(post: dict[str, Any]) -> str:
+    for key in ("title", "headline", "videoTitle", "name"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return _normalize_text_fragment(value)
+    return _first_line(_instagram_post_caption(post))
+
+
+def _instagram_post_caption(post: dict[str, Any]) -> str:
+    for key in ("caption", "text", "description", "alt"):
+        value = post.get(key)
+        if isinstance(value, str) and value.strip():
+            return _normalize_text_fragment(value)
+    return ""
+
+
+def _instagram_post_carousel_text(post: dict[str, Any]) -> str:
+    values: list[str] = []
+    for key in ("carouselText", "carouselTexts", "sidecarText", "sidecarTexts", "imageTexts", "ocrTexts", "ocrText", "imageText"):
+        value = post.get(key)
+        values.extend(_coerce_text_values(value))
+    child_posts = post.get("childPosts")
+    if isinstance(child_posts, list):
+        for child in child_posts:
+            if isinstance(child, dict):
+                values.extend(_coerce_text_values(child.get("caption")))
+                values.extend(_coerce_text_values(child.get("alt")))
+                values.extend(_coerce_text_values(child.get("ocrText")))
+    return _join_unique_text(values)
+
+
+def _instagram_post_image_text(post: dict[str, Any]) -> str:
+    values: list[str] = []
+    images = post.get("images", [])
+    if isinstance(images, list):
+        for image in images:
+            if isinstance(image, dict):
+                values.extend(_coerce_text_values(image.get("alt")))
+                values.extend(_coerce_text_values(image.get("caption")))
+                values.extend(_coerce_text_values(image.get("ocrText")))
+    return _join_unique_text(values)
+
+
+def _coerce_text_values(value: Any) -> list[str]:
+    if isinstance(value, str) and value.strip():
+        return [_normalize_text_fragment(value)]
+    if isinstance(value, list):
+        return [
+            _normalize_text_fragment(str(item))
+            for item in value
+            if str(item).strip()
+        ]
+    return []
+
+
+def _join_unique_text(values: list[str]) -> str:
+    seen: set[str] = set()
+    result: list[str] = []
+    for value in values:
+        normalized = _normalize_text_fragment(value)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+    return ". ".join(result)
+
+
+def _instagram_post_source_type(post: dict[str, Any]) -> str:
+    post_type = str(post.get("type", "")).lower()
+    post_url = _instagram_post_url(post).lower()
+    if "video" in post_type or "reel" in post_type or "/reel/" in post_url:
+        return "instagram_reel"
+    return "instagram_post"
+
+
+def _first_line(text: str) -> str:
+    normalized = _normalize_text_fragment(text)
+    if not normalized:
+        return ""
+    return normalized.split(".", 1)[0].strip()
 
 
 def _clean_html_text(text_html: str) -> str:

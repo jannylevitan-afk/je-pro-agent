@@ -154,6 +154,13 @@ _JANE_BLOG_SEARCH_FIELDS = [
     "info occasion",
     "serial angle",
     "1 thought / 1 emotion / 1 plot cue",
+    "best-performing post URL",
+    "public engagement metrics: views, likes, comments, saves, shares",
+    "engagement score and selection reason",
+    "post title or carousel headline",
+    "caption / description text",
+    "carousel or image OCR text when available",
+    "copied source post text for source-note handoff",
 ]
 
 _WORKFLOW_A_INTAKE = [

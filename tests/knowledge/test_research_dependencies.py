@@ -57,3 +57,20 @@ def test_resolve_research_dependencies_adds_jane_blog_rubric_search_rules(source
     assert "Only keep sources that fit one approved Jane blog rubric." in profile.workflow_intake
     assert "Rubric: #bali life" in profile.writer_context
     assert "1 мысль / 1 эмоция / 1 сюжет" in profile.writer_context
+
+
+def test_resolve_research_dependencies_requires_best_performing_post_extraction_fields(source_item) -> None:
+    profile = resolve_research_dependencies(source_item, workflow="workflow_b")
+
+    required_fields = [
+        "best-performing post URL",
+        "public engagement metrics: views, likes, comments, saves, shares",
+        "engagement score and selection reason",
+        "post title or carousel headline",
+        "caption / description text",
+        "carousel or image OCR text when available",
+        "copied source post text for source-note handoff",
+    ]
+
+    for field in required_fields:
+        assert field in profile.collect_fields
