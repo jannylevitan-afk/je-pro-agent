@@ -4,7 +4,7 @@ from content_engine.context.workflow_b_rules import WorkflowBDecision
 from content_engine.llm.analyst import AnthropicPipelineAnalyst
 from content_engine.models.source_item import SourceItem
 from content_engine.models.workflow_b import ContentBrief, IdeaCandidate, InsightCard
-from content_engine.services.analyst import AnalystReport, WriterSpec, run_analyst, run_analyst_batch
+from content_engine.services.analyst import AnalystReport, ResearchHandoffRow, WriterSpec, run_analyst, run_analyst_batch
 
 
 class StubAnthropicClient:
@@ -40,6 +40,42 @@ def test_run_analyst_returns_report(source_item) -> None:
     assert isinstance(report, AnalystReport)
     assert report.preflight_passed is True
     assert report.risk_flags == []
+
+
+def test_run_analyst_builds_research_handoff_row_for_selected_post(source_item) -> None:
+    item = source_item.model_copy(
+        update={
+            "source_name": "Bali expert",
+            "source_url": "https://t.me/Bali_expert/1382",
+            "raw_payload": {
+                "post_title": "Южнокорейцы на Бали",
+                "caption_text": "Сможете угадать топ-3 страны по тратам на человека в зарубежных путешествиях?",
+                "carousel_text": "Slide 1: тратят больше среднего. Slide 2: Бали меняет туристический профиль.",
+                "engagement_selection_reason": "selected as best-performing post by public engagement score=31.20",
+                "monitoring_selection": "best_performing_post",
+            },
+            "transcript_text": (
+                "Южнокорейцы на Бали. Сможете угадать топ-3 страны по тратам на человека "
+                "в зарубежных путешествиях? Бали меняет туристический профиль."
+            ),
+            "engagement_signals": {"views": 1560, "comments": 12, "shares": 7, "saves": 41},
+        }
+    )
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(item, analyst)
+
+    assert isinstance(report.research_handoff, ResearchHandoffRow)
+    assert report.research_handoff.source_name == "Bali expert"
+    assert report.research_handoff.post_url == "https://t.me/Bali_expert/1382"
+    assert report.research_handoff.topic == "boutique hotel strategy"
+    assert report.research_handoff.public_metrics == {"views": 1560, "comments": 12, "shares": 7, "saves": 41}
+    assert report.research_handoff.popularity_label == "strong"
+    assert "comments=12" in report.research_handoff.metrics_summary
+    assert "score=31.20" in report.research_handoff.what_performed
+    assert "Южнокорейцы на Бали" in report.research_handoff.source_text
+    assert "Slide 1" in report.research_handoff.carousel_or_image_text
+    assert "переписать в голосе Джейн" in report.research_handoff.jane_adaptation_brief
 
 
 def test_run_analyst_builds_insight_from_extraction(source_item) -> None:
@@ -122,6 +158,29 @@ def test_run_analyst_writer_tz_contains_assignment_header_and_strategy_fit(sourc
         assert "Expert narrative" in spec.writer_tz
         assert "### Fact & Privacy Boundaries" in spec.writer_tz
         assert "Claims to avoid" in spec.writer_tz
+
+
+def test_run_analyst_writer_tz_contains_research_output_for_writer(source_item) -> None:
+    item = source_item.model_copy(
+        update={
+            "source_url": "https://www.instagram.com/p/DK63Cl4PL3W/",
+            "raw_payload": {
+                "caption_text": "решила больше рассказывать о своей жизни и о школе на Бали",
+                "engagement_selection_reason": "selected as best-performing post by public engagement score=28302.26",
+            },
+            "engagement_signals": {"likes": 25454, "comments": 461, "video_views": 50213},
+        }
+    )
+    analyst = AnthropicPipelineAnalyst(StubAnthropicClient(responses=[_INSIGHT_JSON]))
+
+    report = run_analyst(item, analyst)
+
+    for spec in report.writer_specs:
+        assert "### Research Output For Writer" in spec.writer_tz
+        assert "Post URL: https://www.instagram.com/p/DK63Cl4PL3W/" in spec.writer_tz
+        assert "Public metrics: likes=25454, comments=461, video_views=50213" in spec.writer_tz
+        assert "Source text to paraphrase" in spec.writer_tz
+        assert "Adaptation task" in spec.writer_tz
 
 
 def test_run_analyst_linkedin_spec_has_bilingual_brief(source_item) -> None:

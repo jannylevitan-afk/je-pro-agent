@@ -91,6 +91,17 @@ def test_extract_insight_sends_transcript_in_prompt(source_item) -> None:
     assert "behavioral_trigger" in str(client.calls[0]["user_prompt"])
 
 
+def test_extract_insight_requests_russian_working_language(source_item) -> None:
+    client = StubAnthropicClient(responses=[_VALID_JSON])
+    analyst = AnthropicPipelineAnalyst(client)
+
+    analyst.extract_insight(source_item)
+
+    assert "Russian" in str(client.calls[0]["system_prompt"])
+    assert "all narrative text values in Russian" in str(client.calls[0]["system_prompt"])
+    assert "Return topic, angle, useful_lesson, emotional_trigger" in str(client.calls[0]["user_prompt"])
+
+
 def test_extract_insight_uses_low_temperature(source_item) -> None:
     client = StubAnthropicClient(responses=[_VALID_JSON])
     analyst = AnthropicPipelineAnalyst(client)
@@ -98,6 +109,15 @@ def test_extract_insight_uses_low_temperature(source_item) -> None:
     analyst.extract_insight(source_item)
 
     assert client.calls[0]["temperature"] == 0.3
+
+
+def test_extract_insight_allows_enough_tokens_for_russian_json(source_item) -> None:
+    client = StubAnthropicClient(responses=[_VALID_JSON])
+    analyst = AnthropicPipelineAnalyst(client)
+
+    analyst.extract_insight(source_item)
+
+    assert client.calls[0]["max_tokens"] >= 1400
 
 
 def test_extract_insight_raises_on_invalid_json(source_item) -> None:

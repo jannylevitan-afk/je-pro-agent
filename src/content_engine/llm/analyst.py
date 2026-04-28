@@ -61,6 +61,8 @@ _SYSTEM_PROMPT = (
     "Rules:\n"
     "- Phase 1 is already handled by source normalization; do not rewrite the source.\n"
     "- Phase 2 must extract the topic, angle, emotional trigger, and audience fit.\n"
+    "- Working language is Russian: return all narrative text values in Russian, even when the source is English.\n"
+    "- Keep enum labels exactly as requested, but write topic, angle, useful_lesson, emotional_trigger, audience_fit, JTBD fields, and outcomes in Russian.\n"
     "- Adapt customer-research logic: identify JTBD/customer_job, pain_point, trigger_event, desired_outcome, and source language.\n"
     "- Adapt ethical marketing psychology only as analysis labels: loss_aversion, status_signal, identity_pull, curiosity_gap, social_proof, or direct_benefit.\n"
     "- The useful_lesson must be 1-2 sentences, specific, and actionable or revelatory.\n"
@@ -86,7 +88,7 @@ class AnthropicPipelineAnalyst:
         raw = self._client.generate_text(
             system_prompt=_SYSTEM_PROMPT,
             user_prompt=_build_extraction_prompt(item),
-            max_tokens=700,
+            max_tokens=1600,
             model=self._model,
             temperature=0.3,
         )
@@ -105,6 +107,7 @@ def _build_extraction_prompt(item: SourceItem) -> str:
         f"Has media: {has_media}",
         f"Engagement signals: {engagement_summary or 'none'}",
         "",
+        "Return topic, angle, useful_lesson, emotional_trigger, audience_fit, customer_job, pain_point, trigger_event, and desired_outcome in Russian.",
         "Extract the insight. Return JSON with these exact keys:",
         '{',
         '  "topic": "specific topic extracted from the source",',

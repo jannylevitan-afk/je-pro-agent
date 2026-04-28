@@ -53,11 +53,30 @@ class WriterSpec:
 
 
 @dataclass(frozen=True, slots=True)
+class ResearchHandoffRow:
+    """Compact research output passed from Analyst to Writer/Admin review."""
+
+    source_name: str
+    source_type: str
+    post_url: str
+    topic: str
+    public_metrics: dict[str, int]
+    metrics_summary: str
+    popularity_label: str
+    what_performed: str
+    source_text: str
+    carousel_or_image_text: str
+    core_idea: str
+    jane_adaptation_brief: str
+
+
+@dataclass(frozen=True, slots=True)
 class AnalystReport:
     """Full analyst output: Phase 1 structure + Phase 2 insight + per-lane Writer specs."""
 
     source_note: SourceNote
     insight: InsightCard
+    research_handoff: ResearchHandoffRow
     writer_specs: list[WriterSpec]
     preflight_passed: bool
     risk_flags: list[str]
@@ -98,15 +117,17 @@ def run_analyst(
         useful_lesson=extraction.useful_lesson,
     )
 
+    research_handoff = build_research_handoff_row(item, extraction)
     decisions = expand_workflow_b_decisions(item)
     writer_specs = [
-        _build_writer_spec(insight, decision, item, extraction, verified_facts or set())
+        _build_writer_spec(insight, decision, item, extraction, research_handoff, verified_facts or set())
         for decision in decisions
     ]
 
     return AnalystReport(
         source_note=note,
         insight=insight,
+        research_handoff=research_handoff,
         writer_specs=writer_specs,
         preflight_passed=len(risk_flags) == 0,
         risk_flags=risk_flags,
@@ -138,6 +159,7 @@ def _build_writer_spec(
     decision: WorkflowBDecision,
     item: SourceItem,
     extraction: InsightExtractionResult,
+    research_handoff: ResearchHandoffRow,
     verified_facts: set[str],
 ) -> WriterSpec:
     idea = build_idea_candidate(
@@ -173,6 +195,7 @@ def _build_writer_spec(
         insight=insight,
         decision=decision,
         extraction=extraction,
+        research_handoff=research_handoff,
         brief=brief,
     )
     brief = brief.model_copy(update={"analyst_tz": writer_tz})
@@ -182,6 +205,40 @@ def _build_writer_spec(
         idea=idea,
         brief=brief,
         writer_tz=writer_tz,
+    )
+
+
+def build_research_handoff_row(
+    item: SourceItem,
+    extraction: InsightExtractionResult,
+) -> ResearchHandoffRow:
+    """Build the table row that explains what Research found and what Writer should adapt."""
+
+    topic = extraction.topic.strip() or _raw_text(item.raw_payload, "post_title", "video_title", "title") or item.content_theme.replace("_", " ")
+    source_text = _source_text_for_handoff(item)
+    carousel_or_image_text = _join_parts(
+        [
+            _raw_text(item.raw_payload, "carousel_text", "carouselTexts", "carouselText"),
+            _raw_text(item.raw_payload, "image_text", "imageText", "ocrText", "ocrTexts"),
+        ]
+    )
+    metrics_summary = _format_dict(item.engagement_signals)
+    what_performed = _what_performed(item)
+    core_idea = extraction.useful_lesson.strip()
+
+    return ResearchHandoffRow(
+        source_name=item.source_name,
+        source_type=item.source_type,
+        post_url=item.source_url,
+        topic=topic,
+        public_metrics=dict(item.engagement_signals),
+        metrics_summary=metrics_summary,
+        popularity_label=_popularity_label(item.engagement_signals),
+        what_performed=what_performed,
+        source_text=source_text,
+        carousel_or_image_text=carousel_or_image_text,
+        core_idea=core_idea,
+        jane_adaptation_brief=_jane_adaptation_brief(topic, source_text, core_idea),
     )
 
 
@@ -270,12 +327,69 @@ def _matching_fact_pack(item: SourceItem, verified_facts: set[str]) -> list[str]
     ][:5]
 
 
+def _source_text_for_handoff(item: SourceItem) -> str:
+    return _join_parts(
+        [
+            _raw_text(item.raw_payload, "post_title", "video_title", "title"),
+            _raw_text(item.raw_payload, "caption_text", "caption", "description", "post_text"),
+            item.transcript_text,
+        ]
+    )
+
+
+def _what_performed(item: SourceItem) -> str:
+    reason = _raw_text(item.raw_payload, "engagement_selection_reason")
+    top_metric = _top_metric(item.engagement_signals)
+    if reason and top_metric:
+        return f"{reason}; strongest public signal: {top_metric}"
+    if reason:
+        return reason
+    if top_metric:
+        return f"selected from monitored source; strongest public signal: {top_metric}"
+    return "selected from monitored source; no public metrics available"
+
+
+def _top_metric(signals: dict[str, int]) -> str:
+    if not signals:
+        return ""
+    key, value = max(signals.items(), key=lambda pair: pair[1])
+    return f"{key}={value}"
+
+
+def _popularity_label(signals: dict[str, int]) -> str:
+    score = (
+        signals.get("likes", 0)
+        + signals.get("comments", 0) * 4
+        + signals.get("shares", 0) * 5
+        + signals.get("saves", 0) * 5
+        + signals.get("views", 0) * 0.02
+        + signals.get("video_views", 0) * 0.02
+    )
+    if score >= 250:
+        return "strong"
+    if score >= 40:
+        return "moderate"
+    if score > 0:
+        return "low"
+    return "unknown"
+
+
+def _jane_adaptation_brief(topic: str, source_text: str, core_idea: str) -> str:
+    source_excerpt = _excerpt(source_text, limit=160)
+    return (
+        f"Взять залетевшую тему «{topic}» и переписать в голосе Джейн: сохранить главный смысл "
+        f"«{core_idea}», заменить формулировки, добавить личный/экспертный угол Джейн и не копировать "
+        f"дословно source text: {source_excerpt}"
+    )
+
+
 def _format_writer_tz(
     *,
     item: SourceItem,
     insight: InsightCard,
     decision: WorkflowBDecision,
     extraction: InsightExtractionResult,
+    research_handoff: ResearchHandoffRow,
     brief: ContentBrief,
 ) -> str:
     rubric = resolve_jane_blog_rubric(insight.content_theme, item.transcript_text)
@@ -306,6 +420,18 @@ def _format_writer_tz(
             f"- Audience: {insight.audience}",
             f"- Content theme: {insight.content_theme}",
             f"- Raw excerpt: {_excerpt(item.transcript_text)}",
+            "",
+            "### Research Output For Writer",
+            f"- Source: {research_handoff.source_name}",
+            f"- Post URL: {research_handoff.post_url}",
+            f"- Public metrics: {research_handoff.metrics_summary or 'n/a'}",
+            f"- Popularity: {research_handoff.popularity_label}",
+            f"- What performed: {research_handoff.what_performed}",
+            f"- Topic: {research_handoff.topic}",
+            f"- Core idea: {research_handoff.core_idea}",
+            f"- Source text to paraphrase: {_excerpt(research_handoff.source_text, limit=420)}",
+            f"- Carousel/image text, if available: {_excerpt(research_handoff.carousel_or_image_text, limit=260) or 'n/a'}",
+            f"- Adaptation task: {research_handoff.jane_adaptation_brief}",
             "",
             *_workflow_a_video_context_section(item),
             "### Phase 2 Insight Card",
