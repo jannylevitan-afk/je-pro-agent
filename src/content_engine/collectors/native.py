@@ -12,7 +12,7 @@ from typing import Any, Literal
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
-from content_engine.collectors.apify import fetch_instagram_profile
+from content_engine.collectors.apify import fetch_instagram_profile, fetch_tiktok_profile
 from content_engine.models.source_item import RoutingDecision, SourceItem
 from content_engine.services.ingestion import build_dedupe_key
 
@@ -38,6 +38,7 @@ class NativeSourceCollector:
     timeout_seconds: float = 30.0
     fetcher: Fetcher | None = None
     apify_profile_fetcher: ApifyProfileFetcher | None = None
+    apify_tiktok_profile_fetcher: ApifyProfileFetcher | None = None
     collected_at: str | None = None
 
     def collect(self) -> list[SourceItem]:
@@ -46,6 +47,7 @@ class NativeSourceCollector:
             timeout_seconds=self.timeout_seconds,
             fetcher=self.fetcher,
             apify_profile_fetcher=self.apify_profile_fetcher,
+            apify_tiktok_profile_fetcher=self.apify_tiktok_profile_fetcher,
             collected_at=self.collected_at,
         )
 
@@ -56,6 +58,7 @@ def collect_native_source_items(
     timeout_seconds: float = 30.0,
     fetcher: Fetcher | None = None,
     apify_profile_fetcher: ApifyProfileFetcher | None = None,
+    apify_tiktok_profile_fetcher: ApifyProfileFetcher | None = None,
     collected_at: str | None = None,
 ) -> list[SourceItem]:
     resolved_fetcher = fetcher or _default_fetcher
@@ -64,6 +67,18 @@ def collect_native_source_items(
 
     for target in targets:
         target_url = resolve_target_url(target)
+        if target.platform == "instagram" and _is_instagram_profile_url(target_url):
+            profile_payload = (apify_profile_fetcher or _default_apify_profile_fetcher)(target, timeout_seconds)
+            items.append(
+                _build_instagram_profile_item(
+                    target=target,
+                    target_url=target_url,
+                    profile_payload=profile_payload,
+                    collected_at=collected_timestamp,
+                )
+            )
+            continue
+
         raw_text = resolved_fetcher(target_url, timeout_seconds)
         if target.platform == "telegram":
             target_items = _parse_telegram_channel_page(target, target_url, raw_text, collected_timestamp)
@@ -72,7 +87,21 @@ def collect_native_source_items(
             target_items = _parse_youtube_feed(target, target_url, raw_text, collected_timestamp)
             items.extend(_select_top_performing_items(target_items))
         elif target.platform == "tiktok":
-            item = _parse_tiktok_public_page(target, target_url, raw_text, collected_timestamp)
+            try:
+                item = _parse_tiktok_public_page(target, target_url, raw_text, collected_timestamp)
+            except ValueError as exc:
+                if not _should_use_apify_tiktok_profile_fallback(target, target_url, exc):
+                    raise
+                profile_payload = (apify_tiktok_profile_fetcher or _default_apify_tiktok_profile_fetcher)(
+                    target,
+                    timeout_seconds,
+                )
+                item = _build_tiktok_profile_item(
+                    target=target,
+                    target_url=target_url,
+                    profile_payload=profile_payload,
+                    collected_at=collected_timestamp,
+                )
             items.append(item)
         else:
             try:
@@ -135,14 +164,13 @@ def _parse_telegram_channel_page(
     items: list[SourceItem] = []
     for block in blocks:
         post_match = re.search(r'data-post="([^"]+/([^"]+))"', block)
-        link_match = re.search(r'href="(https://t\.me/[^"]+)"', block)
         datetime_match = re.search(r'<time[^>]*datetime="([^"]+)"', block)
         text_match = re.search(
             r'<div class="tgme_widget_message_text js-message_text"[^>]*>(.*?)</div>',
             block,
             flags=re.DOTALL,
         )
-        if post_match is None or link_match is None or datetime_match is None:
+        if post_match is None or datetime_match is None:
             continue
 
         text_html = text_match.group(1) if text_match is not None else ""
@@ -164,7 +192,7 @@ def _parse_telegram_channel_page(
         source_type = "telegram_post"
         route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
         content_hash = _content_hash(transcript_text, media_urls)
-        source_url = link_match.group(1)
+        source_url = f"https://t.me/{post_match.group(1)}"
         item = SourceItem(
             item_id=f"telegram_{external_item_id}",
             source_type=source_type,
@@ -372,6 +400,45 @@ def _parse_tiktok_public_page(
     if not posts:
         return _parse_html_meta_page(target, target_url, html, collected_at)
 
+    return _build_tiktok_item_from_posts(
+        target=target,
+        target_url=target_url,
+        posts=posts,
+        collected_at=collected_at,
+        raw_payload_extra={},
+    )
+
+
+def _build_tiktok_profile_item(
+    *,
+    target: NativeSourceTarget,
+    target_url: str,
+    profile_payload: dict[str, Any],
+    collected_at: str,
+) -> SourceItem:
+    posts = [entry for entry in profile_payload.get("latestPosts", []) if isinstance(entry, dict)]
+    if not posts:
+        raise ValueError("Apify TikTok profile payload did not contain usable posts")
+
+    return _build_tiktok_item_from_posts(
+        target=target,
+        target_url=target_url,
+        posts=posts,
+        collected_at=collected_at,
+        raw_payload_extra={
+            "apify_profile": profile_payload,
+        },
+    )
+
+
+def _build_tiktok_item_from_posts(
+    *,
+    target: NativeSourceTarget,
+    target_url: str,
+    posts: list[dict[str, Any]],
+    collected_at: str,
+    raw_payload_extra: dict[str, Any],
+) -> SourceItem:
     best_post = _select_top_tiktok_post(posts)
     external_item_id = _tiktok_post_id(best_post)
     caption_text = _tiktok_post_caption(best_post)
@@ -392,7 +459,7 @@ def _parse_tiktok_public_page(
     engagement_signals = _tiktok_post_engagement_signals(best_post)
     engagement_score = _engagement_score(engagement_signals)
     source_url = _tiktok_post_url(best_post, target)
-    published_at = _normalize_tiktok_timestamp(best_post.get("createTime"), collected_at)
+    published_at = _normalize_tiktok_timestamp(best_post.get("createTime") or best_post.get("createTimeISO"), collected_at)
     source_type = "tiktok_video"
     route, reason, confidence = _infer_route(source_type, transcript_text, media_urls)
     content_hash = _content_hash(transcript_text, media_urls)
@@ -433,6 +500,7 @@ def _parse_tiktok_public_page(
             "engagement_selection_reason": _engagement_selection_reason(engagement_score),
             "monitoring_selection": "best_performing_post",
             "selected_post_payload": best_post,
+            **raw_payload_extra,
         },
         transcript_text=transcript_text,
         media_urls=media_urls,
@@ -579,6 +647,14 @@ def _default_apify_profile_fetcher(target: NativeSourceTarget, timeout_seconds: 
     )
 
 
+def _default_apify_tiktok_profile_fetcher(target: NativeSourceTarget, timeout_seconds: float) -> dict[str, Any]:
+    return fetch_tiktok_profile(
+        handle=target.handle,
+        profile_url=resolve_target_url(target),
+        timeout_seconds=timeout_seconds,
+    )
+
+
 def _default_fetcher(url: str, timeout_seconds: float) -> str:
     request = Request(
         url,
@@ -611,6 +687,26 @@ def _is_instagram_profile_url(url: str) -> bool:
         token not in normalized
         for token in ("/reel/", "/p/", "/tv/", "/stories/", "/video/")
     )
+
+
+def _should_use_apify_tiktok_profile_fallback(
+    target: NativeSourceTarget,
+    target_url: str,
+    error: ValueError,
+) -> bool:
+    return (
+        target.platform == "tiktok"
+        and _is_tiktok_profile_url(target_url)
+        and (
+            "Could not extract transcript text" in str(error)
+            or "TikTok profile payload did not contain usable text" in str(error)
+        )
+    )
+
+
+def _is_tiktok_profile_url(url: str) -> bool:
+    normalized = url.lower().split("?", 1)[0].rstrip("/")
+    return "tiktok.com/@" in normalized and "/video/" not in normalized
 
 
 def _normalize_text_fragment(value: str) -> str:
@@ -953,9 +1049,13 @@ def _tiktok_post_spoken_transcript(post: dict[str, Any]) -> str:
 
 def _tiktok_post_media_urls(post: dict[str, Any]) -> list[str]:
     urls: list[str] = []
-    video = post.get("video")
-    if isinstance(video, dict):
+    for video_key in ("video", "videoMeta"):
+        video = post.get(video_key)
+        if not isinstance(video, dict):
+            continue
         for key in ("playAddr", "downloadAddr", "cover", "dynamicCover", "originCover"):
+            urls.extend(_coerce_url_values(video.get(key)))
+        for key in ("coverUrl", "downloadAddr", "playAddr"):
             urls.extend(_coerce_url_values(video.get(key)))
     image_post = post.get("imagePost")
     if isinstance(image_post, dict):

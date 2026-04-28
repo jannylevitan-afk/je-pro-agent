@@ -42,6 +42,7 @@ TELEGRAM_MULTI_POST_HTML = """
     </div>
     <div class="tgme_widget_message_wrap js-widget_message_wrap">
       <div class="tgme_widget_message" data-post="clearvisionary/102">
+        <a class="tgme_widget_message_owner_name" href="https://t.me/clearvisionary">Clear Visionary</a>
         <a class="tgme_widget_message_date" href="https://t.me/clearvisionary/102">
           <time datetime="2026-04-25T07:55:00+00:00"></time>
         </a>
@@ -286,6 +287,41 @@ APIFY_INSTAGRAM_PROFILE_WITH_MIXED_POSTS = {
 }
 
 
+APIFY_TIKTOK_PROFILE = {
+    "profile": {
+        "name": "baligasm",
+        "profileUrl": "https://www.tiktok.com/@baligasm",
+    },
+    "latestPosts": [
+        {
+            "id": "quiet_tiktok",
+            "text": "Quiet Bali cafe note",
+            "createTime": 1777027200,
+            "authorMeta": {"name": "baligasm"},
+            "webVideoUrl": "https://www.tiktok.com/@baligasm/video/quiet_tiktok",
+            "playCount": 1200,
+            "diggCount": 80,
+            "commentCount": 3,
+            "shareCount": 4,
+            "collectCount": 6,
+        },
+        {
+            "id": "viral_tiktok",
+            "text": "Why this Bali music event made people save the date and send it to friends.",
+            "createTimeISO": "2026-04-26T10:00:00.000Z",
+            "authorMeta": {"name": "baligasm"},
+            "webVideoUrl": "https://www.tiktok.com/@baligasm/video/viral_tiktok",
+            "videoMeta": {"coverUrl": "https://cdn.example.com/tiktok-cover.jpg"},
+            "playCount": 48000,
+            "diggCount": 5400,
+            "commentCount": 380,
+            "shareCount": 260,
+            "collectCount": 920,
+        },
+    ],
+}
+
+
 def test_resolve_target_url_builds_public_platform_urls() -> None:
     assert (
         resolve_target_url(
@@ -378,6 +414,24 @@ def test_collect_native_source_items_selects_top_telegram_post_by_public_engagem
     assert items[0].raw_payload["engagement_rank"] == 1
     assert items[0].raw_payload["scanned_posts_count"] == 2
     assert "public engagement score" in items[0].raw_payload["engagement_selection_reason"]
+
+
+def test_telegram_source_url_uses_post_ref_when_owner_link_appears_first() -> None:
+    target = NativeSourceTarget(
+        platform="telegram",
+        handle="@clearvisionary",
+        audience_segment="developer_investor",
+        content_theme="boutique_hotels",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: TELEGRAM_MULTI_POST_HTML,
+        collected_at="2026-04-25T08:00:00Z",
+    )
+
+    assert items[0].source_url == "https://t.me/clearvisionary/102"
+    assert items[0].raw_payload["source_post_url"] == "https://t.me/clearvisionary/102"
 
 
 def test_collect_native_source_items_parses_youtube_feed() -> None:
@@ -511,6 +565,40 @@ def test_tiktok_profile_scan_selects_best_performing_video_and_extracts_post_tex
     assert item.routing_decision == "both"
 
 
+def test_tiktok_profile_falls_back_to_apify_when_public_html_has_no_posts() -> None:
+    target = NativeSourceTarget(
+        platform="tiktok",
+        handle="@baligasm",
+        audience_segment="bali_life",
+        content_theme="bali_travel",
+        source_name="Baligasm TikTok",
+    )
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=lambda _url, _timeout: "<html><body>No public payload</body></html>",
+        collected_at="2026-04-26T08:00:00Z",
+        apify_tiktok_profile_fetcher=lambda _target, _timeout: APIFY_TIKTOK_PROFILE,
+    )
+
+    assert len(items) == 1
+    item = items[0]
+    assert item.source_type == "tiktok_video"
+    assert item.source_url == "https://www.tiktok.com/@baligasm/video/viral_tiktok"
+    assert item.external_item_id == "viral_tiktok"
+    assert item.engagement_signals == {
+        "views": 48000,
+        "likes": 5400,
+        "comments": 380,
+        "shares": 260,
+        "saves": 920,
+    }
+    assert item.raw_payload["monitoring_selection"] == "best_performing_post"
+    assert item.raw_payload["scanned_posts_count"] == 2
+    assert item.raw_payload["caption_text"].startswith("Why this Bali music event")
+    assert item.media_urls == ["https://cdn.example.com/tiktok-cover.jpg"]
+
+
 def test_native_source_collector_dispatches_multiple_platform_targets() -> None:
     targets = [
         NativeSourceTarget(
@@ -581,6 +669,31 @@ def test_collect_native_source_items_falls_back_to_apify_for_instagram_profiles(
     assert "больше рассказывать о своей жизни" in items[0].transcript_text
     assert items[0].raw_payload["monitoring_selection"] == "best_performing_post"
     assert items[0].routing_decision == "both"
+
+
+def test_instagram_profile_targets_use_apify_without_public_html_fetch() -> None:
+    target = NativeSourceTarget(
+        platform="instagram",
+        handle="@annalutaeva",
+        source_url="https://www.instagram.com/annalutaeva/",
+        audience_segment="dreamer_woman",
+        content_theme="founder_journey",
+        source_name="Anna Lutaeva",
+    )
+
+    def blocked_fetcher(_url: str, _timeout: float) -> str:
+        raise TimeoutError("public Instagram profile HTML should not be fetched first")
+
+    items = collect_native_source_items(
+        targets=[target],
+        fetcher=blocked_fetcher,
+        collected_at="2026-04-25T09:00:00Z",
+        apify_profile_fetcher=lambda _target, _timeout: APIFY_INSTAGRAM_PROFILE,
+    )
+
+    assert len(items) == 1
+    assert items[0].source_url == "https://www.instagram.com/p/DK63Cl4PL3W/"
+    assert items[0].raw_payload["monitoring_selection"] == "best_performing_post"
 
 
 def test_instagram_profile_fallback_selects_best_performing_post_and_extracts_all_post_text() -> None:
