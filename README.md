@@ -25,6 +25,10 @@ The current Producer-oriented restructure plan lives at:
 - `docs/architecture/2026-04-29-producer-agent-entity.md`
 - `.codex/agents/producer_entity.md`
 
+For agent navigation, validation, smoke policy, and source-of-truth rules, start with:
+
+- `docs/README.md`
+
 ## Runtime Notes
 
 - Research Agent collects and tags source items; workflows only process prepared inputs.

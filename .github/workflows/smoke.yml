@@ -1,0 +1,26 @@
+name: smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/smoke/**"
+      - "src/content_engine/models/**"
+      - "src/content_engine/services/content_factory.py"
+      - ".github/workflows/smoke.yml"
+
+jobs:
+  readonly-smoke:
+    runs-on: ubuntu-latest
+    env:
+      CONTENT_ENGINE_SMOKE_MODE: readonly
+      CONTENT_ENGINE_SMOKE_USER_ID: github-smoke-agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Run read-only smoke
+        run: PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py
