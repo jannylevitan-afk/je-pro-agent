@@ -13,11 +13,17 @@ This project is set up as a standalone repository so it stays fully isolated fro
 - `examples/seed_config.sample.yaml` — approved blog source pool and discovery rules
 - `assets/` — static assets
 
-## Current Reference File
+## Current Reference Files
 
-The current architecture document lives at:
+The base architecture document lives at:
 
 - `content_engine_architecture_v3.md`
+
+The current Producer-oriented restructure plan lives at:
+
+- `docs/architecture/2026-04-29-content-factory-producer-restructure.md`
+- `docs/architecture/2026-04-29-producer-agent-entity.md`
+- `.codex/agents/producer_entity.md`
 
 ## Runtime Notes
 
