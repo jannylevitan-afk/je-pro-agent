@@ -222,6 +222,12 @@ MCP / external stack policy:
 - превращает `ApprovedOpportunity` в один из двух brief types:
 - `WorkflowABrief` для видеоворкфлоу;
 - `WorkflowBBrief` для текстового воркфлоу.
+- переносит Producer scene context, если есть `SceneCard`:
+- `producer_scene_type`;
+- `producer_plot_function`;
+- `producer_sales_intensity`;
+- `producer_scene_hook`;
+- `producer_cta_or_next_hook`.
 
 Ключевые файлы:
 
@@ -235,6 +241,8 @@ MCP / external stack policy:
 - Brief Builder не создаёт platform variants.
 - Brief Builder не создаёт publish dates / scheduler / publisher fields.
 - Brief Builder должен сохранять factual boundaries и evidence refs.
+- Brief Builder должен отклонять route mismatch между `ApprovedOpportunity` и `ProducerDecision`.
+- `SceneCard` должен совпадать по `scene_id` / `episode_id`; иначе brief не создаётся.
 
 ### Workflow A — Video
 
@@ -369,6 +377,8 @@ dac6901 feat: add readable producer output contract
 
 - `OpportunityCandidate -> ProducerDecision -> ApprovedOpportunity`;
 - `ApprovedOpportunity -> WorkflowABrief | WorkflowBBrief`;
+- Producer scene context now passes into both brief types;
+- route mismatch validation is enforced before Writer/Video handoff;
 - service/model tests.
 
 ### Workflow B adapter

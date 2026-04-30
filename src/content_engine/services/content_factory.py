@@ -50,6 +50,7 @@ def run_content_factory_dry_run(
         queue_result.approved,
         opportunities=[entry.candidate for entry in queue_result.queued],
         decisions=queue_result.decisions,
+        scenes=producer_output.scenes,
         created_at=created_at,
     )
     human_review_assets = build_human_review_assets(briefs, created_at=created_at)

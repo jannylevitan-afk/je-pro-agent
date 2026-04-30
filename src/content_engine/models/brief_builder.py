@@ -39,6 +39,11 @@ class BriefBase(BaseModel):
     season_id: str | None = None
     episode_id: str | None = None
     scene_id: str | None = None
+    producer_scene_type: str | None = None
+    producer_plot_function: str | None = None
+    producer_sales_intensity: int | None = Field(default=None, ge=0, le=3)
+    producer_scene_hook: str | None = None
+    producer_cta_or_next_hook: str | None = None
 
 
 class WorkflowBBrief(BriefBase):

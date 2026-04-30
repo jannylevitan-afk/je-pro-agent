@@ -1,7 +1,7 @@
 import pytest
 
 from content_engine.models.opportunity import OpportunityCandidate
-from content_engine.models.producer import ApprovedOpportunity, ProducerDecision
+from content_engine.models.producer import ApprovedOpportunity, ProducerDecision, SceneCard
 from content_engine.services.brief_builder import build_brief, build_briefs
 
 
@@ -83,6 +83,30 @@ def make_approved(**overrides: object) -> ApprovedOpportunity:
     return ApprovedOpportunity(**payload)
 
 
+def make_scene(**overrides: object) -> SceneCard:
+    payload = {
+        "scene_id": "scene_001",
+        "episode_id": "episode_001",
+        "channel": "Instagram",
+        "format": "Carousel",
+        "scene_type": "lesson",
+        "plot_function": "teach",
+        "sales_intensity": 1,
+        "hook": "The cheap Bali entry point is rarely the real price.",
+        "context": "Jane translates a public Bali legal signal into a practical investor warning.",
+        "conflict_or_question": "People choose by price before checking the invisible ownership and build risk.",
+        "value_point": "Show the first hidden question Jane asks before looking at the pretty part.",
+        "proof_point": "Public source with engagement and legal-risk context.",
+        "offer_bridge": "Clear Real Estate exists to filter invisible risk before buyers fall in love with visuals.",
+        "cta": "Save this before the next villa review.",
+        "next_hook": "Next: the construction question nobody asks in the viewing.",
+        "required_assets": ["source URL", "public metrics"],
+        "qa_status": "passed",
+    }
+    payload.update(overrides)
+    return SceneCard(**payload)
+
+
 def test_build_workflow_b_brief_from_approved_opportunity() -> None:
     result = build_brief(
         approved=make_approved(),
@@ -110,6 +134,28 @@ def test_build_workflow_b_linkedin_brief_sets_english_publish_language() -> None
     assert result.brief.workflow == "workflow_b"
     assert result.brief.publish_language == "en"
     assert result.brief.internal_working_language == "ru"
+
+
+def test_build_workflow_b_brief_includes_producer_scene_context() -> None:
+    scene = make_scene()
+
+    result = build_brief(
+        approved=make_approved(),
+        opportunity=make_opportunity(),
+        decision=make_decision(),
+        scene=scene,
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+
+    brief = result.brief
+    assert brief.workflow == "workflow_b"
+    assert brief.producer_scene_type == "lesson"
+    assert brief.producer_plot_function == "teach"
+    assert brief.producer_sales_intensity == 1
+    assert brief.producer_scene_hook == "The cheap Bali entry point is rarely the real price."
+    assert brief.producer_cta_or_next_hook == "Save this before the next villa review."
+    assert "Producer scene function: lesson / teach / intensity 1" in brief.must_include
+    assert "Use producer hook as scene direction, not as a separate Hook block." in brief.must_include
 
 
 def test_build_workflow_a_brief_keeps_video_fields_and_no_publish_queue() -> None:
@@ -142,12 +188,66 @@ def test_build_workflow_a_brief_keeps_video_fields_and_no_publish_queue() -> Non
     assert not hasattr(brief, "publish_queue")
 
 
+def test_build_workflow_a_brief_includes_producer_scene_context() -> None:
+    scene = make_scene(
+        format="Reels",
+        scene_type="problem_reveal",
+        plot_function="show_conflict",
+        sales_intensity=2,
+        hook="A luxury villa can still make you sick.",
+        cta=None,
+        next_hook="Next: how Jane spots hidden moisture risk.",
+    )
+
+    result = build_brief(
+        approved=make_approved(
+            selected_workflow="workflow_a",
+            production_intent="Create one source-backed instagram video asset for #недвижка.",
+        ),
+        opportunity=make_opportunity(suggested_workflow="workflow_a", source_type="instagram_reel"),
+        decision=make_decision(
+            selected_workflow="workflow_a",
+            production_intent="Create one source-backed instagram video asset for #недвижка.",
+        ),
+        scene=scene,
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+
+    brief = result.brief
+    assert brief.workflow == "workflow_a"
+    assert brief.producer_scene_type == "problem_reveal"
+    assert brief.producer_plot_function == "show_conflict"
+    assert brief.producer_sales_intensity == 2
+    assert brief.producer_scene_hook == "A luxury villa can still make you sick."
+    assert brief.producer_cta_or_next_hook == "Next: how Jane spots hidden moisture risk."
+    assert "Producer scene function: problem_reveal / show_conflict / intensity 2" in brief.must_include
+
+
 def test_build_brief_rejects_mismatched_opportunity() -> None:
     with pytest.raises(ValueError, match="opportunity_id"):
         build_brief(
             approved=make_approved(opportunity_id="opp_other"),
             opportunity=make_opportunity(opportunity_id="opp_001"),
             decision=make_decision(opportunity_id="opp_other"),
+        )
+
+
+def test_build_brief_rejects_route_mismatch_with_producer_decision() -> None:
+    with pytest.raises(ValueError, match="selected_workflow"):
+        build_brief(
+            approved=make_approved(selected_workflow="workflow_b"),
+            opportunity=make_opportunity(),
+            decision=make_decision(selected_workflow="workflow_a"),
+        )
+
+
+def test_build_brief_rejects_scene_mismatch() -> None:
+    with pytest.raises(ValueError, match="scene_id"):
+        build_brief(
+            approved=make_approved(scene_id="scene_001"),
+            opportunity=make_opportunity(),
+            decision=make_decision(scene_id="scene_001"),
+            scene=make_scene(scene_id="scene_other"),
         )
 
 
@@ -185,8 +285,10 @@ def test_build_briefs_maps_many_approved_items() -> None:
         approved_items,
         opportunities=opportunities,
         decisions=decisions,
+        scenes=[make_scene(), make_scene(scene_id="scene_002")],
         created_at="2026-04-29T10:00:00+08:00",
     )
 
     assert [result.approved_id for result in results] == ["approved_opp_001", "approved_opp_002"]
     assert results[1].brief.selected_platform == "linkedin"
+    assert results[0].brief.producer_scene_type == "lesson"

@@ -11,7 +11,7 @@ from content_engine.services.writer_entity import (
     run_writer_entity_workflow,
     select_voice_register,
 )
-from tests.services.test_brief_builder import make_approved, make_decision, make_opportunity
+from tests.services.test_brief_builder import make_approved, make_decision, make_opportunity, make_scene
 from content_engine.services.brief_builder import build_brief
 
 
@@ -44,6 +44,17 @@ def make_workflow_b_brief():
         approved=make_approved(),
         opportunity=make_opportunity(),
         decision=make_decision(),
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+    return result.brief
+
+
+def make_workflow_b_brief_with_scene():
+    result = build_brief(
+        approved=make_approved(),
+        opportunity=make_opportunity(),
+        decision=make_decision(),
+        scene=make_scene(),
         created_at="2026-04-29T10:00:00+08:00",
     )
     return result.brief
@@ -142,6 +153,16 @@ def test_writer_entity_adapter_builds_task_from_workflow_b_brief() -> None:
     assert "Cheap land can hide expensive structure risk." in task.source_material
     assert "Concrete legal risk made invisible bureaucracy tangible." in task.source_material
     assert "Draft placeholder" not in task.source_material
+
+
+def test_writer_entity_adapter_receives_producer_scene_context_from_brief() -> None:
+    brief = make_workflow_b_brief_with_scene()
+
+    task = build_writer_task_from_workflow_b_brief(brief)
+
+    assert "Producer scene: lesson / teach / intensity 1" in task.source_material
+    assert "Producer hook direction: The cheap Bali entry point is rarely the real price." in task.source_material
+    assert "Producer CTA/next hook direction: Save this before the next villa review." in task.source_material
 
 
 def test_writer_entity_runs_from_workflow_b_brief_without_placeholder() -> None:

@@ -2082,6 +2082,7 @@ def _source_material_from_workflow_b_brief(brief: WorkflowBBrief) -> str:
         f"Core idea: {brief.core_idea}",
         f"Jane adaptation: {brief.jane_adaptation_instruction}",
         f"Opening direction: {brief.opening_direction}",
+        _producer_scene_material(brief),
         f"Must include: {'; '.join(brief.must_include)}",
         f"Quality criteria: {'; '.join(brief.quality_criteria)}",
     ]
@@ -2094,9 +2095,26 @@ def _allowed_facts_from_workflow_b_brief(brief: WorkflowBBrief) -> list[str]:
         brief.source_text_excerpt,
         brief.what_performed,
         brief.core_idea,
+        _producer_scene_material(brief),
         *brief.must_include,
     ]
     return _unique_text_items(facts)[:8]
+
+
+def _producer_scene_material(brief: WorkflowBBrief) -> str:
+    parts: list[str] = []
+    if brief.producer_scene_type or brief.producer_plot_function or brief.producer_sales_intensity is not None:
+        parts.append(
+            "Producer scene: "
+            f"{brief.producer_scene_type or 'n/a'} / "
+            f"{brief.producer_plot_function or 'n/a'} / "
+            f"intensity {brief.producer_sales_intensity if brief.producer_sales_intensity is not None else 'n/a'}"
+        )
+    if brief.producer_scene_hook:
+        parts.append(f"Producer hook direction: {brief.producer_scene_hook}")
+    if brief.producer_cta_or_next_hook:
+        parts.append(f"Producer CTA/next hook direction: {brief.producer_cta_or_next_hook}")
+    return "\n".join(parts)
 
 
 def _reference_sources_from_workflow_b_brief(brief: WorkflowBBrief) -> list[str]:

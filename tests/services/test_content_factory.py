@@ -117,6 +117,8 @@ def test_run_content_factory_dry_run_connects_producer_queue_briefs_and_assets()
     assert result.run_result.workflow_b_asset_count == 1
     assert len(result.briefs) == 2
     assert len(result.human_review_assets) == 2
+    assert all(brief_result.brief.producer_scene_type for brief_result in result.briefs)
+    assert all(brief_result.brief.producer_plot_function for brief_result in result.briefs)
     assert result.queue_result.held_ids == ["opp_hold"]
     assert result.readable_producer_output.title == result.producer_output.season.title
     assert any(task.target_agent == "video_asset_agent" for task in result.readable_producer_output.agent_tasks)

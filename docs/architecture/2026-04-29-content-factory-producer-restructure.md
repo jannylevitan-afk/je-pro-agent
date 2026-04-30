@@ -306,7 +306,18 @@ Brief Builder should include:
 - opening direction;
 - quality criteria;
 - risk flags;
-- scene function if coming from Producer season plan.
+- scene function if coming from Producer season plan;
+- producer scene type;
+- producer plot function;
+- producer sales intensity;
+- producer scene hook as direction;
+- producer CTA or next hook as direction.
+
+Route rule:
+
+- `ApprovedOpportunity.selected_workflow` and `selected_platform` must match `ProducerDecision`.
+- `season_id`, `episode_id`, and `scene_id` must match when both sides provide them.
+- If a `SceneCard` is attached, it must match the approved `scene_id` and `episode_id`.
 
 Brief Builder must not include:
 
@@ -668,6 +679,11 @@ risk_flags
 season_id
 episode_id
 scene_id
+producer_scene_type
+producer_plot_function
+producer_sales_intensity
+producer_scene_hook
+producer_cta_or_next_hook
 ```
 
 ### 5.11 EditorialReviewResult
