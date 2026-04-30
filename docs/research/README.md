@@ -12,3 +12,8 @@ Each research note must include:
 - related architecture, ADR, or task file.
 
 Do not paste private data or secrets into research notes.
+
+## Current Files
+
+- `2026-04-30-saas-open-source-production-architecture.md` — external SaaS/API
+  and open-source research for production architecture options.

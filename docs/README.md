@@ -92,6 +92,18 @@ folder below before final handoff.
 | External research | `docs/research/` | Include source URLs and date |
 | Generated output | `outputs/` | Never use as source of truth |
 
+## Newly Imported Context
+
+The following imported root documents were promoted into durable folders on
+2026-04-30:
+
+- `docs/plans/2026-04-30-codex-content-factory-restructure-source-spec-ru.md`
+- `docs/plans/2026-04-30-producer-agent-source-spec-ru.md`
+- `docs/plans/2026-04-30-workflow-b-final-output-contract-source-spec.md`
+- `docs/research/2026-04-30-saas-open-source-production-architecture.md`
+
+They are context inputs, not replacements for current architecture.
+
 ## High-Risk Files
 
 Read tests and architecture before editing:
