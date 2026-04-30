@@ -185,6 +185,10 @@ def test_build_human_review_assets_creates_video_asset_from_workflow_a_brief() -
     assert asset.script is not None
     assert asset.filming_card is not None
     assert asset.final_text is None
+    assert "placeholder" not in asset.script.lower()
+    assert "placeholder" not in asset.filming_card.lower()
+    assert "publish_queue" not in asset.filming_card
+    assert asset.editor_score > 0.0
 
 
 def test_build_human_review_assets_accepts_explicit_brief_list() -> None:

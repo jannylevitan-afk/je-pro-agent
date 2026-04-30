@@ -10,6 +10,7 @@ from content_engine.models.writer_entity import EditorDiagnosis
 from content_engine.services.brief_builder import build_briefs
 from content_engine.services.opportunity_queue import OpportunityQueueResult, process_opportunity_queue
 from content_engine.services.producer import run_producer_workflow
+from content_engine.services.workflow_a import run_workflow_a_from_brief
 from content_engine.services.writer_entity import build_final_content_asset, run_writer_entity_for_workflow_b_brief
 
 
@@ -153,16 +154,7 @@ def _workflow_a_asset(
     *,
     created_at: str,
 ) -> HumanReviewAsset:
-    selected_hook = brief.source_hook or brief.opening_direction
-    script = (
-        f"{selected_hook}\n"
-        f"{brief.core_idea}\n"
-        "Script placeholder: Workflow A script generation has not run in this dry-run."
-    )
-    filming_card = (
-        f"Filming card placeholder for {brief.selected_platform}: "
-        f"{brief.production_intent}"
-    )
+    video_asset = run_workflow_a_from_brief(brief)
     return HumanReviewAsset(
         content_id=f"content_{brief.brief_id}",
         source_item_id=brief.source_item_id,
@@ -175,16 +167,31 @@ def _workflow_a_asset(
         pillar=brief.rubric,
         audience_segment=brief.audience_segment,
         approval_status="needs_revision",
-        selected_hook=selected_hook,
-        script=script,
-        filming_card=filming_card,
-        editor_score=0.0,
-        revision_notes=["Dry-run asset: route to Workflow A script generation before human approval."],
+        selected_hook=video_asset.selected_hook.hook_text,
+        script=video_asset.script.script_text,
+        filming_card=_format_filming_card(video_asset.filming_card.card_id, video_asset.filming_card.filming_priority),
+        editor_score=round(video_asset.selected_hook.score / 10, 2),
+        revision_notes=[
+            "Workflow A generated from WorkflowABrief.",
+            f"Selected hook type: {video_asset.selected_hook.hook_type}.",
+            "Manual filming remains required.",
+        ],
         source_refs=_source_refs(brief),
         season_id=brief.season_id,
         episode_id=brief.episode_id,
         scene_id=brief.scene_id,
         created_at=created_at,
+    )
+
+
+def _format_filming_card(card_id: str, priority: int) -> str:
+    return "\n".join(
+        [
+            f"card_id: {card_id}",
+            f"filming_priority: {priority}",
+            "filmed: false",
+            "manual_step: human records video",
+        ]
     )
 
 

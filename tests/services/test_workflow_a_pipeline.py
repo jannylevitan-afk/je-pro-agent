@@ -5,8 +5,11 @@ from content_engine.services.workflow_a import (
     build_video_publish_item,
     build_video_script,
     develop_video_hooks,
+    run_workflow_a_from_brief,
     select_best_hook,
 )
+from content_engine.services.brief_builder import build_brief
+from tests.services.test_brief_builder import make_approved, make_decision, make_opportunity
 
 
 def make_video_source_item() -> SourceItem:
@@ -48,6 +51,34 @@ def make_video_source_item() -> SourceItem:
         routing_confidence=0.94,
         processing_state="collected",
     )
+
+
+def make_workflow_a_brief():
+    result = build_brief(
+        approved=make_approved(
+            selected_workflow="workflow_a",
+            selected_platform="instagram",
+            production_intent="Create one source-backed instagram video asset for #bali life.",
+        ),
+        opportunity=make_opportunity(
+            suggested_workflow="workflow_a",
+            source_type="instagram_reel",
+            source_url="https://www.instagram.com/reel/example/",
+            topic="Bali villa permit layer",
+            core_idea="A beautiful villa story can collapse when the permit layer is weak.",
+            what_performed="The source made a hidden permit risk visible in the first seconds.",
+            rubric="#bali life",
+            content_theme="land_and_legal",
+            emotional_trigger="fear",
+        ),
+        decision=make_decision(
+            selected_workflow="workflow_a",
+            selected_platform="instagram",
+            production_intent="Create one source-backed instagram video asset for #bali life.",
+        ),
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+    return result.brief
 
 
 def test_build_video_intake_record_extracts_title_transcript_refs_and_metrics() -> None:
@@ -314,3 +345,16 @@ def test_build_video_publish_item_marks_item_ready() -> None:
 
     assert publish_item.linked_script_id == script.script_id
     assert publish_item.status == "ready"
+
+
+def test_run_workflow_a_from_brief_creates_real_hook_script_and_filming_card_without_publish_queue() -> None:
+    brief = make_workflow_a_brief()
+
+    result = run_workflow_a_from_brief(brief)
+
+    assert result.selected_hook.hook_text
+    assert result.script.script_text
+    assert result.filming_card.card_id.startswith("film_")
+    assert "placeholder" not in result.script.script_text.lower()
+    assert "publish" not in result.filming_card.model_dump()
+    assert result.source_item.routing_decision == "workflow_a"

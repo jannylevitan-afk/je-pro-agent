@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+from typing import cast
+
+from content_engine.models.brief_builder import WorkflowABrief
 from content_engine.models.source_item import SourceItem
 from content_engine.models.workflow_a import (
     FilmingCard,
@@ -20,6 +24,15 @@ HOOK_BLUEPRINTS: list[tuple[HookType, str]] = [
     ("data_stat_callout", "The listing price is rarely the full Bali cost."),
     ("bts_fragment", "What we notice on site before clients ever see the brochure."),
 ]
+
+
+@dataclass(frozen=True, slots=True)
+class WorkflowAVideoAsset:
+    source_item: SourceItem
+    hooks: list[VideoHook]
+    selected_hook: VideoHook
+    script: VideoScript
+    filming_card: FilmingCard
 
 
 def build_video_intake_record(item: SourceItem) -> VideoIntakeRecord:
@@ -199,6 +212,78 @@ def build_video_publish_item(
     )
 
 
+def run_workflow_a_from_brief(brief: WorkflowABrief) -> WorkflowAVideoAsset:
+    """Run the new Workflow A path from Brief Builder output."""
+
+    item = build_video_source_item_from_brief(brief)
+    platform = _platform_from_brief(brief)
+    hooks = develop_video_hooks(item, platform=platform)
+    selected_hook = select_best_hook(hooks)
+    script = build_video_script(
+        selected_hook,
+        title=brief.angle,
+        body_points=_script_body_points_from_brief(brief),
+        cta=_script_cta_from_brief(brief),
+    )
+    filming_card = build_filming_card(script, filming_priority=_filming_priority_from_brief(brief))
+    return WorkflowAVideoAsset(
+        source_item=item,
+        hooks=hooks,
+        selected_hook=selected_hook,
+        script=script,
+        filming_card=filming_card,
+    )
+
+
+def build_video_source_item_from_brief(brief: WorkflowABrief) -> SourceItem:
+    source_url = brief.video_refs[0] if brief.video_refs else _first_evidence_ref(brief)
+    source_hook = brief.source_hook or brief.opening_direction
+    transcript = _normalize_space(
+        " ".join(
+            [
+                brief.source_text_excerpt,
+                brief.core_idea,
+                brief.what_performed,
+                brief.jane_adaptation_instruction,
+            ]
+        )
+    )
+    return SourceItem(
+        item_id=brief.source_item_id,
+        source_type=_source_type_from_brief(brief),
+        source_name="WorkflowABrief",
+        source_url=source_url,
+        external_item_id=brief.brief_id,
+        collected_at="1970-01-01T00:00:00Z",
+        published_at="",
+        content_hash=f"brief:{brief.brief_id}",
+        dedupe_key=f"workflow_a_brief:{brief.brief_id}",
+        audience_segment=brief.audience_segment,
+        content_theme=brief.rubric.strip("#").replace(" ", "_") or brief.angle.replace(" ", "_").lower(),
+        raw_payload={
+            "video_title": brief.angle,
+            "caption_text": brief.source_summary,
+            "spoken_transcript": transcript,
+            "transcript_source": brief.transcript_source or "workflow_a_brief",
+            "source_hook": source_hook,
+            "first_3_seconds": source_hook,
+            "hook_pattern": brief.what_performed,
+            "hook_tension": brief.emotional_trigger,
+            "hook_promise": brief.core_idea,
+            "hook_cta": _script_cta_from_brief(brief),
+            "repeatable_formula": brief.production_intent,
+            "hook_modality": "brief_adapter",
+        },
+        transcript_text=transcript,
+        media_urls=[ref for ref in brief.video_refs[1:] if ref],
+        engagement_signals={},
+        routing_decision="workflow_a",
+        routing_reason=brief.production_intent,
+        routing_confidence=1.0,
+        processing_state="normalized",
+    )
+
+
 def _score_hook(item: SourceItem, hook_type: str) -> int:
     score = 5
     if hook_type == "market_warning":
@@ -210,6 +295,59 @@ def _score_hook(item: SourceItem, hook_type: str) -> int:
     if hook_type == "data_stat_callout" and any(value >= 1000 for value in item.engagement_signals.values()):
         score += 1
     return min(score, 10)
+
+
+def _platform_from_brief(brief: WorkflowABrief) -> VideoPlatform:
+    platform = brief.selected_platform.lower()
+    if platform in _VIDEO_PLATFORMS:
+        return cast(VideoPlatform, platform)
+    return "instagram"
+
+
+def _source_type_from_brief(brief: WorkflowABrief) -> str:
+    platform = _platform_from_brief(brief)
+    if platform == "youtube":
+        return "youtube_video"
+    if platform == "tiktok":
+        return "tiktok_video"
+    if platform == "linkedin":
+        return "linkedin_video"
+    return "instagram_reel"
+
+
+def _script_body_points_from_brief(brief: WorkflowABrief) -> list[str]:
+    points = [
+        f"Context: {brief.source_summary}",
+        f"Tension: {brief.what_performed}",
+        f"Jane angle: {brief.jane_adaptation_instruction}",
+        f"Payoff: {brief.core_idea}",
+    ]
+    points.extend(f"Boundary: {boundary}" for boundary in brief.factual_boundaries[:2])
+    return [_normalize_space(point) for point in points if point.strip()]
+
+
+def _script_cta_from_brief(brief: WorkflowABrief) -> str:
+    if brief.selected_platform == "linkedin":
+        return "Save this as a pre-check before trusting the next market story."
+    if brief.audience_segment == "developer_investor":
+        return "Save this before you trust the next beautiful Bali deal."
+    return "Save this before the next place looks too perfect."
+
+
+def _filming_priority_from_brief(brief: WorkflowABrief) -> int:
+    if brief.risk_flags:
+        return 1
+    if brief.emotional_trigger.lower() in {"fear", "страх", "desire", "желание"}:
+        return 1
+    return 2
+
+
+def _first_evidence_ref(brief: WorkflowABrief) -> str:
+    prefix = "Evidence ref: "
+    for boundary in brief.factual_boundaries:
+        if boundary.startswith(prefix):
+            return boundary.removeprefix(prefix)
+    return f"workflow-a-brief://{brief.brief_id}"
 
 
 def _build_hook_text(item: SourceItem, hook_type: str, default_line: str) -> str:
