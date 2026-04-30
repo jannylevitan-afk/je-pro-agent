@@ -24,6 +24,10 @@ Optional stable public/read-only fixtures:
 ```bash
 CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID=
 CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID=
+CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID=
+CONTENT_ENGINE_SMOKE_AUTH_USER_ID=
+CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL=
+CONTENT_ENGINE_REMOTE_SMOKE_TOKEN=
 CONTENT_ENGINE_ENABLE_DANGEROUS_SMOKE=false
 ```
 
@@ -50,5 +54,41 @@ Stateful smoke is excluded from CI by default and requires
 ```bash
 CONTENT_ENGINE_SMOKE_MODE=readonly \
 CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
-PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py
+PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
 ```
+
+Help:
+
+```bash
+python3 scripts/smoke/smoke_readonly_contracts.py --help
+```
+
+Read-only flow checks:
+
+```bash
+python3 scripts/smoke/smoke_readonly_contracts.py --flow auth
+python3 scripts/smoke/smoke_readonly_contracts.py --flow card
+python3 scripts/smoke/smoke_readonly_contracts.py --flow public
+```
+
+If a remote flow is not configured, the script returns JSON with
+`"status": "skipped"` and exits successfully. Agents must not guess missing
+remote smoke values.
+
+## GitHub Remote Smoke Variables
+
+Repository variables:
+
+- `CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL`
+- `CONTENT_ENGINE_SMOKE_USER_ID`
+- `CONTENT_ENGINE_SMOKE_AUTH_USER_ID`
+- `CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID`
+- `CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID`
+- `CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID`
+
+Repository secret:
+
+- `CONTENT_ENGINE_REMOTE_SMOKE_TOKEN`
+
+`.github/workflows/remote-smoke.yml` checks readiness first and runs auth, card,
+and public smoke as separate read-only jobs.

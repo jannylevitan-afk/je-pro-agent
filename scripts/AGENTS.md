@@ -8,3 +8,6 @@ No script may require live mutation unless its filename and README section mark 
 as stateful/dangerous.
 
 Use explicit environment variables. Do not read secrets from hardcoded paths.
+
+Repo-wide validation lives in `scripts/check.sh` and must stay readable enough for
+an agent to audit in under one minute.

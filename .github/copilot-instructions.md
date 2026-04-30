@@ -1,6 +1,8 @@
 # Copilot Instructions
 
-Use `AGENTS.md` as the root instruction source.
+This file is a thin adapter for GitHub Copilot. Use `AGENTS.md` as the canonical
+repo-wide instruction source. If files disagree, follow `AGENTS.md`, then the
+nearest nested `AGENTS.md`.
 
 Fast reading order:
 
@@ -20,6 +22,5 @@ Respect these hard rules:
 Before proposing completion, run or request:
 
 ```bash
-PYTHONPATH=src:. pytest -q
-python3 -m mypy src
+make check
 ```

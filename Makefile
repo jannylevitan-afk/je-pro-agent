@@ -1,9 +1,18 @@
-.PHONY: test typecheck all
+.PHONY: check test typecheck smoke build all
+
+check:
+	bash scripts/check.sh
 
 test:
-	python3 -m pytest -q
+	PYTHONPATH=src:. python3 -m pytest -q
 
 typecheck:
-	python3 -m mypy src/ --no-error-summary
+	python3 -m mypy src
 
-all: test typecheck
+smoke:
+	CONTENT_ENGINE_SMOKE_MODE=readonly CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
+
+build:
+	python3 -m compileall -q src tests
+
+all: check

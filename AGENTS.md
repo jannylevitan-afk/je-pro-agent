@@ -4,6 +4,11 @@ This is the single root instruction entrypoint for agents. If another tool-speci
 instruction file conflicts with this file, follow this file and then the nearest
 nested `AGENTS.md` for the directory you are editing.
 
+Nearest `AGENTS.md` wins for its subtree. Tool-specific files such as
+`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/*`, and
+`.github/agents/*` are compatibility adapters. They must link back here and must
+not become a second source of truth.
+
 ## Fast Reading Order
 
 1. `AGENTS.md`
@@ -16,6 +21,41 @@ nested `AGENTS.md` for the directory you are editing.
 Historical handoffs, generated outputs, screenshots, logs, local downloads, and
 root-level scratch files are not source of truth unless the current task names
 them explicitly.
+
+Durable knowledge cannot live only in chat. If a session discovers a lasting
+constraint, regression, decision, or operator procedure, write it to `docs/`.
+
+## Repository Map
+
+| Path | Purpose |
+|---|---|
+| `.codex/agents/` | Full local prompts for dedicated Codex entities |
+| `.agents/skills/` | Local Research Agent skills |
+| `.github/agents/` | Thin GitHub-native role adapters |
+| `.github/instructions/` | Thin path-specific GitHub guidance |
+| `.github/workflows/` | CI, setup, and optional smoke automation |
+| `docs/architecture/` | Current architecture and dated architecture replacements |
+| `docs/runbooks/` | Validation, deploy, rollback, debug, ops |
+| `docs/decisions/` | ADRs and durable process decisions |
+| `docs/incidents/` | Regressions, hidden constraints, postmortems |
+| `docs/tasks/active/` | Temporary handoff notes for active work only |
+| `docs/plans/` | Historical design context and old plans |
+| `docs/research/` | External research and source analysis |
+| `examples/` | Safe sample inputs and seed configs |
+| `knowledge/kmd/` | Generated knowledge material for agent handoff |
+| `outputs/` | Generated local outputs, never source of truth |
+| `scripts/` | Small operational scripts |
+| `src/content_engine/` | Python package |
+| `tests/` | Deterministic tests mirroring package areas |
+
+## Main Packages And Applications
+
+- `src/content_engine/models/`: shared contracts. Change these first when the data shape changes.
+- `src/content_engine/services/`: deterministic business behavior. Keep external I/O out unless the service is explicitly an adapter.
+- `src/content_engine/orchestration/`: connects services into flows. Treat as high-risk.
+- `src/content_engine/runtime/` and `src/content_engine/cli/`: executable entrypoints.
+- `src/content_engine/collectors/`, `llm/`, `notion/`, `n8n/`: integration adapters. Keep secrets in env, not code.
+- There is no active frontend app yet. Future admin/public apps must add local `AGENTS.md` only if their rules differ from this file.
 
 ## Current Architecture Contract
 
@@ -110,22 +150,47 @@ Read the local code and tests before editing:
 - `src/content_engine/models/brief_builder.py`
 - `src/content_engine/models/content_factory.py`
 
+## Universal Commands
+
+Use these from the repo root:
+
+```bash
+make check
+make test
+make typecheck
+bash scripts/check.sh
+CONTENT_ENGINE_SMOKE_MODE=readonly CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
+  PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
+```
+
+`make check` and `bash scripts/check.sh` are the repo-wide validation contract.
+
+## Global Invariants
+
+- Research Agent is the only layer that collects external data.
+- Compliance and evidence logging happen before Workflow A or Workflow B handoff.
+- Producer orchestrates season logic and decisions; it does not search, scrape, write, publish, or schedule.
+- Analyst structures source-backed insights; it does not invent facts or collect live sources.
+- Writer writes from approved briefs; it does not become a search agent.
+- Workflow B returns one selected-platform asset, not platform variants.
+- Workflow A returns video hook/script/filming-ready material, not an automatic publisher.
+- Admin Operating Hub is the intended output layer; Notion is not the current destination.
+- Generated outputs, cache folders, screenshots, logs, dist/build files, and root scratch files are not source of truth.
+
 ## Validation Before Completion
 
 Use the narrowest targeted test first, then full validation:
 
 ```bash
 PYTHONPATH=src:. pytest -q tests/path/to/relevant_test.py
-PYTHONPATH=src:. pytest -q
-python3 -m mypy src
+make check
 ```
 
 If smoke policy or scripts changed, also run:
 
 ```bash
-CONTENT_ENGINE_SMOKE_MODE=readonly \
-CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
-PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py
+CONTENT_ENGINE_SMOKE_MODE=readonly CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
+  PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
 ```
 
 Before final handoff, run:
@@ -136,3 +201,12 @@ git status --short
 
 Only stage files that belong to the current task. Do not delete or move unrelated
 dirty/untracked user files without explicit instruction.
+
+## Update Obligations
+
+- Architecture behavior changed -> update `docs/architecture/` and `docs/README.md`.
+- Validation, deploy, smoke, or rollback changed -> update `docs/runbooks/validation-and-deploy.md` or `scripts/smoke/README.md`.
+- Durable rule changed -> add or update an ADR in `docs/decisions/`.
+- Regression or hidden constraint found -> add an incident note in `docs/incidents/`.
+- Active handoff needed -> use `docs/tasks/active/` and delete/archive it when done.
+- External research used as design input -> place it in `docs/research/`.

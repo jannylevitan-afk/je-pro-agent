@@ -9,6 +9,7 @@ This file is the documentation entrypoint for agents and humans.
 3. `architecture/2026-04-29-producer-agent-entity.md`
 4. `decisions/0001-agent-first-contract.md`
 5. `runbooks/validation-and-deploy.md`
+6. `scripts/smoke/README.md` when smoke or remote validation is involved
 
 ## Source Of Truth Map
 
@@ -23,6 +24,10 @@ This file is the documentation entrypoint for agents and humans.
 | Validation/deploy | `docs/runbooks/validation-and-deploy.md` |
 | Smoke policy | `scripts/smoke/README.md` |
 | Historical context | `docs/handoffs/` |
+| Incidents and hidden constraints | `docs/incidents/` |
+| Active handoffs | `docs/tasks/active/` |
+| Historical plans | `docs/plans/` and `docs/superpowers/plans/` |
+| External research | `docs/research/` |
 
 ## Target Repository Structure
 
@@ -40,6 +45,10 @@ This file is the documentation entrypoint for agents and humans.
 │   ├── architecture/
 │   ├── decisions/
 │   ├── handoffs/
+│   ├── incidents/
+│   ├── plans/
+│   ├── research/
+│   ├── tasks/
 │   └── runbooks/
 ├── scripts/
 │   ├── AGENTS.md
@@ -63,6 +72,25 @@ Do not treat these as source of truth:
 - `.pytest_cache/`
 - `.mypy_cache/`
 - root-level scratch files unless a task names them explicitly
+- local imported context files ignored by `.gitignore` until durable material is
+  promoted into `docs/`
+
+Durable knowledge cannot remain only in chat. If a conversation establishes a
+lasting rule, hidden constraint, incident, or process decision, write it into the
+folder below before final handoff.
+
+## Placement Rules
+
+| Knowledge type | Put it here | Rule |
+|---|---|---|
+| Current system behavior | `docs/architecture/` | Use dated files; update this README when current file changes |
+| Validation/deploy/debug procedure | `docs/runbooks/` | Include exact commands and rollback caveats |
+| Durable decision or process rule | `docs/decisions/` | Use ADR format with status/date/consequences |
+| Regression or hidden constraint | `docs/incidents/` | Include symptom, cause, fix, prevention |
+| Temporary active handoff | `docs/tasks/active/` | Include owner/status/next command; remove or archive when done |
+| Historical plan/design | `docs/plans/` | Mark historical; do not override current architecture |
+| External research | `docs/research/` | Include source URLs and date |
+| Generated output | `outputs/` | Never use as source of truth |
 
 ## High-Risk Files
 
@@ -105,8 +133,7 @@ service tests, and a dry-run path.
 Run the relevant targeted test first, then:
 
 ```bash
-PYTHONPATH=src:. pytest -q
-python3 -m mypy src
+make check
 git status --short
 ```
 
@@ -115,7 +142,7 @@ If smoke files changed:
 ```bash
 CONTENT_ENGINE_SMOKE_MODE=readonly \
 CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
-PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py
+PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
 ```
 
 ## Docs Update Rules

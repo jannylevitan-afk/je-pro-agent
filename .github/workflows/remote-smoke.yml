@@ -1,0 +1,95 @@
+name: remote-smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      auth_ready: ${{ steps.config.outputs.auth_ready }}
+      card_ready: ${{ steps.config.outputs.card_ready }}
+      public_ready: ${{ steps.config.outputs.public_ready }}
+    steps:
+      - id: config
+        env:
+          BASE_URL: ${{ vars.CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL }}
+          SMOKE_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_USER_ID }}
+          AUTH_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_AUTH_USER_ID }}
+          PUBLIC_CARD_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID }}
+          PUBLIC_ENTITY_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID }}
+          PUBLIC_INVOICE_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID }}
+          REMOTE_TOKEN: ${{ secrets.CONTENT_ENGINE_REMOTE_SMOKE_TOKEN }}
+        run: |
+          if [ -n "$BASE_URL" ] && [ -n "$SMOKE_USER_ID" ] && [ -n "$AUTH_USER_ID" ] && [ -n "$REMOTE_TOKEN" ]; then
+            echo "auth_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "auth_ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$BASE_URL" ] && [ -n "$SMOKE_USER_ID" ] && [ -n "$PUBLIC_CARD_ID" ] && [ -n "$REMOTE_TOKEN" ]; then
+            echo "card_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "card_ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ -n "$BASE_URL" ] && [ -n "$SMOKE_USER_ID" ] && [ -n "$PUBLIC_ENTITY_ID" ] && [ -n "$PUBLIC_INVOICE_ID" ] && [ -n "$REMOTE_TOKEN" ]; then
+            echo "public_ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "public_ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  auth-smoke:
+    needs: prepare
+    if: needs.prepare.outputs.auth_ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      CONTENT_ENGINE_SMOKE_MODE: readonly
+      CONTENT_ENGINE_SMOKE_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_USER_ID }}
+      CONTENT_ENGINE_SMOKE_AUTH_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_AUTH_USER_ID }}
+      CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL: ${{ vars.CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL }}
+      CONTENT_ENGINE_REMOTE_SMOKE_TOKEN: ${{ secrets.CONTENT_ENGINE_REMOTE_SMOKE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - run: PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow auth
+
+  card-smoke:
+    needs: prepare
+    if: needs.prepare.outputs.card_ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      CONTENT_ENGINE_SMOKE_MODE: readonly
+      CONTENT_ENGINE_SMOKE_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_USER_ID }}
+      CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID }}
+      CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL: ${{ vars.CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL }}
+      CONTENT_ENGINE_REMOTE_SMOKE_TOKEN: ${{ secrets.CONTENT_ENGINE_REMOTE_SMOKE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - run: PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow card
+
+  public-smoke:
+    needs: prepare
+    if: needs.prepare.outputs.public_ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      CONTENT_ENGINE_SMOKE_MODE: readonly
+      CONTENT_ENGINE_SMOKE_USER_ID: ${{ vars.CONTENT_ENGINE_SMOKE_USER_ID }}
+      CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID }}
+      CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID: ${{ vars.CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID }}
+      CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL: ${{ vars.CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL }}
+      CONTENT_ENGINE_REMOTE_SMOKE_TOKEN: ${{ secrets.CONTENT_ENGINE_REMOTE_SMOKE_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e .
+      - run: PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow public

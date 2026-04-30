@@ -13,3 +13,10 @@ in a pure service and test first.
 
 Do not add network calls to services that are intended to be deterministic.
 Research Agent remains the only layer that collects external data.
+
+Validation for source changes:
+
+```bash
+PYTHONPATH=src:. pytest -q tests/path/to/relevant_test.py
+make check
+```

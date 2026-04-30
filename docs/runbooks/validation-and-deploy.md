@@ -16,8 +16,7 @@ PYTHONPATH=src:. pytest -q tests/path/to/test_file.py
 Then run full validation:
 
 ```bash
-PYTHONPATH=src:. pytest -q
-python3 -m mypy src
+make check
 ```
 
 If smoke files changed:
@@ -25,8 +24,15 @@ If smoke files changed:
 ```bash
 CONTENT_ENGINE_SMOKE_MODE=readonly \
 CONTENT_ENGINE_SMOKE_USER_ID=local-smoke-agent \
-PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py
+PYTHONPATH=src:. python3 scripts/smoke/smoke_readonly_contracts.py --flow contracts
 ```
+
+`make check` runs:
+
+1. Python compile check for `src` and `tests`.
+2. Read-only contract smoke.
+3. Full pytest suite.
+4. mypy over `src`.
 
 ## Deploy Order
 
@@ -56,6 +62,27 @@ For changes to Research, Analyst, Producer, Brief Builder, Writer, or live orche
 - Confirm Workflow B does not emit platform variants.
 - Confirm Workflow A does not emit publish queue in the new pipeline.
 - Confirm human-review outputs are not marked published or scheduled.
+
+## Remote Smoke
+
+Remote smoke is optional and read-only by default. It must use only GitHub
+repository variables and secrets.
+
+Required repository variables:
+
+- `CONTENT_ENGINE_REMOTE_SMOKE_BASE_URL`
+- `CONTENT_ENGINE_SMOKE_USER_ID`
+- `CONTENT_ENGINE_SMOKE_AUTH_USER_ID` for auth smoke
+- `CONTENT_ENGINE_SMOKE_PUBLIC_CARD_ID` for card smoke
+- `CONTENT_ENGINE_SMOKE_PUBLIC_ENTITY_ID` for public API smoke
+- `CONTENT_ENGINE_SMOKE_PUBLIC_INVOICE_ID` for public acquiring/API smoke
+
+Required repository secret:
+
+- `CONTENT_ENGINE_REMOTE_SMOKE_TOKEN`
+
+If a job-specific value is missing, `.github/workflows/remote-smoke.yml` skips
+that job instead of guessing.
 
 ## Git Handoff
 

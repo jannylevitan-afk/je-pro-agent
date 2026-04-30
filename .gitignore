@@ -25,3 +25,14 @@ temp/
 
 .idea/
 .vscode/
+
+# Local imported context files are not repo source of truth.
+# Promote durable material into docs/ before tracking.
+Fact_Dossier_Jane_Levitan_RU.md
+Voice_Jane_Levitan_Agent.md
+content_farm_workflow_spec*.md
+openapi.json
+photo_2026-04-24 16.16.21.jpeg
+target-audience-portraits.md
+writer_entity_combined_technical_spec.md
+Стратегия AI агент Instagram LinkedIn.docx
