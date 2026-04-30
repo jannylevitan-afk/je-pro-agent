@@ -134,6 +134,19 @@ ProducerQAReport
 SeriesMemory
 ```
 
+For human review and admin/interface handoff, Producer also exposes a readable
+`ProducerOutput` document. That display contract is defined in
+`2026-04-30-producer-output-contract.md` and must keep the approved structure:
+
+```text
+brief -> season -> episodes -> scene cards -> sales plan -> QA -> tasks for workflow agents
+```
+
+In that readable document, Workflow A appears under `Video / AssetAgent` and
+Workflow B appears under `CopywriterAgent` / Writer Entity. Display-only blocks
+such as `DesignerAgent`, `Sales / AutomationAgent`, `Manual Publishing / Calendar`,
+and `AnalyticsAgent` are planning instructions, not active runtime task targets.
+
 ## 6. Season Logic
 
 Formula:

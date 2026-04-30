@@ -118,6 +118,8 @@ def test_run_content_factory_dry_run_connects_producer_queue_briefs_and_assets()
     assert len(result.briefs) == 2
     assert len(result.human_review_assets) == 2
     assert result.queue_result.held_ids == ["opp_hold"]
+    assert result.readable_producer_output.title == result.producer_output.season.title
+    assert any(task.target_agent == "video_asset_agent" for task in result.readable_producer_output.agent_tasks)
 
 
 def test_build_human_review_assets_creates_clean_workflow_b_asset() -> None:

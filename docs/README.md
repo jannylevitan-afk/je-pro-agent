@@ -7,9 +7,10 @@ This file is the documentation entrypoint for agents and humans.
 1. `../AGENTS.md`
 2. `architecture/2026-04-29-content-factory-producer-restructure.md`
 3. `architecture/2026-04-29-producer-agent-entity.md`
-4. `decisions/0001-agent-first-contract.md`
-5. `runbooks/validation-and-deploy.md`
-6. `scripts/smoke/README.md` when smoke or remote validation is involved
+4. `architecture/2026-04-30-producer-output-contract.md`
+5. `decisions/0001-agent-first-contract.md`
+6. `runbooks/validation-and-deploy.md`
+7. `scripts/smoke/README.md` when smoke or remote validation is involved
 
 ## Source Of Truth Map
 
@@ -18,6 +19,7 @@ This file is the documentation entrypoint for agents and humans.
 | Global agent rules | `AGENTS.md` |
 | Current architecture | `docs/architecture/2026-04-29-content-factory-producer-restructure.md` |
 | Producer entity | `docs/architecture/2026-04-29-producer-agent-entity.md` and `.codex/agents/producer_entity.md` |
+| Producer readable output | `docs/architecture/2026-04-30-producer-output-contract.md` |
 | Analyst entity | `.codex/agents/analyst_entity.md` |
 | Shared contracts | `src/content_engine/models/` |
 | Service behavior | `src/content_engine/services/` plus matching `tests/services/` |
@@ -112,12 +114,14 @@ Read tests and architecture before editing:
 - `src/content_engine/orchestration/live_pipeline.py`
 - `src/content_engine/services/analyst.py`
 - `src/content_engine/services/producer.py`
+- `src/content_engine/services/producer_output_contract.py`
 - `src/content_engine/services/opportunity_queue.py`
 - `src/content_engine/services/brief_builder.py`
 - `src/content_engine/services/content_factory.py`
 - `src/content_engine/services/writer_entity.py`
 - `src/content_engine/models/source_item.py`
 - `src/content_engine/models/producer.py`
+- `src/content_engine/models/producer_output_contract.py`
 - `src/content_engine/models/opportunity.py`
 - `src/content_engine/models/brief_builder.py`
 - `src/content_engine/models/content_factory.py`

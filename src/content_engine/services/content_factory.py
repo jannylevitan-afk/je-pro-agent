@@ -6,10 +6,12 @@ from content_engine.models.brief_builder import BriefBuilderResult, WorkflowABri
 from content_engine.models.content_factory import ContentFactoryRunResult, HumanReviewAsset
 from content_engine.models.opportunity import OpportunityCandidate
 from content_engine.models.producer import ProducerContext, ProducerOutput
+from content_engine.models.producer_output_contract import ReadableProducerOutput
 from content_engine.models.writer_entity import EditorDiagnosis
 from content_engine.services.brief_builder import build_briefs
 from content_engine.services.opportunity_queue import OpportunityQueueResult, process_opportunity_queue
 from content_engine.services.producer import run_producer_workflow
+from content_engine.services.producer_output_contract import build_readable_producer_output
 from content_engine.services.workflow_a import run_workflow_a_from_brief
 from content_engine.services.writer_entity import build_final_content_asset, run_writer_entity_for_workflow_b_brief
 
@@ -17,6 +19,7 @@ from content_engine.services.writer_entity import build_final_content_asset, run
 @dataclass(frozen=True, slots=True)
 class ContentFactoryDryRunResult:
     producer_output: ProducerOutput
+    readable_producer_output: ReadableProducerOutput
     queue_result: OpportunityQueueResult
     briefs: list[BriefBuilderResult]
     human_review_assets: list[HumanReviewAsset]
@@ -33,6 +36,7 @@ def run_content_factory_dry_run(
     """Run the new Producer -> Queue -> Brief Builder chain without live Search/Writer calls."""
 
     producer_output = run_producer_workflow(context, created_at=created_at)
+    readable_producer_output = build_readable_producer_output(producer_output, context=context)
     first_episode = producer_output.episodes[0]
     first_scene_id = first_episode.scene_ids[0]
     queue_result = process_opportunity_queue(
@@ -71,6 +75,7 @@ def run_content_factory_dry_run(
     )
     return ContentFactoryDryRunResult(
         producer_output=producer_output,
+        readable_producer_output=readable_producer_output,
         queue_result=queue_result,
         briefs=briefs,
         human_review_assets=human_review_assets,

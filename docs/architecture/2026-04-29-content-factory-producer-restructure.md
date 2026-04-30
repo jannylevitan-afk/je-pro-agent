@@ -47,6 +47,11 @@ User Season Seed / Strategy Input
   -> Jane Superstar Admin Hub
 ```
 
+The Producer also exposes a separate readable `ProducerOutput` document for
+human review and interface handoff. This document is not a replacement for the
+runtime models. Its current contract lives in
+`2026-04-30-producer-output-contract.md`.
+
 ## 2. Non-Negotiable Rules
 
 - Research Agent remains the only layer allowed to search, scrape, crawl, or collect external data.
@@ -57,6 +62,7 @@ User Season Seed / Strategy Input
 - Workflow B creates one final text asset per approved opportunity and selected platform.
 - No automatic multi-platform variants in the active pipeline.
 - No Publisher, Scheduler, Auto-publishing, publish queue, visual producer, platform adapter, or format adapter in this stage.
+- Readable ProducerOutput may show planning blocks for Designer, Sales/Automation, Manual Publishing/Calendar, and Analytics, but these are not active runtime services.
 - Source evidence stays traceable internally, but final user-facing assets stay clean.
 - LinkedIn remains special: final publish text is English, internal Russian master can exist for review.
 - Editor / QA Gate has maximum 3 review passes before human review handoff.

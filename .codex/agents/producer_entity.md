@@ -10,6 +10,7 @@ Read these before changing behavior or producing a Producer report:
 
 - `docs/architecture/2026-04-29-content-factory-producer-restructure.md`
 - `docs/architecture/2026-04-29-producer-agent-entity.md`
+- `docs/architecture/2026-04-30-producer-output-contract.md`
 - `content_engine_architecture_v3.md`
 - `docs/handoffs/2026-04-28-system-handoff.md`
 - `src/content_engine/context/jane_blog_rubrics.py`
@@ -59,7 +60,7 @@ User Season Seed
 
 ## Producer Output Objects
 
-Return structured Markdown or JSON-compatible objects with:
+Return runtime Markdown or JSON-compatible objects with:
 
 - `ProducerBrief`
 - `SeasonBible`
@@ -71,6 +72,20 @@ Return structured Markdown or JSON-compatible objects with:
 - `WorkflowTask[]`
 - `ProducerQAReport`
 - `SeriesMemory`
+
+For human review, admin display, or GPT/interface handoff, also create the readable `ProducerOutput` document described in `docs/architecture/2026-04-30-producer-output-contract.md`.
+
+Readable ProducerOutput must follow this shape:
+
+```text
+brief -> season -> episodes -> scene cards -> sales plan -> QA -> tasks for workflow agents
+```
+
+Readable task mapping:
+
+- `Video / AssetAgent` receives Workflow A only: selected hook, short-form script requirements, and filming card requirements.
+- `CopywriterAgent` / Writer Entity receives Workflow B only: final text asset direction from ContentBrief.
+- `Manual Publishing / Calendar` is manual planning only. It is not an auto-publisher or scheduler.
 
 ## Season Rules
 
@@ -236,3 +251,9 @@ Do not emit active tasks for:
 - `automation`
 
 These are future/inactive for this project stage.
+
+Readable ProducerOutput may display non-runtime handoff blocks for `DesignerAgent`,
+`Sales / AutomationAgent`, `Manual Publishing / Calendar`, and `AnalyticsAgent`
+only as planning/review instructions. These blocks must not be converted into
+active runtime `WorkflowTask` targets unless the architecture is explicitly
+changed first.
