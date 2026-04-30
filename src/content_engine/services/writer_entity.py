@@ -4,6 +4,7 @@ import re
 
 from content_engine.context.jane_blog_rubrics import resolve_jane_blog_rubric
 from content_engine.context.workflow_b_rules import WorkflowBDecision
+from content_engine.models.brief_builder import WorkflowBBrief
 from content_engine.models.source_item import SourceItem
 from content_engine.models.workflow_b import InsightCard
 from content_engine.models.writer_entity import (
@@ -795,6 +796,38 @@ def run_writer_entity_for_workflow_b(
         allowed_facts=matched_facts[:5],
         reference_sources=reference_sources,
         preferred_register=decision.tone,
+    )
+
+
+def build_writer_task_from_workflow_b_brief(brief: WorkflowBBrief) -> WriterTaskInput:
+    """Convert the new Producer-approved WorkflowBBrief into Writer Entity input."""
+
+    return WriterTaskInput(
+        raw_topic=brief.angle,
+        source_material=_source_material_from_workflow_b_brief(brief),
+        target_audience=brief.audience_segment,
+        platform=brief.selected_platform,
+        goal=_goal_from_workflow_b_brief(brief),
+        tone_of_voice=_tone_from_workflow_b_brief(brief),
+        length=_length_from_workflow_b_brief(brief),
+        cta_type="no_CTA",
+        author_profile="jane_levitan",
+        available_context=AvailableContext(
+            fact_dossier=True,
+            voice_profile=True,
+            source_material=bool(brief.source_text_excerpt.strip()),
+        ),
+    )
+
+
+def run_writer_entity_for_workflow_b_brief(brief: WorkflowBBrief) -> WriterEntityOutput:
+    task = build_writer_task_from_workflow_b_brief(brief)
+    return run_writer_entity_workflow(
+        task=task,
+        author_voice=build_jane_levitan_voice_object(),
+        allowed_facts=_allowed_facts_from_workflow_b_brief(brief),
+        reference_sources=_reference_sources_from_workflow_b_brief(brief),
+        preferred_register=_preferred_register_from_workflow_b_brief(brief),
     )
 
 
@@ -2039,6 +2072,93 @@ def _goal_from_decision(decision: WorkflowBDecision) -> str:
     if decision.funnel_role == "conversion":
         return "sales"
     return "nurture"
+
+
+def _source_material_from_workflow_b_brief(brief: WorkflowBBrief) -> str:
+    parts = [
+        f"Source summary: {brief.source_summary}",
+        f"Source excerpt: {brief.source_text_excerpt}",
+        f"What performed: {brief.what_performed}",
+        f"Core idea: {brief.core_idea}",
+        f"Jane adaptation: {brief.jane_adaptation_instruction}",
+        f"Opening direction: {brief.opening_direction}",
+        f"Must include: {'; '.join(brief.must_include)}",
+        f"Quality criteria: {'; '.join(brief.quality_criteria)}",
+    ]
+    return _tighten_spacing("\n".join(part for part in parts if part.strip()))
+
+
+def _allowed_facts_from_workflow_b_brief(brief: WorkflowBBrief) -> list[str]:
+    facts = [
+        brief.source_summary,
+        brief.source_text_excerpt,
+        brief.what_performed,
+        brief.core_idea,
+        *brief.must_include,
+    ]
+    return _unique_text_items(facts)[:8]
+
+
+def _reference_sources_from_workflow_b_brief(brief: WorkflowBBrief) -> list[str]:
+    refs: list[str] = []
+    prefix = "Evidence ref: "
+    for boundary in brief.factual_boundaries:
+        if boundary.startswith(prefix):
+            refs.append(boundary.removeprefix(prefix))
+    return _unique_text_items(refs)
+
+
+def _goal_from_workflow_b_brief(brief: WorkflowBBrief) -> str:
+    text = f"{brief.production_intent} {brief.rubric} {brief.audience_segment}".lower()
+    if any(marker in text for marker in ("sales", "conversion", "lead", "dm", "offer", "продаж")):
+        return "sales"
+    if brief.selected_platform == "linkedin" or any(
+        marker in text for marker in ("authority", "expert", "#недвижка", "market", "investor")
+    ):
+        return "authority"
+    if any(marker in text for marker in ("lifestyle", "#bali life", "#отношения", "family", "личн")):
+        return "engagement"
+    return "nurture"
+
+
+def _tone_from_workflow_b_brief(brief: WorkflowBBrief) -> str:
+    text = f"{brief.rubric} {brief.emotional_trigger} {brief.risk_flags} {brief.selected_platform}".lower()
+    if brief.selected_platform == "linkedin" or any(marker in text for marker in ("risk", "fear", "legal", "market")):
+        return "analytical"
+    if any(marker in text for marker in ("#отношения", "lifestyle", "family", "desire", "личн")):
+        return "personal"
+    return "sharp"
+
+
+def _length_from_workflow_b_brief(brief: WorkflowBBrief) -> str:
+    if brief.selected_platform == "linkedin":
+        return "medium"
+    if brief.risk_flags:
+        return "medium"
+    return "short"
+
+
+def _preferred_register_from_workflow_b_brief(brief: WorkflowBBrief) -> str | None:
+    text = f"{brief.rubric} {brief.audience_segment} {brief.core_idea} {brief.selected_platform}".lower()
+    if brief.selected_platform == "linkedin" or any(marker in text for marker in ("#недвижка", "investor", "market")):
+        return "register_3"
+    if any(marker in text for marker in ("#experience", "wellness", "hospitality", "architecture")):
+        return "register_2"
+    if any(marker in text for marker in ("#отношения", "family", "mother", "founder", "личн")):
+        return "register_1"
+    return None
+
+
+def _unique_text_items(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result: list[str] = []
+    for item in items:
+        normalized = _normalize_space(item)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        result.append(normalized)
+    return result
 
 
 def _fact_relevant_to_text(fact: str, text: str) -> bool:

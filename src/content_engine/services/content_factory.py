@@ -6,9 +6,11 @@ from content_engine.models.brief_builder import BriefBuilderResult, WorkflowABri
 from content_engine.models.content_factory import ContentFactoryRunResult, HumanReviewAsset
 from content_engine.models.opportunity import OpportunityCandidate
 from content_engine.models.producer import ProducerContext, ProducerOutput
+from content_engine.models.writer_entity import EditorDiagnosis
 from content_engine.services.brief_builder import build_briefs
 from content_engine.services.opportunity_queue import OpportunityQueueResult, process_opportunity_queue
 from content_engine.services.producer import run_producer_workflow
+from content_engine.services.writer_entity import build_final_content_asset, run_writer_entity_for_workflow_b_brief
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,16 +101,29 @@ def _workflow_b_asset(
     *,
     created_at: str,
 ) -> HumanReviewAsset:
-    final_text = (
-        f"Draft placeholder: {brief.opening_direction} "
-        f"{brief.core_idea} Brief Builder prepared this for Writer Entity; final copy is not generated in dry-run."
+    writer_output = run_writer_entity_for_workflow_b_brief(brief)
+    final_asset = build_final_content_asset(
+        writer_output=writer_output,
+        content_id=f"content_{brief.brief_id}",
+        title=brief.angle,
+        platform=brief.selected_platform,
+        pillar=brief.rubric,
+        content_format="post",
+        approval_status="review_ready",
+        source_ids=_source_refs(brief) or [brief.source_item_id],
+        insight_id=brief.opportunity_id,
+        idea_id=writer_output.selected_idea.idea_id,
+        brief_id=brief.brief_id,
+        draft_id=f"draft_{brief.brief_id}",
+        edit_version_id=f"edit_{brief.brief_id}_v1",
     )
-    internal_ru_master = None
-    if brief.selected_platform == "linkedin":
-        internal_ru_master = (
-            f"RU master placeholder: {brief.core_idea}. "
-            "LinkedIn final copy must be written in English after Writer Entity runs."
-        )
+    internal_ru_master = _internal_ru_master_for_linkedin(brief) if brief.selected_platform == "linkedin" else None
+    revision_notes = [
+        "Writer Entity generated from WorkflowBBrief.",
+        *writer_output.qa_report.fixes_applied,
+    ]
+    if writer_output.qa_report.issues:
+        revision_notes.extend(f"QA issue: {issue}" for issue in writer_output.qa_report.issues)
     return HumanReviewAsset(
         content_id=f"content_{brief.brief_id}",
         source_item_id=brief.source_item_id,
@@ -120,11 +135,11 @@ def _workflow_b_asset(
         title=brief.angle,
         pillar=brief.rubric,
         audience_segment=brief.audience_segment,
-        approval_status="needs_revision",
-        final_text=final_text,
+        approval_status="approved_for_human_review" if writer_output.qa_report.passed else "needs_revision",
+        final_text=final_asset.final_text,
         internal_ru_master=internal_ru_master,
-        editor_score=0.0,
-        revision_notes=["Dry-run asset: route to Writer Entity before human approval."],
+        editor_score=_editor_score(writer_output.editor_diagnosis),
+        revision_notes=revision_notes,
         source_refs=_source_refs(brief),
         season_id=brief.season_id,
         episode_id=brief.episode_id,
@@ -180,6 +195,30 @@ def _source_refs(brief: WorkflowABrief | WorkflowBBrief) -> list[str]:
         if boundary.startswith(prefix):
             refs.append(boundary.removeprefix(prefix))
     return refs
+
+
+def _internal_ru_master_for_linkedin(brief: WorkflowBBrief) -> str:
+    return "\n\n".join(
+        [
+            "Рабочая RU-версия для LinkedIn.",
+            f"Угол: {brief.angle}.",
+            f"Главная мысль: {brief.core_idea}",
+            f"Адаптация Jane: {brief.jane_adaptation_instruction}",
+            f"Основа источника: {brief.source_summary}",
+            f"Что сработало: {brief.what_performed}",
+        ]
+    )
+
+
+def _editor_score(diagnosis: EditorDiagnosis) -> float:
+    raw_score = min(
+        diagnosis.hook_score,
+        diagnosis.clarity_score,
+        diagnosis.emotional_score,
+        diagnosis.voice_preservation_score,
+        diagnosis.fact_safety_score,
+    )
+    return round(raw_score / 10, 2)
 
 
 def _dry_run_warnings(queue_result: OpportunityQueueResult) -> list[str]:

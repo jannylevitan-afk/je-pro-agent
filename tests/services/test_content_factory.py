@@ -132,9 +132,30 @@ def test_build_human_review_assets_creates_clean_workflow_b_asset() -> None:
 
     assert asset.workflow == "workflow_b"
     assert asset.final_text is not None
-    assert asset.final_text.startswith("Draft placeholder:")
+    assert "placeholder" not in asset.final_text.lower()
+    assert "Brief Builder prepared this for Writer Entity" not in asset.final_text
     assert asset.selected_hook is None
-    assert asset.approval_status == "needs_revision"
+    assert asset.editor_score > 0.0
+    assert any("Writer Entity" in note for note in asset.revision_notes)
+
+
+def test_build_human_review_assets_creates_linkedin_asset_with_ru_master_from_writer_chain() -> None:
+    dry_run = run_content_factory_dry_run(
+        context=make_context(),
+        opportunities=[make_opportunity(suggested_platform="linkedin")],
+        run_id="run_linkedin",
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+
+    asset = dry_run.human_review_assets[0]
+
+    assert asset.workflow == "workflow_b"
+    assert asset.platform == "linkedin"
+    assert asset.final_text is not None
+    assert asset.internal_ru_master is not None
+    assert "placeholder" not in asset.final_text.lower()
+    assert "placeholder" not in asset.internal_ru_master.lower()
+    assert not any("а" <= char.lower() <= "я" or char.lower() == "ё" for char in asset.final_text)
 
 
 def test_build_human_review_assets_creates_video_asset_from_workflow_a_brief() -> None:

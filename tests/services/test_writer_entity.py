@@ -1,14 +1,18 @@
 from content_engine.models.writer_entity import AvailableContext, WriterTaskInput
 from content_engine.services.writer_entity import (
     MAX_JANE_ANALYST_REVIEW_PASSES,
+    build_writer_task_from_workflow_b_brief,
     build_final_content_asset,
     build_jane_levitan_voice_object,
     format_final_content_asset_markdown,
     generate_video_hooks_topics,
+    run_writer_entity_for_workflow_b_brief,
     run_preflight,
     run_writer_entity_workflow,
     select_voice_register,
 )
+from tests.services.test_brief_builder import make_approved, make_decision, make_opportunity
+from content_engine.services.brief_builder import build_brief
 
 
 def make_task(**overrides: object) -> WriterTaskInput:
@@ -33,6 +37,16 @@ def make_task(**overrides: object) -> WriterTaskInput:
     }
     data.update(overrides)
     return WriterTaskInput(**data)
+
+
+def make_workflow_b_brief():
+    result = build_brief(
+        approved=make_approved(),
+        opportunity=make_opportunity(),
+        decision=make_decision(),
+        created_at="2026-04-29T10:00:00+08:00",
+    )
+    return result.brief
 
 
 def test_preflight_blocks_jane_without_fact_and_voice_context() -> None:
@@ -113,6 +127,33 @@ def test_writer_entity_workflow_returns_full_step_by_step_contract() -> None:
     assert result.hook_options
     assert result.cta_options
     assert result.qa_report.requires_human_review is True
+
+
+def test_writer_entity_adapter_builds_task_from_workflow_b_brief() -> None:
+    brief = make_workflow_b_brief()
+
+    task = build_writer_task_from_workflow_b_brief(brief)
+
+    assert task.raw_topic == "Bali land risk"
+    assert task.platform == "instagram"
+    assert task.target_audience == "developer_investor"
+    assert task.available_context.fact_dossier is True
+    assert task.available_context.voice_profile is True
+    assert "Cheap land can hide expensive structure risk." in task.source_material
+    assert "Concrete legal risk made invisible bureaucracy tangible." in task.source_material
+    assert "Draft placeholder" not in task.source_material
+
+
+def test_writer_entity_runs_from_workflow_b_brief_without_placeholder() -> None:
+    brief = make_workflow_b_brief()
+
+    output = run_writer_entity_for_workflow_b_brief(brief)
+
+    assert output.preflight.status == "ready"
+    assert output.content_brief.platform == "instagram"
+    assert output.content_brief.required_facts
+    assert output.edited_final.body
+    assert "placeholder" not in output.edited_final.body.lower()
 
 
 def test_writer_entity_uses_source_specific_hook_direction_per_source() -> None:
