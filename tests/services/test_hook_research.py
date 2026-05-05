@@ -47,6 +47,11 @@ def make_board_payload(**overrides: object) -> dict[str, object]:
             "sources_scanned": 50,
             "platform_scan_counts": {"youtube": 15, "tiktok": 15, "instagram": 20},
             "format_scan_counts": {"short_form": 45, "long_form": 5},
+            "qualified_sources": 50,
+            "qualified_platform_counts": {"youtube": 15, "tiktok": 15, "instagram": 20},
+            "qualified_format_counts": {"short_form": 45, "long_form": 5},
+            "metrics_incomplete_sources": 0,
+            "gate_rejected_sources": 0,
             "raw_candidates_collected": 12,
             "duplicates_removed": 2,
             "candidates_rejected": 7,
@@ -194,6 +199,38 @@ def test_hook_research_board_requires_exact_platform_distribution() -> None:
             search_summary={
                 **make_board_payload()["search_summary"],
                 "platform_scan_counts": {"youtube": 50},
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_requires_qualified_platform_distribution() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "qualified_platform_counts": {"youtube": 15, "tiktok": 15, "instagram": 19},
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_rejects_discovered_links_as_qualified_sources() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "qualified_sources": 5,
+                "qualified_platform_counts": {"youtube": 0, "tiktok": 5, "instagram": 0},
+                "qualified_format_counts": {"short_form": 5},
+                "metrics_incomplete_sources": 20,
+                "gate_rejected_sources": 25,
             }
         )
     )

@@ -170,6 +170,11 @@ class SearchSummary(BaseModel):
     sources_scanned: int = Field(ge=0)
     platform_scan_counts: dict[str, int] = Field(default_factory=dict)
     format_scan_counts: dict[str, int] = Field(default_factory=dict)
+    qualified_sources: int = Field(default=0, ge=0)
+    qualified_platform_counts: dict[str, int] = Field(default_factory=dict)
+    qualified_format_counts: dict[str, int] = Field(default_factory=dict)
+    metrics_incomplete_sources: int = Field(default=0, ge=0)
+    gate_rejected_sources: int = Field(default=0, ge=0)
     raw_candidates_collected: int = Field(ge=0)
     duplicates_removed: int = Field(ge=0)
     candidates_rejected: int = Field(ge=0)
@@ -459,6 +464,24 @@ class HookResearchOutcomeBoard(BaseModel):
             raise ValueError("HookResearchOutcomeBoard short_form scan count must meet ProducerHookSearchTask.short_form_source_count_target")
         if sum(format_counts.values()) != self.search_summary.sources_scanned:
             raise ValueError("HookResearchOutcomeBoard format_scan_counts must sum to sources_scanned")
+        if self.search_summary.qualified_sources < self.producer_hook_search_task.source_count_target:
+            raise ValueError("HookResearchOutcomeBoard qualified_sources must meet ProducerHookSearchTask source_count_target")
+        qualified_platform_counts = _normalize_count_map(self.search_summary.qualified_platform_counts)
+        if qualified_platform_counts != _normalize_count_map(self.producer_hook_search_task.platform_source_targets):
+            raise ValueError(
+                "HookResearchOutcomeBoard qualified_platform_counts must match ProducerHookSearchTask platform_source_targets"
+            )
+        qualified_format_counts = _normalize_count_map(self.search_summary.qualified_format_counts)
+        if qualified_format_counts.get("long_form", 0) > self.producer_hook_search_task.max_long_form_sources:
+            raise ValueError(
+                "HookResearchOutcomeBoard qualified long_form count exceeds ProducerHookSearchTask.max_long_form_sources"
+            )
+        if qualified_format_counts.get("short_form", 0) < self.producer_hook_search_task.short_form_source_count_target:
+            raise ValueError(
+                "HookResearchOutcomeBoard qualified short_form count must meet ProducerHookSearchTask.short_form_source_count_target"
+            )
+        if sum(qualified_format_counts.values()) != self.search_summary.qualified_sources:
+            raise ValueError("HookResearchOutcomeBoard qualified_format_counts must sum to qualified_sources")
         if self.source_evidence_log and any(
             not _is_public_url(evidence.source_url_or_internal_ref) for evidence in self.source_evidence_log
         ):
@@ -514,10 +537,25 @@ def evaluate_video_research_minimums(metrics: Mapping[str, int]) -> VideoResearc
     keep_reasons: list[str] = []
     reject_reasons: list[str] = []
 
-    if views >= 100_000 and like_rate >= 2:
+    if views >= 100_000 and like_rate >= 2 and comments >= 30:
         keep_reasons.append("BROAD_VIRAL")
-    if views >= 20_000 and views_to_followers_ratio is not None and views_to_followers_ratio >= 5:
+    elif views >= 100_000 and like_rate >= 2 and comments < 30:
+        reject_reasons.append("BROAD_VIRAL_COMMENTS_BELOW_30")
+    if (
+        views >= 20_000
+        and views_to_followers_ratio is not None
+        and views_to_followers_ratio >= 5
+        and like_rate >= 3
+    ):
         keep_reasons.append("NICHE_VIRAL")
+    elif (
+        views >= 20_000
+        and views_to_followers_ratio is not None
+        and views_to_followers_ratio >= 5
+        and like_rate < 3
+        and views_to_followers_ratio < 10
+    ):
+        reject_reasons.append("NICHE_LIKE_RATE_BELOW_3_PERCENT")
     if views >= 10_000 and views_to_followers_ratio is not None and views_to_followers_ratio >= 10:
         keep_reasons.append("SMALL_ACCOUNT_BREAKOUT")
     if comments >= 100 and comment_rate >= 0.1:

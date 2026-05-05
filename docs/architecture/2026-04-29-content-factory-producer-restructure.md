@@ -170,6 +170,8 @@ Add later, without breaking current collectors:
 - `ProducerHookSearchTask` input for Workflow A hook research boards;
 - for `ProducerHookSearchTask`, a loop must scan at least 50 relevant public videos before board creation;
 - for Workflow A hook research, the 50-video validation set must be platform-distributed: 15 YouTube, 15 TikTok, 20 Instagram;
+- the 50-video validation set counts only qualified videos: short-form, public metrics present, minimum gate passed;
+- discovery-only links, zero/low metric videos, incomplete Instagram metrics, and off-format links are recorded as dropped/blocked discovery and do not count toward the 50;
 - short-form is default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, normally <= 180 seconds;
 - long educational YouTube videos are support-only and capped at 5 sources per 50-video validation set;
 - apply the minimum analysis gate before hook mining or ranking; views alone are not enough;
@@ -662,7 +664,9 @@ Rules:
 
 - `source_count_target` must be at least 50 for one hook-search loop.
 - `platform_source_targets` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
-- `format_scan_counts` must include at least 45 short-form videos and no more than 5 long-form videos.
+- `qualified_sources` must be at least `source_count_target`; discovered links do not count.
+- `qualified_platform_counts` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
+- `qualified_format_counts` must include at least 45 short-form videos and no more than 5 long-form videos.
 - Short-form means Reels/TikTok/Shorts/vertical 9:16, usually <= 180 seconds.
 - The Research Agent searches the Producer-approved platforms/themes, especially TikTok, Instagram, YouTube/Shorts, and public video sources available through Exa, Firecrawl, Apify, or Playwright.
 - The Research Agent must not invent hook evidence. A research-mined row needs a public video URL and observed public metrics.
@@ -674,10 +678,10 @@ Minimum analysis gate before ranking:
 Analyze only if one of these is true:
 
 BROAD_VIRAL:
-views >= 100000 AND like_rate >= 2%
+views >= 100000 AND like_rate >= 2% AND comments >= 30
 
 NICHE_VIRAL:
-views >= 20000 AND views_to_followers_ratio >= 5
+views >= 20000 AND views_to_followers_ratio >= 5 AND like_rate >= 3%
 
 STRONG_DISCUSSION:
 comments >= 100 AND comment_rate >= 0.1%
@@ -747,6 +751,9 @@ Boundary:
 - `search_summary.sources_scanned` must be greater than or equal to `producer_hook_search_task.source_count_target`;
 - `search_summary.platform_scan_counts` must match `ProducerHookSearchTask.platform_source_targets`;
 - `search_summary.format_scan_counts.long_form` must be `<= 5`, and `short_form` must be `>= 45`;
+- `search_summary.qualified_sources` must be greater than or equal to `producer_hook_search_task.source_count_target`;
+- `search_summary.qualified_platform_counts` must match `ProducerHookSearchTask.platform_source_targets`;
+- `search_summary.qualified_format_counts.long_form` must be `<= 5`, and `short_form` must be `>= 45`;
 - `source_evidence_log.source_url_or_internal_ref` must be a public URL for hook research evidence.
 
 ### 5.7 OpportunityCandidate

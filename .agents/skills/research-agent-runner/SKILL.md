@@ -84,13 +84,14 @@ Workflow A hook research requires a Producer task:
 
 - Do not run hook research without `ProducerHookSearchTask`.
 - Validate a 50-video short-form-first set before hook mining: 15 YouTube, 15 TikTok, 20 Instagram.
+- Count only qualified videos toward the 50-video set. Qualified means short-form, public metrics present, and minimum gate passed. Discovery-only links, zero/low metrics, missing Instagram metrics, and long/off-format links must be recorded as dropped or blocked and must not count toward 50.
 - Use Reels / TikTok / YouTube Shorts / 9:16 vertical videos as the default. Long educational YouTube videos may support context, but no more than 5 long-form sources may appear in the 50-video validation set.
 - Treat the short-form duration target as <= 180 seconds unless Producer says otherwise.
 - Focus on the Producer brief: season, episode, scene, audience, pain, desire, tension, target themes, forbidden themes, desired hook mechanics, creator archetypes, languages/regions, and date window.
 - Search TikTok, Instagram, YouTube/Shorts, and other Producer-approved public video sources using Exa/Firecrawl/Apify/Playwright as appropriate.
 - Apply the minimum analysis gate before hook mining or ranking. Do not count views alone as "залетело":
-  - `BROAD_VIRAL`: `views >= 100000` and `like_rate >= 2%`
-  - `NICHE_VIRAL`: `views >= 20000` and `views_to_followers_ratio >= 5`
+  - `BROAD_VIRAL`: `views >= 100000`, `like_rate >= 2%`, and `comments >= 30`
+  - `NICHE_VIRAL`: `views >= 20000`, `views_to_followers_ratio >= 5`, and `like_rate >= 3%`
   - `STRONG_DISCUSSION`: `comments >= 100` and `comment_rate >= 0.1%`
   - `HIGH_VALUE_SIGNAL`: `share_rate >= 0.5%` or `save_rate >= 0.5%`
   - `SMALL_ACCOUNT_BREAKOUT`: `views >= 10000` and `views_to_followers_ratio >= 10`

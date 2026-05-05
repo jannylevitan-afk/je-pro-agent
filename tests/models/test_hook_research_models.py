@@ -202,6 +202,37 @@ def test_video_minimum_gate_keeps_broad_viral_with_real_engagement() -> None:
     assert decision.like_rate == 3.0
 
 
+def test_video_minimum_gate_rejects_broad_views_without_discussion_floor() -> None:
+    decision = evaluate_video_research_minimums(
+        {
+            "views": 140_000,
+            "likes": 4_200,
+            "comments": 20,
+            "shares": 0,
+            "saves": 0,
+        }
+    )
+
+    assert decision.passes is False
+    assert "BROAD_VIRAL" not in decision.keep_reasons
+    assert "BROAD_VIRAL_COMMENTS_BELOW_30" in decision.reject_reasons
+
+
+def test_video_minimum_gate_requires_like_rate_for_niche_breakout() -> None:
+    decision = evaluate_video_research_minimums(
+        {
+            "views": 30_000,
+            "likes": 750,
+            "comments": 40,
+            "followers": 4_000,
+        }
+    )
+
+    assert decision.passes is False
+    assert "NICHE_VIRAL" not in decision.keep_reasons
+    assert "NICHE_LIKE_RATE_BELOW_3_PERCENT" in decision.reject_reasons
+
+
 def test_video_minimum_gate_rejects_views_without_engagement() -> None:
     decision = evaluate_video_research_minimums(
         {
