@@ -11,10 +11,16 @@ from content_engine.collectors.native import (
 )
 from content_engine.knowledge.kmd import KnowledgeStore
 from content_engine.models.source_item import SourceItem
+from content_engine.models.hook_research import (
+    HookResearchBlockedResult,
+    HookResearchOutcomeBoard,
+    ProducerHookSearchTask,
+)
 from content_engine.notion.sync import NotionClientLike
 from content_engine.orchestration.live_pipeline import LivePipelineItemResult, WorkflowWriter, run_live_pipeline
 from content_engine.orchestration.targets import LivePipelineTargets
 from content_engine.services.analyst import WorkflowAnalyst
+from content_engine.services.hook_research import build_hook_research_outcome_board
 
 
 ComplianceStatus = Literal["allowed", "review", "blocked"]
@@ -50,6 +56,24 @@ class SearchAgentReport:
     pipeline_results: list[LivePipelineItemResult]
     skipped_target_handles: list[str]
     dropped_item_ids: list[str]
+
+
+def run_hook_research_agent(
+    *,
+    producer_hook_search_task: ProducerHookSearchTask | dict[str, object] | None,
+    **board_payload: object,
+) -> HookResearchOutcomeBoard | HookResearchBlockedResult:
+    """Guarded Research Agent entry point for Workflow A hook boards.
+
+    Hook research is producer-directed only. Without a valid
+    ProducerHookSearchTask this returns an explicit blocked state and performs
+    no discovery or collection.
+    """
+
+    return build_hook_research_outcome_board(
+        producer_hook_search_task=producer_hook_search_task,
+        **board_payload,
+    )
 
 
 def run_search_agent(

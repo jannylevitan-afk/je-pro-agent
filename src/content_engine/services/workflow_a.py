@@ -238,6 +238,7 @@ def run_workflow_a_from_brief(brief: WorkflowABrief) -> WorkflowAVideoAsset:
 def build_video_source_item_from_brief(brief: WorkflowABrief) -> SourceItem:
     source_url = brief.video_refs[0] if brief.video_refs else _first_evidence_ref(brief)
     source_hook = brief.source_hook or brief.opening_direction
+    first_3_seconds = brief.visual_opening_direction or source_hook
     transcript = _normalize_space(
         " ".join(
             [
@@ -266,7 +267,8 @@ def build_video_source_item_from_brief(brief: WorkflowABrief) -> SourceItem:
             "spoken_transcript": transcript,
             "transcript_source": brief.transcript_source or "workflow_a_brief",
             "source_hook": source_hook,
-            "first_3_seconds": source_hook,
+            "first_frame_text": brief.first_frame_text or source_hook,
+            "first_3_seconds": first_3_seconds,
             "hook_pattern": brief.what_performed,
             "hook_tension": brief.emotional_trigger,
             "hook_promise": brief.core_idea,
@@ -327,11 +329,26 @@ def _script_body_points_from_brief(brief: WorkflowABrief) -> list[str]:
 
 
 def _script_cta_from_brief(brief: WorkflowABrief) -> str:
+    if brief.cta_direction:
+        return _cta_from_direction(brief.cta_direction, brief)
     if brief.selected_platform == "linkedin":
         return "Save this as a pre-check before trusting the next market story."
     if brief.audience_segment == "developer_investor":
         return "Save this before you trust the next beautiful Bali deal."
     return "Save this before the next place looks too perfect."
+
+
+def _cta_from_direction(direction: str, brief: WorkflowABrief) -> str:
+    normalized = direction.strip().lower()
+    if normalized in {"save", "сохранить"}:
+        return "Save this before you force the next plan."
+    if normalized in {"comment", "коммент", "комментарий"}:
+        return "Comment if this feels familiar."
+    if normalized in {"share", "поделиться"}:
+        return "Share this with someone who keeps calling exhaustion laziness."
+    if "lead" in normalized or "dm" in normalized or "директ" in normalized:
+        return f"DM me if you want the deeper checklist for {brief.rubric}."
+    return direction
 
 
 def _filming_priority_from_brief(brief: WorkflowABrief) -> int:

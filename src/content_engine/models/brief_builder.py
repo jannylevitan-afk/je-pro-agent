@@ -66,6 +66,12 @@ class WorkflowABrief(BriefBase):
     video_refs: list[str] = Field(default_factory=list)
     source_hook: str | None = None
     transcript_source: str | None = None
+    hook_board_id: str | None = None
+    approved_hook_id: str | None = None
+    first_frame_text: str | None = None
+    cta_direction: str | None = None
+    visual_opening_direction: str | None = None
+    hook_research_evidence_refs: list[str] = Field(default_factory=list)
 
 
 class BriefBuilderResult(BaseModel):

@@ -99,6 +99,7 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - Brief Builder является единственным слоем, который превращает approved opportunity в Writer/Video task.
 - Workflow A и Workflow B полностью разделены.
 - Workflow A создаёт только video hook, script, filming card.
+- Workflow A hook research идёт только через `ProducerHookSearchTask -> HookResearchOutcomeBoard`; без task Research Agent возвращает `BLOCKED`.
 - Workflow B создаёт один final text asset на approved opportunity и selected platform.
 - LinkedIn: publish text на английском, internal RU master может существовать для ревью.
 - Нет активного Publisher, Scheduler, Auto-publishing, publish queue, visual producer, platform adapter или format adapter.
@@ -114,11 +115,13 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 Назначение:
 
 - получает Producer ResearchDirective или seed/source список;
+- для Workflow A hook research требует `ProducerHookSearchTask`;
 - проверяет compliance;
 - собирает только public data;
 - выбирает high-performing posts/signals;
 - создаёт `SourceItem` и evidence fields;
 - маршрутизирует сигнал в Workflow A, Workflow B, both или drop.
+- создаёт `HookResearchOutcomeBoard` только для producer-directed hook research.
 
 Ключевые файлы:
 
@@ -222,6 +225,7 @@ MCP / external stack policy:
 - превращает `ApprovedOpportunity` в один из двух brief types:
 - `WorkflowABrief` для видеоворкфлоу;
 - `WorkflowBBrief` для текстового воркфлоу.
+- превращает `ApprovedWorkflowAHandoff` из `HookResearchOutcomeBoard` в `WorkflowABrief`.
 - переносит Producer scene context, если есть `SceneCard`:
 - `producer_scene_type`;
 - `producer_plot_function`;
@@ -243,6 +247,24 @@ MCP / external stack policy:
 - Brief Builder должен сохранять factual boundaries и evidence refs.
 - Brief Builder должен отклонять route mismatch между `ApprovedOpportunity` и `ProducerDecision`.
 - `SceneCard` должен совпадать по `scene_id` / `episode_id`; иначе brief не создаётся.
+- Hook rows проходят в Workflow A только если `human_decision = APPROVE_FOR_WORKFLOW_A`, `qa_status = PASS`, risk acceptable.
+
+### HookResearchOutcomeBoard
+
+Назначение:
+
+- human-facing board для producer-directed hook research;
+- показывает Producer task, research scope, source evidence, hook opportunities, expanded hook cards, QA, approved handoffs;
+- не является viral hook bank;
+- не создаёт scripts, filming cards, publish queue, scheduler или final captions.
+
+Ключевые файлы:
+
+- `src/content_engine/models/hook_research.py`
+- `src/content_engine/services/hook_research.py`
+- `tests/models/test_hook_research_models.py`
+- `tests/services/test_hook_research.py`
+- `tests/services/test_brief_builder_hook_research.py`
 
 ### Workflow A — Video
 
@@ -266,6 +288,7 @@ MCP / external stack policy:
 Важно:
 
 - Workflow A не пишет final text.
+- Workflow A не выполняет research и не расширяет источники.
 - Workflow A не создаёт publish queue.
 - Workflow A не публикует.
 - В readable ProducerOutput Workflow A отображается как `Video / AssetAgent`.
@@ -402,6 +425,7 @@ Relevant commit:
 Сделано:
 
 - `WorkflowABrief -> Workflow A video pipeline`;
+- `HookResearchOutcomeBoard -> approved handoff -> WorkflowABrief`;
 - selected hook, script, filming card;
 - no publish queue in new output;
 - tests.

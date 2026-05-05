@@ -56,8 +56,10 @@ runtime models. Its current contract lives in
 
 - Research Agent remains the only layer allowed to search, scrape, crawl, or collect external data.
 - Producer can create search tasks, but never fetches sources itself.
+- Workflow A hook research must start from `ProducerHookSearchTask`; without it the Research Agent returns `BLOCKED`.
 - Analyst analyzes evidence and creates opportunities, but does not directly command Writer in the new pipeline.
 - Brief Builder is the only layer that converts approved opportunities into Writer/Video tasks.
+- Brief Builder is also the only layer that converts approved hook opportunities into `WorkflowABrief`.
 - Workflow A creates video hooks, script, and filming card only.
 - Workflow B creates one final text asset per approved opportunity and selected platform.
 - No automatic multi-platform variants in the active pipeline.
@@ -165,6 +167,7 @@ Keep:
 Add later, without breaking current collectors:
 
 - optional `ResearchDirective` input from Producer;
+- `ProducerHookSearchTask` input for Workflow A hook research boards;
 - persistent monitoring fields:
   - `source_scanned`;
   - `selected_post_url`;
@@ -286,6 +289,21 @@ ContentBrief / WriterSpec for Workflow B
 VideoBrief for Workflow A
 ```
 
+For Workflow A hook research, Brief Builder also converts:
+
+```text
+HookResearchOutcomeBoard
++ approved HookOpportunity
++ ApprovedWorkflowAHandoff
+  -> WorkflowABrief
+```
+
+Conversion is allowed only when:
+
+- `human_decision == APPROVE_FOR_WORKFLOW_A`;
+- `qa_status == PASS`;
+- risk is acceptable: no high/blocker copy, claim, tone, brand, platform, or overall risk.
+
 Brief Builder should include:
 
 - selected workflow;
@@ -327,9 +345,26 @@ Brief Builder must not include:
 - scheduled time;
 - publisher assignment.
 
+Brief Builder must reject:
+
+- missing approved hook rows;
+- approved hook handoffs that are not present on the board;
+- `BACKUP`, `HOLD`, `REQUEST_REWRITE`, `REJECT`, or `SEND_TO_WORKFLOW_B` rows;
+- rows that have not passed QA.
+
 ### 4.6 Workflow A — Video
 
 New Workflow A starts from `VideoBrief`, not raw research.
+
+For hook-research assets, the source is a `WorkflowABrief` created from
+`HookResearchOutcomeBoard`. Workflow A must not search, mine, scrape, or
+expand sources. It may only create:
+
+- selected hook;
+- script;
+- filming card;
+- editorial QA / review metadata;
+- `HumanReviewAsset`.
 
 It should output:
 
@@ -360,6 +395,8 @@ Scheduled At
 Publisher
 Auto Publish Status
 Distribution Status
+Research Queries
+Source Discovery
 ```
 
 Legacy note:
@@ -572,6 +609,79 @@ created_at
 
 Research Agent consumes this as instruction, but remains the only collector.
 
+### 5.6A ProducerHookSearchTask
+
+Producer output for Workflow A hook research. This is mandatory for hook
+research; without it, the Research Agent returns:
+
+```text
+status = BLOCKED
+blocked_reason = PRODUCER_HOOK_SEARCH_TASK_MISSING
+```
+
+Required fields:
+
+```text
+directive_id
+directive_type = HOOK_RESEARCH_FOR_WORKFLOW_A
+route = workflow_a
+search_goal
+season_context
+target_audience
+core_pain
+core_desire
+core_tension
+target_themes
+forbidden_themes
+desired_hook_mechanics
+platforms
+languages_regions
+creator_archetypes
+date_window
+performance_threshold
+source_count_target
+hook_count_target
+compliance_boundaries
+notes_for_research_agent
+```
+
+### 5.6B HookResearchOutcomeBoard
+
+Human-facing outcome for producer-directed Workflow A hook research.
+
+Purpose:
+
+- show what Producer asked Research Agent to search;
+- show the scope and filters used;
+- store source evidence internally;
+- expose decision-ready hook opportunities;
+- route only approved/pass/acceptable hooks into Workflow A through Brief Builder.
+
+Required sections:
+
+```text
+board_header
+producer_hook_search_task
+research_scope
+search_summary
+source_evidence_log[]
+hook_opportunities[]
+expanded_hook_cards[]
+scoring_rubric
+human_decision_queue
+approved_for_workflow_a[]
+rejected_or_held[]
+qa_report
+codex_runtime_notes
+```
+
+Boundary:
+
+- this board must not create scripts;
+- this board must not create filming cards;
+- this board must not create publish queue, scheduler, or final captions;
+- this board must not expose raw source dumps as the main human table.
+
 ### 5.7 OpportunityCandidate
 
 Analyst output.
@@ -684,6 +794,12 @@ producer_plot_function
 producer_sales_intensity
 producer_scene_hook
 producer_cta_or_next_hook
+hook_board_id
+approved_hook_id
+first_frame_text
+cta_direction
+visual_opening_direction
+hook_research_evidence_refs
 ```
 
 ### 5.11 EditorialReviewResult

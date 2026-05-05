@@ -1,6 +1,12 @@
 from __future__ import annotations
 
 from content_engine.models.brief_builder import BriefBuilderResult, WorkflowABrief, WorkflowBBrief
+from content_engine.models.hook_research import (
+    ApprovedWorkflowAHandoff,
+    HookOpportunity,
+    HookResearchOutcomeBoard,
+    is_workflow_a_eligible_hook,
+)
 from content_engine.models.opportunity import OpportunityCandidate
 from content_engine.models.producer import ApprovedOpportunity, ProducerDecision, SceneCard
 
@@ -49,6 +55,37 @@ def build_brief(
     )
 
 
+def build_workflow_a_briefs_from_hook_board(
+    board: HookResearchOutcomeBoard,
+    *,
+    created_at: str,
+) -> list[BriefBuilderResult]:
+    """Convert approved hook research handoffs into Workflow A briefs.
+
+    Brief Builder is the only layer allowed to perform this conversion, and it
+    only accepts rows approved by a human/producer with QA PASS and acceptable
+    risk.
+    """
+
+    hooks_by_id = {hook.hook_id: hook for hook in board.hook_opportunities}
+    results: list[BriefBuilderResult] = []
+    for handoff in board.approved_for_workflow_a:
+        hook = hooks_by_id.get(handoff.approved_hook_id)
+        if hook is None:
+            raise ValueError(f"approved hook {handoff.approved_hook_id} is missing from HookResearchOutcomeBoard")
+        if not is_workflow_a_eligible_hook(hook):
+            raise ValueError("Only APPROVE_FOR_WORKFLOW_A + QA PASS + acceptable risk hooks can become WorkflowABrief")
+        brief = _workflow_a_brief_from_hook_handoff(board, handoff, hook)
+        results.append(
+            BriefBuilderResult(
+                approved_id=handoff.approved_opportunity_id,
+                brief=brief,
+                created_at=created_at,
+            )
+        )
+    return results
+
+
 def _build_workflow_b_brief(
     approved: ApprovedOpportunity,
     opportunity: OpportunityCandidate,
@@ -91,6 +128,87 @@ def _build_workflow_b_brief(
         publish_language="en" if selected_platform == "linkedin" else "ru",
         internal_working_language="ru",
         platform_variants=[],
+    )
+
+
+def _workflow_a_brief_from_hook_handoff(
+    board: HookResearchOutcomeBoard,
+    handoff: ApprovedWorkflowAHandoff,
+    hook: HookOpportunity,
+) -> WorkflowABrief:
+    platform = _platform_from_hook_handoff(handoff, hook)
+    source_item_id = _source_item_id_from_handoff(handoff, hook)
+    return WorkflowABrief(
+        brief_id=f"brief_{handoff.approved_opportunity_id}",
+        source_item_id=source_item_id,
+        opportunity_id=handoff.approved_opportunity_id,
+        decision_id=handoff.directive_id,
+        workflow="workflow_a",
+        selected_platform=platform,
+        rubric=str(handoff.producer_context.get("content_line") or hook.content_line),
+        audience_segment=str(handoff.producer_context.get("target_audience") or hook.target_audience),
+        production_intent=f"Create Workflow A video from approved hook {handoff.approved_hook_id}.",
+        core_idea=handoff.video_angle,
+        angle=handoff.video_angle,
+        emotional_trigger=hook.emotional_trigger,
+        source_summary=_hook_source_summary(board, handoff, hook),
+        source_text_excerpt=handoff.selected_hook,
+        what_performed=str(handoff.source_context.get("why_it_performed") or hook.why_it_performed),
+        jane_adaptation_instruction=handoff.reuse_boundary,
+        factual_boundaries=_unique(
+            [
+                *handoff.factual_boundaries,
+                *[f"Evidence ref: {ref}" for ref in handoff.evidence_refs],
+                "Research Agent already completed hook research; Workflow A must use this brief only.",
+            ]
+        ),
+        must_include=[
+            "selected hook",
+            handoff.selected_hook,
+            f"first frame text: {handoff.first_frame_text}",
+            f"video angle: {handoff.video_angle}",
+            f"CTA direction: {handoff.cta_direction}",
+            "editorial QA before HumanReviewAsset",
+        ],
+        must_not_include=[
+            "new research",
+            "source discovery",
+            "publish queue",
+            "scheduled publishing",
+            "publisher assignment",
+            "platform variants",
+            "final platform captions",
+        ],
+        tone_rules=[
+            "Jane voice: lived expertise, concrete, no generic AI tone.",
+            str(hook.tone_direction),
+        ],
+        opening_direction=handoff.selected_hook,
+        quality_criteria=[
+            "board-gated",
+            "QA PASS hook only",
+            "acceptable risk only",
+            "source-backed pattern adaptation",
+            "script uses WorkflowABrief only",
+        ],
+        risk_flags=[hook.risk_notes] if hook.risk_notes else [],
+        season_id=handoff.season_id,
+        episode_id=handoff.episode_id,
+        scene_id=handoff.scene_id,
+        producer_scene_type=_optional_str(handoff.producer_context.get("scene_type")),
+        producer_plot_function=_optional_str(handoff.producer_context.get("plot_function")),
+        producer_sales_intensity=_producer_sales_intensity_from_label(handoff.producer_context.get("sales_intensity")),
+        producer_scene_hook=handoff.selected_hook,
+        producer_cta_or_next_hook=handoff.cta_direction,
+        video_refs=[ref for ref in handoff.evidence_refs if ref.startswith("http")],
+        source_hook=handoff.selected_hook,
+        transcript_source="HookResearchOutcomeBoard / ApprovedWorkflowAHandoff",
+        hook_board_id=board.board_header.board_id,
+        approved_hook_id=handoff.approved_hook_id,
+        first_frame_text=handoff.first_frame_text,
+        cta_direction=handoff.cta_direction,
+        visual_opening_direction=hook.visual_opening_direction,
+        hook_research_evidence_refs=list(handoff.evidence_refs),
     )
 
 
@@ -341,6 +459,65 @@ def _producer_cta_or_next_hook(scene: SceneCard | None) -> str | None:
     return scene.cta or scene.next_hook
 
 
+def _platform_from_hook_handoff(
+    handoff: ApprovedWorkflowAHandoff,
+    hook: HookOpportunity,
+) -> str:
+    platform = str(handoff.source_context.get("source_platform") or hook.source_platform or "instagram").lower()
+    if "tiktok" in platform:
+        return "tiktok"
+    if "youtube" in platform or "short" in platform:
+        return "youtube"
+    if "linkedin" in platform:
+        return "linkedin"
+    return "instagram"
+
+
+def _source_item_id_from_handoff(
+    handoff: ApprovedWorkflowAHandoff,
+    hook: HookOpportunity,
+) -> str:
+    source_refs = handoff.source_context.get("source_item_refs")
+    if isinstance(source_refs, list):
+        for source_ref in source_refs:
+            if isinstance(source_ref, str) and source_ref.strip():
+                return source_ref
+    if hook.source_item_refs:
+        return hook.source_item_refs[0]
+    return handoff.approved_hook_id
+
+
+def _hook_source_summary(
+    board: HookResearchOutcomeBoard,
+    handoff: ApprovedWorkflowAHandoff,
+    hook: HookOpportunity,
+) -> str:
+    evidence_summary = ", ".join(handoff.evidence_refs) if handoff.evidence_refs else "producer original"
+    return (
+        f"{board.board_header.board_type} {board.board_header.board_id}; "
+        f"mode: {hook.input_mode}; source evidence: {evidence_summary}; "
+        f"signal: {handoff.source_context.get('performance_signal') or hook.performance_signal or 'producer strategy'}."
+    )
+
+
+def _optional_str(value: object) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    return normalized or None
+
+
+def _producer_sales_intensity_from_label(value: object) -> int | None:
+    label = str(value or "").strip().lower()
+    mapping = {
+        "none": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+    }
+    return mapping.get(label)
+
+
 def _unique(values: list[str]) -> list[str]:
     seen: set[str] = set()
     unique_values: list[str] = []
@@ -353,4 +530,4 @@ def _unique(values: list[str]) -> list[str]:
     return unique_values
 
 
-__all__ = ["build_brief", "build_briefs"]
+__all__ = ["build_brief", "build_briefs", "build_workflow_a_briefs_from_hook_board"]
