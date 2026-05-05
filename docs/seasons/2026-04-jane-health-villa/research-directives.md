@@ -38,10 +38,26 @@ platform_source_targets:
   youtube: 15
   tiktok: 15
   instagram: 20
+language_source_targets:
+  ru: 25
+  en: 25
 short_form_source_count_target: 45
 max_long_form_sources: 5
 max_short_form_duration_seconds: 180
 preferred_aspect_ratio: "9:16"
+topic_search_order:
+  - recovery_energy
+  - invisible_quality
+  - bali_real_estate
+  - phygital_villa_experience
+  - founder_ceo_transition
+per_topic_platform_targets:
+  youtube: 3
+  tiktok: 3
+  instagram: 4
+per_topic_language_targets:
+  ru: 5
+  en: 5
 topic_source_targets:
   recovery_energy: 10
   invisible_quality: 10
@@ -64,6 +80,46 @@ links do not count.
 | `founder_ceo_transition` | Линия предпринимательства + смены роли | founder role shift, CEO reality, launch behind the scenes, team building, from broker/operator to creator | 10 |
 
 `audience_participation is a CTA/feedback mechanic`, not a search topic.
+
+## Search Loop Algorithm
+
+Search each topic sequentially until its qualified count is met. Do not run one
+broad search and then hope the final distribution works.
+
+For each topic:
+
+1. Search both Russian and English public videos.
+2. Search YouTube Shorts, TikTok, and Instagram Reels.
+3. Fill the per-topic quota before moving to the next topic:
+   - YouTube: 3 qualified videos;
+   - TikTok: 3 qualified videos;
+   - Instagram: 4 qualified videos.
+4. Keep collecting candidates until the topic has 10 qualified videos or the
+   connector reports a hard blocker.
+5. Record blocked candidates separately. Missing metrics, off-format videos, and
+   low-metric videos do not count toward the topic quota.
+
+This creates the final board quota:
+
+```yaml
+language_source_targets:
+  ru: 25
+  en: 25
+per_topic_platform_targets:
+  youtube: 3
+  tiktok: 3
+  instagram: 4
+```
+
+## RU/EN Query Expansion
+
+| Topic Key | Russian Search Examples | English Search Examples |
+|---|---|---|
+| `recovery_energy` | восстановление после выгорания; дыхание здоровье усталость; нервная система восстановление энергия | burnout recovery nervous system; breathing health reset; body as system recovery |
+| `invisible_quality` | плесень влажность дом; скрытые дефекты гидроизоляция; вентиляция качество воздуха | mold humidity waterproofing; air quality mold inspection; hidden defects waterproofing failure |
+| `bali_real_estate` | Бали вилла покупка ошибки; Бали недвижимость due diligence; Бали стройка виллы задержки | Bali villa buying mistakes; Bali real estate due diligence; Bali construction delays villa |
+| `phygital_villa_experience` | иммерсивное пространство свадьба; фиджитал пространство архитектура; вилла для свадьбы событие | immersive wedding venue; phygital space architecture; luxury ocean villa event venue |
+| `founder_ceo_transition` | основатель CEO запуск проекта; предприниматель новая роль; фаундер команда запуск | founder CEO startup launch; building a team founder reality; founder transition operator to creator |
 
 ## Required Board Counts
 
@@ -122,8 +178,11 @@ likes.
 - Search TikTok, Instagram Reels, YouTube Shorts, and producer-approved public video sources.
 - Prefer 9:16 short-form videos under 180 seconds.
 - Long educational YouTube sources are support-only and max 5 in the 50-video validation set.
+- If Firecrawl MCP fails on TLS/certificate handling, use Firecrawl CLI/API outside the MCP path for public URL discovery.
+- Use Apify actor-backed extraction for Instagram Reels and TikTok public videos when platform metrics are needed.
 - If Instagram metrics are missing, mark the row as blocked and do not count it toward 50.
 - If a video has zero/low metrics, move it to dropped discovery and do not count it toward 50.
+- If an actor returns `no_items`, 400, private/empty data, or no public metrics, record a blocked candidate and keep searching.
 - If one topic fills all qualified rows, block the board even if platform and metric gates pass.
 - Search Agent must not write scripts, captions, publish queue, or final assets.
 
@@ -152,4 +211,3 @@ Only rows with all of the following may reach Brief Builder:
 
 Workflow A receives only approved `WorkflowABrief` objects. It must not perform
 new research and must not create publish queue.
-

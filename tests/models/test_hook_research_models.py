@@ -206,6 +206,11 @@ def test_producer_hook_search_task_requires_topic_targets_for_all_themes() -> No
         )
 
 
+def test_producer_hook_search_task_requires_russian_and_english_search_languages() -> None:
+    with pytest.raises(ValueError, match="languages_regions"):
+        ProducerHookSearchTask(**make_task_payload(languages_regions=["EN"]))
+
+
 def test_research_mined_hook_requires_source_item_refs() -> None:
     with pytest.raises(ValueError, match="source_item_refs"):
         HookOpportunity(**make_hook_payload(source_item_refs=[]))

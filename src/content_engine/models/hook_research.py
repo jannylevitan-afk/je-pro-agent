@@ -146,6 +146,9 @@ class ProducerHookSearchTask(BaseModel):
             raise ValueError("ProducerHookSearchTask.short_form_source_count_target must leave at most max_long_form_sources")
         if self.preferred_aspect_ratio.strip() != "9:16":
             raise ValueError("ProducerHookSearchTask.preferred_aspect_ratio must be 9:16")
+        normalized_languages = {_normalize_key(language) for language in self.languages_regions}
+        if not {"ru", "en"}.issubset(normalized_languages):
+            raise ValueError("ProducerHookSearchTask.languages_regions must include RU and EN")
         normalized_topic_targets = _normalize_count_map(self.topic_source_targets)
         normalized_target_themes = {_normalize_key(theme) for theme in self.target_themes}
         if len(normalized_topic_targets) < 2:

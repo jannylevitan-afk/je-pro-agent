@@ -44,3 +44,23 @@ The 50-video Workflow A research set is topic-balanced:
 
 `audience_participation` remains a CTA/feedback mechanic, not a separate search topic.
 
+## Search Fill Rule
+
+Research must fill the season topic quotas sequentially:
+
+1. `recovery_energy`
+2. `invisible_quality`
+3. `bali_real_estate`
+4. `phygital_villa_experience`
+5. `founder_ceo_transition`
+
+For each topic, Search Agent searches both Russian and English public videos and
+fills:
+
+- YouTube Shorts: 3 qualified videos;
+- TikTok: 3 qualified videos;
+- Instagram Reels: 4 qualified videos.
+
+The total target remains 50 qualified videos: `25 ru`, `25 en`,
+`15 YouTube`, `15 TikTok`, `20 Instagram`. Missing metrics, weak metrics,
+off-format links, and discovery-only URLs do not count.

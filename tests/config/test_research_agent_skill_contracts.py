@@ -78,6 +78,12 @@ def test_research_agent_runner_requires_topic_balanced_hook_research() -> None:
         "topic_source_targets",
         "topic-balanced",
         "10 videos per topic",
+        "process one Producer topic at a time",
+        "Russian and English public videos",
+        "ru=25",
+        "en=25",
+        "Firecrawl CLI/API outside the failing MCP path",
+        "Apify actor-backed extraction for Instagram Reels and TikTok public videos",
         "qualified_topic_counts",
         "audience participation is a CTA/feedback mechanic",
     ]

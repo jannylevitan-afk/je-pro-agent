@@ -126,6 +126,7 @@ Read tests and architecture before editing:
 - `src/content_engine/services/opportunity_queue.py`
 - `src/content_engine/services/brief_builder.py`
 - `src/content_engine/services/hook_research.py`
+- `src/content_engine/services/hook_search_plan.py`
 - `src/content_engine/services/content_factory.py`
 - `src/content_engine/services/writer_entity.py`
 - `src/content_engine/models/source_item.py`
@@ -134,6 +135,7 @@ Read tests and architecture before editing:
 - `src/content_engine/models/opportunity.py`
 - `src/content_engine/models/brief_builder.py`
 - `src/content_engine/models/hook_research.py`
+- `src/content_engine/models/hook_search_plan.py`
 - `src/content_engine/models/content_factory.py`
 
 ## Deploy Order

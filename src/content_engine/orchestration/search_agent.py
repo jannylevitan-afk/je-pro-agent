@@ -16,11 +16,13 @@ from content_engine.models.hook_research import (
     HookResearchOutcomeBoard,
     ProducerHookSearchTask,
 )
+from content_engine.models.hook_search_plan import HookSearchPlan
 from content_engine.notion.sync import NotionClientLike
 from content_engine.orchestration.live_pipeline import LivePipelineItemResult, WorkflowWriter, run_live_pipeline
 from content_engine.orchestration.targets import LivePipelineTargets
 from content_engine.services.analyst import WorkflowAnalyst
 from content_engine.services.hook_research import build_hook_research_outcome_board
+from content_engine.services.hook_search_plan import build_hook_search_plan
 
 
 ComplianceStatus = Literal["allowed", "review", "blocked"]
@@ -74,6 +76,26 @@ def run_hook_research_agent(
         producer_hook_search_task=producer_hook_search_task,
         **board_payload,
     )
+
+
+def plan_hook_research_agent_collection(
+    *,
+    producer_hook_search_task: ProducerHookSearchTask | dict[str, object] | None,
+) -> HookSearchPlan | HookResearchBlockedResult:
+    """Prepare the rubric-first live collection plan for Workflow A hook research."""
+
+    if producer_hook_search_task is None:
+        return HookResearchBlockedResult(
+            blocked_reason="PRODUCER_HOOK_SEARCH_TASK_MISSING",
+            message="Research Agent cannot plan hook collection without a producer-approved task.",
+        )
+    try:
+        return build_hook_search_plan(producer_hook_search_task)
+    except (TypeError, ValueError) as exc:
+        return HookResearchBlockedResult(
+            blocked_reason="PRODUCER_HOOK_SEARCH_TASK_INVALID",
+            message=f"Research Agent cannot plan hook collection with an invalid producer task: {exc}",
+        )
 
 
 def run_search_agent(

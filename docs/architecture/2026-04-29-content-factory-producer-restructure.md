@@ -178,6 +178,7 @@ Current strict additions, without breaking current collectors:
 - the Producer task must carry `topic_source_targets`; the board must stay topic-balanced and cannot pass with one dominant topic;
 - for Jane's current season, use 5 search rubrics with 10 qualified videos each: `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, `founder_ceo_transition`;
 - the role-shift line is merged into `founder_ceo_transition`; audience participation is a CTA/feedback mechanic, not a separate search topic;
+- Workflow A hook search must use the rubric-first `HookSearchPlan`: process topics sequentially, search both RU and EN, and fill each topic with YouTube=3, TikTok=3, Instagram=4 qualified videos before treating the topic as complete;
 - short-form is default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, normally <= 180 seconds;
 - long educational YouTube videos are support-only and capped at 5 sources per 50-video validation set;
 - apply the minimum analysis gate before hook mining or ranking; views alone are not enough;
@@ -671,7 +672,11 @@ Rules:
 
 - `source_count_target` must be at least 50 for one hook-search loop.
 - `platform_source_targets` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
+- `languages_regions` must include both `RU` and `EN`.
 - `topic_source_targets` must match `target_themes`, sum to `source_count_target`, and be evenly distributed.
+- `HookSearchPlan` splits each topic into `youtube=3`, `tiktok=3`, `instagram=4`; across 5 topics this satisfies the board platform target.
+- `HookSearchPlan` splits language search as `ru=25`, `en=25`; for each topic this means `ru=5`, `en=5`.
+- Research Agent must search topic-by-topic and continue collecting candidates until the current topic's qualified target is met or the connector reports a hard blocker.
 - `qualified_sources` must equal `source_count_target`; discovered links do not count.
 - `qualified_platform_counts` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
 - `qualified_topic_counts` must match `topic_source_targets`; one-topic boards are invalid.

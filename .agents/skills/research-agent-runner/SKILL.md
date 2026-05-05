@@ -86,6 +86,10 @@ Workflow A hook research requires a Producer task:
 - Validate a 50-video short-form-first set before hook mining: 15 YouTube, 15 TikTok, 20 Instagram.
 - Count only qualified videos toward the 50-video set. Qualified means short-form, public metrics present, and minimum gate passed. Discovery-only links, zero/low metrics, missing Instagram metrics, and long/off-format links must be recorded as dropped or blocked and must not count toward 50.
 - Require `topic_source_targets` from the Producer brief and keep the research set topic-balanced. For Jane's current season, use 10 videos per topic across `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, and `founder_ceo_transition`. The role-shift line is merged into `founder_ceo_transition`; audience participation is a CTA/feedback mechanic, not a separate search topic.
+- Build and follow a rubric-first search plan before collecting: process one Producer topic at a time, search both Russian and English public videos, and fill YouTube=3, TikTok=3, Instagram=4 qualified videos per topic before moving on.
+- Required language coverage for Jane's current season is `ru=25` and `en=25` across the 50 qualified videos. Russian search is especially required for Instagram/Reels and TikTok.
+- If Firecrawl MCP fails because of TLS/certificate handling, use Firecrawl CLI/API outside the failing MCP path for public URL discovery instead of weakening quotas.
+- Use Apify actor-backed extraction for Instagram Reels and TikTok public videos when public metrics are needed. Empty/private actor responses, 400s, or payloads without public metrics are blocked candidates, not qualified rows.
 - Return `qualified_topic_counts` in the board summary. It must match `topic_source_targets`; if 50 qualified videos all come from one rubric, the board stays blocked.
 - Use Reels / TikTok / YouTube Shorts / 9:16 vertical videos as the default. Long educational YouTube videos may support context, but no more than 5 long-form sources may appear in the 50-video validation set.
 - Treat the short-form duration target as <= 180 seconds unless Producer says otherwise.

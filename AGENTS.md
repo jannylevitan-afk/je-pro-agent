@@ -119,6 +119,8 @@ Workflow A hook research is stricter than general routing:
 - One hook-search loop must validate exactly 50 platform-distributed videos before board approval: YouTube = 15, TikTok = 15, Instagram = 20.
 - The 50-video set means 50 qualified videos, not 50 discovered links. A qualified video must be short-form, have public metrics, and pass the minimum gate. Low/zero metrics, incomplete metrics, or off-format links go to dropped/blocked discovery and do not count toward 50.
 - The Producer task must include `topic_source_targets` from the season content lines. For Jane's current season use a topic-balanced split of 10 videos per topic: `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, `founder_ceo_transition`. `audience_participation` is a CTA/feedback mechanic, not a separate search topic.
+- Workflow A hook search must use a rubric-first search plan: fill each Producer topic sequentially, search both Russian and English public videos, and target YouTube=3, TikTok=3, Instagram=4 qualified videos per topic. Across 5 topics this produces the required 15/15/20 platform mix and 25 RU / 25 EN language mix.
+- If Firecrawl MCP fails on TLS/certificate handling, use Firecrawl CLI/API outside the failing MCP path for public URL discovery. For Instagram Reels and TikTok public videos, use Apify actor-backed extraction when public metrics are needed; empty/private actor responses or payloads without metrics are blocked candidates and do not count.
 - `qualified_topic_counts` must match `topic_source_targets`; a board with all 50 videos in one topic is invalid even if the platform and metric gates pass.
 - Short-form is the default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, usually <= 180 seconds. Long educational YouTube videos are allowed only as support sources and max 5 per 50-video validation set.
 - Research-mined hook rows must include public `source_video_url`, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason.
@@ -172,12 +174,14 @@ Read the local code and tests before editing:
 - `src/content_engine/services/producer.py`
 - `src/content_engine/services/opportunity_queue.py`
 - `src/content_engine/services/brief_builder.py`
+- `src/content_engine/services/hook_search_plan.py`
 - `src/content_engine/services/content_factory.py`
 - `src/content_engine/services/writer_entity.py`
 - `src/content_engine/models/source_item.py`
 - `src/content_engine/models/producer.py`
 - `src/content_engine/models/opportunity.py`
 - `src/content_engine/models/brief_builder.py`
+- `src/content_engine/models/hook_search_plan.py`
 - `src/content_engine/models/content_factory.py`
 
 ## Universal Commands

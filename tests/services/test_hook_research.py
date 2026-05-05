@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from content_engine.models.hook_research import HookResearchBlockedResult, HookResearchOutcomeBoard
-from content_engine.orchestration.search_agent import run_hook_research_agent
+from content_engine.models.hook_search_plan import HookSearchPlan
+from content_engine.orchestration.search_agent import plan_hook_research_agent_collection, run_hook_research_agent
 from content_engine.services.hook_research import (
     build_hook_research_outcome_board,
     calculate_video_engagement_score,
@@ -154,6 +155,15 @@ def test_hook_research_agent_blocks_without_producer_hook_search_task() -> None:
     assert isinstance(result, HookResearchBlockedResult)
     assert result.status == "BLOCKED"
     assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_MISSING"
+
+
+def test_hook_research_agent_prepares_rubric_first_search_plan() -> None:
+    result = plan_hook_research_agent_collection(producer_hook_search_task=make_task_payload())
+
+    assert isinstance(result, HookSearchPlan)
+    assert result.language_source_targets == {"ru": 25, "en": 25}
+    assert result.topic_batches[0].topic_key == "recovery_energy"
+    assert result.topic_batches[0].platform_targets == {"youtube": 3, "tiktok": 3, "instagram": 4}
 
 
 def test_hook_research_board_blocks_invalid_task_payload() -> None:
