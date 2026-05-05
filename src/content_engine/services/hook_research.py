@@ -125,6 +125,8 @@ def format_hook_research_outcome_board_markdown(
         "| Metric | Value |",
         "|---|---:|",
         f"| Sources scanned | {board.search_summary.sources_scanned} |",
+        f"| Platform scan counts | {_format_metrics(board.search_summary.platform_scan_counts)} |",
+        f"| Format scan counts | {_format_metrics(board.search_summary.format_scan_counts)} |",
         f"| Raw candidates | {board.search_summary.raw_candidates_collected} |",
         f"| Filtered hook opportunities | {board.search_summary.filtered_hook_opportunities} |",
         f"| Top priority hooks | {board.search_summary.top_priority_hooks} |",

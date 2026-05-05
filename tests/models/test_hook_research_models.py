@@ -29,6 +29,11 @@ def make_task_payload(**overrides: object) -> dict[str, object]:
         "date_window": "last_90_days",
         "performance_threshold": "top relative saves/comments/shares",
         "source_count_target": 50,
+        "platform_source_targets": {"youtube": 15, "tiktok": 15, "instagram": 20},
+        "short_form_source_count_target": 45,
+        "max_long_form_sources": 5,
+        "max_short_form_duration_seconds": 180,
+        "preferred_aspect_ratio": "9:16",
         "hook_count_target": 8,
         "compliance_boundaries": ["public sources only", "no copying", "no unsupported medical claims"],
         "notes_for_research_agent": "avoid generic biohacking tone",
@@ -145,6 +150,20 @@ def test_producer_hook_search_task_requires_workflow_a_route() -> None:
 def test_producer_hook_search_task_requires_minimum_50_video_scan_target() -> None:
     with pytest.raises(ValueError, match="source_count_target"):
         ProducerHookSearchTask(**make_task_payload(source_count_target=49))
+
+
+def test_producer_hook_search_task_requires_workflow_a_platform_mix() -> None:
+    with pytest.raises(ValueError, match="platform_source_targets"):
+        ProducerHookSearchTask(
+            **make_task_payload(
+                platform_source_targets={"youtube": 30, "tiktok": 10, "instagram": 10},
+            )
+        )
+
+
+def test_producer_hook_search_task_limits_long_form_sources() -> None:
+    with pytest.raises(ValueError, match="max_long_form_sources"):
+        ProducerHookSearchTask(**make_task_payload(max_long_form_sources=6))
 
 
 def test_research_mined_hook_requires_source_item_refs() -> None:

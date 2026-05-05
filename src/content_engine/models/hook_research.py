@@ -116,6 +116,13 @@ class ProducerHookSearchTask(BaseModel):
     date_window: str = Field(min_length=1)
     performance_threshold: str = Field(min_length=1)
     source_count_target: int = Field(ge=50)
+    platform_source_targets: dict[str, int] = Field(
+        default_factory=lambda: {"youtube": 15, "tiktok": 15, "instagram": 20}
+    )
+    short_form_source_count_target: int = Field(default=45, ge=0)
+    max_long_form_sources: int = Field(default=5, ge=0)
+    max_short_form_duration_seconds: int = Field(default=180, ge=1)
+    preferred_aspect_ratio: str = "9:16"
     hook_count_target: int = Field(ge=1)
     compliance_boundaries: list[str] = Field(default_factory=list, min_length=1)
     notes_for_research_agent: str | None = None
@@ -126,6 +133,18 @@ class ProducerHookSearchTask(BaseModel):
             raise ValueError("ProducerHookSearchTask.route must be workflow_a")
         if not self.search_goal.strip():
             raise ValueError("ProducerHookSearchTask.search_goal is required")
+        normalized_targets = _normalize_count_map(self.platform_source_targets)
+        required_targets = {"youtube": 15, "tiktok": 15, "instagram": 20}
+        if normalized_targets != required_targets:
+            raise ValueError("ProducerHookSearchTask.platform_source_targets must be youtube=15, tiktok=15, instagram=20")
+        if sum(normalized_targets.values()) != self.source_count_target:
+            raise ValueError("ProducerHookSearchTask.platform_source_targets must sum to source_count_target")
+        if self.max_long_form_sources > 5:
+            raise ValueError("ProducerHookSearchTask.max_long_form_sources must be <= 5")
+        if self.short_form_source_count_target < self.source_count_target - self.max_long_form_sources:
+            raise ValueError("ProducerHookSearchTask.short_form_source_count_target must leave at most max_long_form_sources")
+        if self.preferred_aspect_ratio.strip() != "9:16":
+            raise ValueError("ProducerHookSearchTask.preferred_aspect_ratio must be 9:16")
         return self
 
 
@@ -149,6 +168,8 @@ class SearchSummary(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     sources_scanned: int = Field(ge=0)
+    platform_scan_counts: dict[str, int] = Field(default_factory=dict)
+    format_scan_counts: dict[str, int] = Field(default_factory=dict)
     raw_candidates_collected: int = Field(ge=0)
     duplicates_removed: int = Field(ge=0)
     candidates_rejected: int = Field(ge=0)
@@ -428,6 +449,16 @@ class HookResearchOutcomeBoard(BaseModel):
             raise ValueError("HookResearchOutcomeBoard must preserve Workflow A boundaries")
         if self.search_summary.sources_scanned < self.producer_hook_search_task.source_count_target:
             raise ValueError("HookResearchOutcomeBoard sources_scanned must meet ProducerHookSearchTask source_count_target")
+        platform_counts = _normalize_count_map(self.search_summary.platform_scan_counts)
+        if platform_counts != _normalize_count_map(self.producer_hook_search_task.platform_source_targets):
+            raise ValueError("HookResearchOutcomeBoard platform_scan_counts must match ProducerHookSearchTask platform_source_targets")
+        format_counts = _normalize_count_map(self.search_summary.format_scan_counts)
+        if format_counts.get("long_form", 0) > self.producer_hook_search_task.max_long_form_sources:
+            raise ValueError("HookResearchOutcomeBoard long_form scan count exceeds ProducerHookSearchTask.max_long_form_sources")
+        if format_counts.get("short_form", 0) < self.producer_hook_search_task.short_form_source_count_target:
+            raise ValueError("HookResearchOutcomeBoard short_form scan count must meet ProducerHookSearchTask.short_form_source_count_target")
+        if sum(format_counts.values()) != self.search_summary.sources_scanned:
+            raise ValueError("HookResearchOutcomeBoard format_scan_counts must sum to sources_scanned")
         if self.source_evidence_log and any(
             not _is_public_url(evidence.source_url_or_internal_ref) for evidence in self.source_evidence_log
         ):
@@ -564,6 +595,15 @@ def _clean_text(value: str | None) -> str:
 def _has_public_engagement_metrics(metrics: dict[str, int]) -> bool:
     metric_keys = {"views", "video_views", "likes", "comments", "shares", "saves"}
     return any(metrics.get(key, 0) > 0 for key in metric_keys)
+
+
+def _normalize_count_map(values: Mapping[str, int]) -> dict[str, int]:
+    normalized: dict[str, int] = {}
+    for key, value in values.items():
+        if not isinstance(value, int):
+            continue
+        normalized[key.strip().lower().replace(" ", "_")] = value
+    return normalized
 
 
 def _metric(metrics: Mapping[str, int], key: str) -> int:

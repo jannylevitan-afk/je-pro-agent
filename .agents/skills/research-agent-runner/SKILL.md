@@ -83,7 +83,9 @@ For Workflow A or `both` routes, the Research Agent must also collect:
 Workflow A hook research requires a Producer task:
 
 - Do not run hook research without `ProducerHookSearchTask`.
-- Scan at least 50 relevant public videos per hook-search loop.
+- Validate a 50-video short-form-first set before hook mining: 15 YouTube, 15 TikTok, 20 Instagram.
+- Use Reels / TikTok / YouTube Shorts / 9:16 vertical videos as the default. Long educational YouTube videos may support context, but no more than 5 long-form sources may appear in the 50-video validation set.
+- Treat the short-form duration target as <= 180 seconds unless Producer says otherwise.
 - Focus on the Producer brief: season, episode, scene, audience, pain, desire, tension, target themes, forbidden themes, desired hook mechanics, creator archetypes, languages/regions, and date window.
 - Search TikTok, Instagram, YouTube/Shorts, and other Producer-approved public video sources using Exa/Firecrawl/Apify/Playwright as appropriate.
 - Apply the minimum analysis gate before hook mining or ranking. Do not count views alone as "залетело":

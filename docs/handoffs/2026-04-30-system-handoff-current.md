@@ -121,6 +121,9 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - собирает только public data;
 - выбирает high-performing posts/signals;
 - для Workflow A ищет по Producer brief на TikTok / Instagram / YouTube / Shorts и approved public video sources;
+- для Workflow A hook research валидирует ровно 50-video set по платформам: YouTube 15, TikTok 15, Instagram 20;
+- short-form является дефолтом: Reels / TikTok / YouTube Shorts / vertical 9:16, обычно <= 180 секунд;
+- long educational YouTube допускается только как support, максимум 5 из 50;
 - перед hook mining применяет minimum analysis gate: views alone не считаются доказательством залёта;
 - ранжирует видео по public engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
 - для research-mined hook rows сохраняет `source_video_url`, observed hook/opening, first-frame text, public metrics, engagement score/rank, scan batch size и selection reason;
@@ -266,6 +269,8 @@ MCP / external stack policy:
 - не является viral hook bank;
 - не создаёт scripts, filming cards, publish queue, scheduler или final captions.
 - блокируется, если `search_summary.sources_scanned` меньше `ProducerHookSearchTask.source_count_target`.
+- блокируется, если `platform_scan_counts` не равен `youtube=15, tiktok=15, instagram=20`.
+- блокируется, если `format_scan_counts.long_form > 5` или `format_scan_counts.short_form < 45`.
 - блокируется, если source evidence использует internal refs вместо public video URLs.
 - блокируется, если research-mined video не проходит minimum analysis gate:
 - keep: `views >= 100000 AND like_rate >= 2%`;

@@ -169,6 +169,9 @@ Add later, without breaking current collectors:
 - optional `ResearchDirective` input from Producer;
 - `ProducerHookSearchTask` input for Workflow A hook research boards;
 - for `ProducerHookSearchTask`, a loop must scan at least 50 relevant public videos before board creation;
+- for Workflow A hook research, the 50-video validation set must be platform-distributed: 15 YouTube, 15 TikTok, 20 Instagram;
+- short-form is default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, normally <= 180 seconds;
+- long educational YouTube videos are support-only and capped at 5 sources per 50-video validation set;
 - apply the minimum analysis gate before hook mining or ranking; views alone are not enough;
 - public video engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
 - persistent monitoring fields:
@@ -645,6 +648,11 @@ creator_archetypes
 date_window
 performance_threshold
 source_count_target
+platform_source_targets = youtube:15, tiktok:15, instagram:20
+short_form_source_count_target = 45
+max_long_form_sources = 5
+max_short_form_duration_seconds = 180
+preferred_aspect_ratio = 9:16
 hook_count_target
 compliance_boundaries
 notes_for_research_agent
@@ -653,6 +661,9 @@ notes_for_research_agent
 Rules:
 
 - `source_count_target` must be at least 50 for one hook-search loop.
+- `platform_source_targets` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
+- `format_scan_counts` must include at least 45 short-form videos and no more than 5 long-form videos.
+- Short-form means Reels/TikTok/Shorts/vertical 9:16, usually <= 180 seconds.
 - The Research Agent searches the Producer-approved platforms/themes, especially TikTok, Instagram, YouTube/Shorts, and public video sources available through Exa, Firecrawl, Apify, or Playwright.
 - The Research Agent must not invent hook evidence. A research-mined row needs a public video URL and observed public metrics.
 - Producer-original hooks are allowed as backup strategy rows only; they must not pretend to be research-mined.
@@ -734,6 +745,8 @@ Boundary:
 - every research-mined hook must include `source_video_url`, `observed_source_hook`, `observed_first_frame_text`, `observed_engagement_metrics`, `engagement_score`, `engagement_rank`, `scan_batch_size >= 50`, and `engagement_selection_reason`;
 - every research-mined hook must pass `evaluate_video_research_minimums`; if it fails the minimum gate, it cannot become a hook opportunity;
 - `search_summary.sources_scanned` must be greater than or equal to `producer_hook_search_task.source_count_target`;
+- `search_summary.platform_scan_counts` must match `ProducerHookSearchTask.platform_source_targets`;
+- `search_summary.format_scan_counts.long_form` must be `<= 5`, and `short_form` must be `>= 45`;
 - `source_evidence_log.source_url_or_internal_ref` must be a public URL for hook research evidence.
 
 ### 5.7 OpportunityCandidate

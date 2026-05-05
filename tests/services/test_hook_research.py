@@ -45,6 +45,8 @@ def make_board_payload(**overrides: object) -> dict[str, object]:
         },
         "search_summary": {
             "sources_scanned": 50,
+            "platform_scan_counts": {"youtube": 15, "tiktok": 15, "instagram": 20},
+            "format_scan_counts": {"short_form": 45, "long_form": 5},
             "raw_candidates_collected": 12,
             "duplicates_removed": 2,
             "candidates_rejected": 7,
@@ -178,6 +180,34 @@ def test_hook_research_board_requires_scan_count_to_match_task_target() -> None:
             search_summary={
                 **make_board_payload()["search_summary"],
                 "sources_scanned": 49,
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_requires_exact_platform_distribution() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "platform_scan_counts": {"youtube": 50},
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_limits_long_form_scan_count() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "format_scan_counts": {"short_form": 44, "long_form": 6},
             }
         )
     )

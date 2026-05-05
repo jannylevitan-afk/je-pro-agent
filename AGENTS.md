@@ -114,7 +114,8 @@ Research Agent operating order:
 Workflow A hook research is stricter than general routing:
 
 - It must start from `ProducerHookSearchTask`; otherwise return `BLOCKED`.
-- One hook-search loop must scan at least 50 relevant public videos across the Producer-approved platforms/themes.
+- One hook-search loop must validate exactly 50 platform-distributed videos before board approval: YouTube = 15, TikTok = 15, Instagram = 20.
+- Short-form is the default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, usually <= 180 seconds. Long educational YouTube videos are allowed only as support sources and max 5 per 50-video validation set.
 - Research-mined hook rows must include public `source_video_url`, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason.
 - Do not treat views alone as "viral"; Shorts/Reels/TikTok views can be inflated by autoplay. Apply the minimum analysis gate before ranking:
   - `BROAD_VIRAL`: `views >= 100000` and `like_rate >= 2%`
