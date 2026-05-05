@@ -168,6 +168,8 @@ Add later, without breaking current collectors:
 
 - optional `ResearchDirective` input from Producer;
 - `ProducerHookSearchTask` input for Workflow A hook research boards;
+- for `ProducerHookSearchTask`, a loop must scan at least 50 relevant public videos before board creation;
+- public video engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
 - persistent monitoring fields:
   - `source_scanned`;
   - `selected_post_url`;
@@ -303,6 +305,8 @@ Conversion is allowed only when:
 - `human_decision == APPROVE_FOR_WORKFLOW_A`;
 - `qa_status == PASS`;
 - risk is acceptable: no high/blocker copy, claim, tone, brand, platform, or overall risk.
+- research-mined hook has public `source_video_url`;
+- research-mined hook has observed source hook/opening, first-frame text, public metrics, engagement score/rank, scan batch size, and selection reason.
 
 Brief Builder should include:
 
@@ -645,6 +649,13 @@ compliance_boundaries
 notes_for_research_agent
 ```
 
+Rules:
+
+- `source_count_target` must be at least 50 for one hook-search loop.
+- The Research Agent searches the Producer-approved platforms/themes, especially TikTok, Instagram, YouTube/Shorts, and public video sources available through Exa, Firecrawl, Apify, or Playwright.
+- The Research Agent must not invent hook evidence. A research-mined row needs a public video URL and observed public metrics.
+- Producer-original hooks are allowed as backup strategy rows only; they must not pretend to be research-mined.
+
 ### 5.6B HookResearchOutcomeBoard
 
 Human-facing outcome for producer-directed Workflow A hook research.
@@ -681,6 +692,9 @@ Boundary:
 - this board must not create filming cards;
 - this board must not create publish queue, scheduler, or final captions;
 - this board must not expose raw source dumps as the main human table.
+- every research-mined hook must include `source_video_url`, `observed_source_hook`, `observed_first_frame_text`, `observed_engagement_metrics`, `engagement_score`, `engagement_rank`, `scan_batch_size >= 50`, and `engagement_selection_reason`;
+- `search_summary.sources_scanned` must be greater than or equal to `producer_hook_search_task.source_count_target`;
+- `source_evidence_log.source_url_or_internal_ref` must be a public URL for hook research evidence.
 
 ### 5.7 OpportunityCandidate
 

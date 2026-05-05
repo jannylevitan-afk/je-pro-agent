@@ -22,6 +22,7 @@ def test_brief_builder_converts_only_approved_passed_acceptable_hook_to_workflow
     assert brief.approved_hook_id == "hook_001"
     assert brief.hook_board_id == "hook_board_001"
     assert brief.source_hook == "Ты не ленивая. Твоё тело просто больше не верит, что ты в безопасности."
+    assert brief.video_refs == ["https://www.instagram.com/reel/example/"]
     assert brief.first_frame_text == "Ты не ленивая."
     assert brief.cta_direction == "save"
     assert "publish queue" in " ".join(brief.must_not_include)

@@ -20,6 +20,7 @@ This file is the documentation entrypoint for agents and humans.
 | Current architecture | `docs/architecture/2026-04-29-content-factory-producer-restructure.md` |
 | Producer entity | `docs/architecture/2026-04-29-producer-agent-entity.md` and `.codex/agents/producer_entity.md` |
 | Producer readable output | `docs/architecture/2026-04-30-producer-output-contract.md` |
+| Workflow A hook research | `src/content_engine/models/hook_research.py`, `src/content_engine/services/hook_research.py`, and matching tests |
 | Analyst entity | `.codex/agents/analyst_entity.md` |
 | Shared contracts | `src/content_engine/models/` |
 | Service behavior | `src/content_engine/services/` plus matching `tests/services/` |
@@ -117,6 +118,7 @@ Read tests and architecture before editing:
 - `src/content_engine/services/producer_output_contract.py`
 - `src/content_engine/services/opportunity_queue.py`
 - `src/content_engine/services/brief_builder.py`
+- `src/content_engine/services/hook_research.py`
 - `src/content_engine/services/content_factory.py`
 - `src/content_engine/services/writer_entity.py`
 - `src/content_engine/models/source_item.py`
@@ -124,6 +126,7 @@ Read tests and architecture before editing:
 - `src/content_engine/models/producer_output_contract.py`
 - `src/content_engine/models/opportunity.py`
 - `src/content_engine/models/brief_builder.py`
+- `src/content_engine/models/hook_research.py`
 - `src/content_engine/models/content_factory.py`
 
 ## Deploy Order

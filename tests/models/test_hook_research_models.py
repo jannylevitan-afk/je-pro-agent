@@ -24,7 +24,7 @@ def make_task_payload(**overrides: object) -> dict[str, object]:
         "creator_archetypes": ["wellness creator", "female founder"],
         "date_window": "last_90_days",
         "performance_threshold": "top relative saves/comments/shares",
-        "source_count_target": 40,
+        "source_count_target": 50,
         "hook_count_target": 8,
         "compliance_boundaries": ["public sources only", "no copying", "no unsupported medical claims"],
         "notes_for_research_agent": "avoid generic biohacking tone",
@@ -61,10 +61,24 @@ def make_hook_payload(**overrides: object) -> dict[str, object]:
         "desired_cta_direction": "save",
         "source_item_refs": ["src_001"],
         "evidence_refs": ["ev_001"],
+        "source_video_url": "https://www.instagram.com/reel/example/",
         "source_platform": "Instagram",
         "source_type": "public_reel",
         "creator_archetype": "wellness creator",
         "source_recency_days": 12,
+        "observed_source_hook": "Internal paraphrase of the source opening.",
+        "observed_first_frame_text": "Internal paraphrase of first frame text.",
+        "observed_engagement_metrics": {
+            "views": 120000,
+            "likes": 4300,
+            "comments": 310,
+            "shares": 520,
+            "saves": 740,
+        },
+        "engagement_score": 14240.0,
+        "engagement_rank": 1,
+        "scan_batch_size": 50,
+        "engagement_selection_reason": "selected as best-performing video by public engagement score",
         "performance_signal": "high saves and recognition comments",
         "performance_signal_strength": 0.84,
         "relative_baseline_note": "above creator baseline",
@@ -124,6 +138,11 @@ def test_producer_hook_search_task_requires_workflow_a_route() -> None:
         ProducerHookSearchTask(**make_task_payload(route="workflow_b"))
 
 
+def test_producer_hook_search_task_requires_minimum_50_video_scan_target() -> None:
+    with pytest.raises(ValueError, match="source_count_target"):
+        ProducerHookSearchTask(**make_task_payload(source_count_target=49))
+
+
 def test_research_mined_hook_requires_source_item_refs() -> None:
     with pytest.raises(ValueError, match="source_item_refs"):
         HookOpportunity(**make_hook_payload(source_item_refs=[]))
@@ -134,6 +153,16 @@ def test_research_mined_hook_requires_evidence_refs() -> None:
         HookOpportunity(**make_hook_payload(evidence_refs=[]))
 
 
+def test_research_mined_hook_requires_public_video_url() -> None:
+    with pytest.raises(ValueError, match="source_video_url"):
+        HookOpportunity(**make_hook_payload(source_video_url="internal://source/src_001"))
+
+
+def test_research_mined_hook_requires_observed_engagement_metrics() -> None:
+    with pytest.raises(ValueError, match="observed_engagement_metrics"):
+        HookOpportunity(**make_hook_payload(observed_engagement_metrics={}))
+
+
 def test_producer_original_hook_must_not_contain_source_refs() -> None:
     with pytest.raises(ValueError, match="must not contain source/evidence refs"):
         HookOpportunity(
@@ -141,10 +170,18 @@ def test_producer_original_hook_must_not_contain_source_refs() -> None:
                 input_mode="PRODUCER_ORIGINAL",
                 source_item_refs=["src_001"],
                 evidence_refs=[],
+                source_video_url=None,
                 source_platform=None,
                 source_type=None,
                 creator_archetype=None,
                 source_recency_days=None,
+                observed_source_hook=None,
+                observed_first_frame_text=None,
+                observed_engagement_metrics={},
+                engagement_score=None,
+                engagement_rank=None,
+                scan_batch_size=None,
+                engagement_selection_reason=None,
                 performance_signal=None,
                 performance_signal_strength=None,
                 source_relevance_score=None,
@@ -161,10 +198,18 @@ def test_producer_original_hook_requires_strategy_basis() -> None:
                 input_mode="PRODUCER_ORIGINAL",
                 source_item_refs=[],
                 evidence_refs=[],
+                source_video_url=None,
                 source_platform=None,
                 source_type=None,
                 creator_archetype=None,
                 source_recency_days=None,
+                observed_source_hook=None,
+                observed_first_frame_text=None,
+                observed_engagement_metrics={},
+                engagement_score=None,
+                engagement_rank=None,
+                scan_batch_size=None,
+                engagement_selection_reason=None,
                 performance_signal=None,
                 performance_signal_strength=None,
                 source_relevance_score=None,

@@ -111,6 +111,15 @@ Research Agent operating order:
    - strong video plus textual depth -> both
    - weak or unsupported signal -> drop
 
+Workflow A hook research is stricter than general routing:
+
+- It must start from `ProducerHookSearchTask`; otherwise return `BLOCKED`.
+- One hook-search loop must scan at least 50 relevant public videos across the Producer-approved platforms/themes.
+- Research-mined hook rows must include public `source_video_url`, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason.
+- Video engagement score is `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`.
+- Brief Builder may convert only rows with `human_decision = APPROVE_FOR_WORKFLOW_A`, `qa_status = PASS`, and acceptable risk into `WorkflowABrief`.
+- Workflow A must not perform research or create publish queue; it only creates selected hook, script, filming card, editorial QA, and `HumanReviewAsset`.
+
 Environment notes:
 
 - `FIRECRAWL_API_KEY` is required for the `firecrawl` MCP server

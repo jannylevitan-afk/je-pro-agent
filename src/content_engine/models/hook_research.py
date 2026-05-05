@@ -81,7 +81,7 @@ class ProducerHookSearchTask(BaseModel):
     creator_archetypes: list[str] = Field(default_factory=list, min_length=1)
     date_window: str = Field(min_length=1)
     performance_threshold: str = Field(min_length=1)
-    source_count_target: int = Field(ge=1)
+    source_count_target: int = Field(ge=50)
     hook_count_target: int = Field(ge=1)
     compliance_boundaries: list[str] = Field(default_factory=list, min_length=1)
     notes_for_research_agent: str | None = None
@@ -183,10 +183,18 @@ class HookOpportunity(BaseModel):
 
     source_item_refs: list[str] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
+    source_video_url: str | None = None
     source_platform: str | None = None
     source_type: str | None = None
     creator_archetype: str | None = None
     source_recency_days: int | None = Field(default=None, ge=0)
+    observed_source_hook: str | None = None
+    observed_first_frame_text: str | None = None
+    observed_engagement_metrics: dict[str, int] = Field(default_factory=dict)
+    engagement_score: float | None = Field(default=None, ge=0)
+    engagement_rank: int | None = Field(default=None, ge=1)
+    scan_batch_size: int | None = Field(default=None, ge=1)
+    engagement_selection_reason: str | None = None
     performance_signal: str | None = None
     performance_signal_strength: float | None = Field(default=None, ge=0, le=1)
     relative_baseline_note: str | None = None
@@ -254,11 +262,31 @@ class HookOpportunity(BaseModel):
                 raise ValueError("RESEARCH_MINED hooks require source_item_refs")
             if not self.evidence_refs:
                 raise ValueError("RESEARCH_MINED hooks require evidence_refs")
+            if not _is_public_url(self.source_video_url):
+                raise ValueError("RESEARCH_MINED hooks require public source_video_url")
+            if not _clean_text(self.observed_source_hook):
+                raise ValueError("RESEARCH_MINED hooks require observed_source_hook")
+            if not _clean_text(self.observed_first_frame_text):
+                raise ValueError("RESEARCH_MINED hooks require observed_first_frame_text")
+            if not _has_public_engagement_metrics(self.observed_engagement_metrics):
+                raise ValueError("RESEARCH_MINED hooks require observed_engagement_metrics")
+            if self.engagement_score is None:
+                raise ValueError("RESEARCH_MINED hooks require engagement_score")
+            if self.engagement_rank is None:
+                raise ValueError("RESEARCH_MINED hooks require engagement_rank")
+            if self.scan_batch_size is None or self.scan_batch_size < 50:
+                raise ValueError("RESEARCH_MINED hooks require scan_batch_size >= 50")
+            if not _clean_text(self.engagement_selection_reason):
+                raise ValueError("RESEARCH_MINED hooks require engagement_selection_reason")
             if not self.performance_signal:
                 raise ValueError("RESEARCH_MINED hooks require performance_signal")
         if self.input_mode == "PRODUCER_ORIGINAL":
             if self.source_item_refs or self.evidence_refs:
                 raise ValueError("PRODUCER_ORIGINAL hooks must not contain source/evidence refs")
+            if self.source_video_url:
+                raise ValueError("PRODUCER_ORIGINAL hooks must not contain source_video_url")
+            if self.observed_engagement_metrics:
+                raise ValueError("PRODUCER_ORIGINAL hooks must not contain observed_engagement_metrics")
             if not self.producer_original_basis:
                 raise ValueError("PRODUCER_ORIGINAL hooks require producer_original_basis")
         if self.human_decision == "APPROVE_FOR_WORKFLOW_A":
@@ -362,6 +390,12 @@ class HookResearchOutcomeBoard(BaseModel):
             raise ValueError("hook opportunities must reference ProducerHookSearchTask directive_id")
         if not self.qa_report.workflow_boundary_ok:
             raise ValueError("HookResearchOutcomeBoard must preserve Workflow A boundaries")
+        if self.search_summary.sources_scanned < self.producer_hook_search_task.source_count_target:
+            raise ValueError("HookResearchOutcomeBoard sources_scanned must meet ProducerHookSearchTask source_count_target")
+        if self.source_evidence_log and any(
+            not _is_public_url(evidence.source_url_or_internal_ref) for evidence in self.source_evidence_log
+        ):
+            raise ValueError("HookResearchOutcomeBoard source evidence must include public video URLs")
         return self
 
 
@@ -383,6 +417,22 @@ def is_workflow_a_eligible_hook(hook: HookOpportunity) -> bool:
         and hook.qa_status == "PASS"
         and is_acceptable_workflow_a_risk(hook)
     )
+
+
+def _is_public_url(value: str | None) -> bool:
+    if not value:
+        return False
+    normalized = value.strip().lower()
+    return normalized.startswith("https://") or normalized.startswith("http://")
+
+
+def _clean_text(value: str | None) -> str:
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _has_public_engagement_metrics(metrics: dict[str, int]) -> bool:
+    metric_keys = {"views", "video_views", "likes", "comments", "shares", "saves"}
+    return any(metrics.get(key, 0) > 0 for key in metric_keys)
 
 
 __all__ = [

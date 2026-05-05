@@ -4,6 +4,7 @@ from content_engine.models.hook_research import HookResearchBlockedResult, HookR
 from content_engine.orchestration.search_agent import run_hook_research_agent
 from content_engine.services.hook_research import (
     build_hook_research_outcome_board,
+    calculate_video_engagement_score,
     format_hook_research_outcome_board_markdown,
 )
 from tests.models.test_hook_research_models import make_hook_payload, make_task_payload
@@ -43,7 +44,7 @@ def make_board_payload(**overrides: object) -> dict[str, object]:
             "search_limitations": ["Instagram saves are inferred when public saves are unavailable."],
         },
         "search_summary": {
-            "sources_scanned": 42,
+            "sources_scanned": 50,
             "raw_candidates_collected": 12,
             "duplicates_removed": 2,
             "candidates_rejected": 7,
@@ -165,7 +166,48 @@ def test_hook_research_board_derives_approved_workflow_a_handoffs() -> None:
     assert handoff.approved_hook_id == "hook_001"
     assert handoff.workflow_a_brief_status == "READY_TO_BUILD"
     assert handoff.selected_hook.startswith("Ты не ленивая.")
+    assert handoff.source_context["source_video_url"] == "https://www.instagram.com/reel/example/"
+    assert handoff.source_context["observed_engagement_metrics"]["saves"] == 740
     assert handoff.factual_boundaries
+
+
+def test_hook_research_board_requires_scan_count_to_match_task_target() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "sources_scanned": 49,
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_blocks_research_rows_without_public_video_url() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            hook_opportunities=[make_hook_payload(source_video_url=None)],
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_video_engagement_score_weights_comments_saves_and_shares_above_views() -> None:
+    score = calculate_video_engagement_score(
+        {
+            "views": 10000,
+            "likes": 100,
+            "comments": 20,
+            "shares": 10,
+            "saves": 5,
+        }
+    )
+
+    assert score == 455.0
 
 
 def test_hook_research_board_has_no_downstream_video_or_publish_fields() -> None:
@@ -189,5 +231,7 @@ def test_hook_research_board_markdown_is_readable_not_raw_json() -> None:
     assert "# HookResearchOutcomeBoard" in markdown
     assert "## 1. Board Header" in markdown
     assert "## 6. Hook Opportunities" in markdown
+    assert "https://www.instagram.com/reel/example/" in markdown
+    assert "saves=740" in markdown
     assert "```json" not in markdown
     assert "| Priority | Status | Mode |" in markdown

@@ -46,6 +46,18 @@ Every accepted source item must carry:
 
 For approved monitored public accounts and channels, the Research Agent must scan recent public posts and select the best-performing post before workflow handoff. Best-performing post means the item with the strongest public engagement score from available public metrics: views, likes, comments, saves, shares. Comments, saves, and shares are stronger signals than passive views.
 
+Use this weighted score when the platform exposes the metrics:
+
+```text
+engagement_score =
+  likes
+  + comments * 4
+  + shares * 5
+  + saves * 5
+  + views * 0.02
+  + video_views * 0.02
+```
+
 For each selected post, collect:
 
 - post URL
@@ -67,6 +79,15 @@ For Workflow A or `both` routes, the Research Agent must also collect:
 - hook pattern, hook tension, hook promise, CTA, visual device, repeatable formula
 - public comments / reactions when available and compliant
 - public metrics: views, likes, comments, saves, shares
+
+Workflow A hook research requires a Producer task:
+
+- Do not run hook research without `ProducerHookSearchTask`.
+- Scan at least 50 relevant public videos per hook-search loop.
+- Focus on the Producer brief: season, episode, scene, audience, pain, desire, tension, target themes, forbidden themes, desired hook mechanics, creator archetypes, languages/regions, and date window.
+- Search TikTok, Instagram, YouTube/Shorts, and other Producer-approved public video sources using Exa/Firecrawl/Apify/Playwright as appropriate.
+- Return `HookResearchOutcomeBoard` with public video URL, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason for each research-mined hook.
+- Do not convert weak/no-proof hooks into Workflow A. Only `APPROVE_FOR_WORKFLOW_A` + `qa_status = PASS` + acceptable risk may be handed to Brief Builder.
 
 ## Current Project Mapping
 

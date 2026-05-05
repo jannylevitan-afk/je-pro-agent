@@ -200,7 +200,7 @@ def _workflow_a_brief_from_hook_handoff(
         producer_sales_intensity=_producer_sales_intensity_from_label(handoff.producer_context.get("sales_intensity")),
         producer_scene_hook=handoff.selected_hook,
         producer_cta_or_next_hook=handoff.cta_direction,
-        video_refs=[ref for ref in handoff.evidence_refs if ref.startswith("http")],
+        video_refs=_video_refs_from_hook_handoff(handoff),
         source_hook=handoff.selected_hook,
         transcript_source="HookResearchOutcomeBoard / ApprovedWorkflowAHandoff",
         hook_board_id=board.board_header.board_id,
@@ -485,6 +485,17 @@ def _source_item_id_from_handoff(
     if hook.source_item_refs:
         return hook.source_item_refs[0]
     return handoff.approved_hook_id
+
+
+def _video_refs_from_hook_handoff(handoff: ApprovedWorkflowAHandoff) -> list[str]:
+    refs: list[str] = []
+    source_video_url = handoff.source_context.get("source_video_url")
+    if isinstance(source_video_url, str) and source_video_url.startswith(("http://", "https://")):
+        refs.append(source_video_url)
+    for evidence_ref in handoff.evidence_refs:
+        if evidence_ref.startswith(("http://", "https://")) and evidence_ref not in refs:
+            refs.append(evidence_ref)
+    return refs
 
 
 def _hook_source_summary(

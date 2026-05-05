@@ -100,6 +100,7 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - Workflow A и Workflow B полностью разделены.
 - Workflow A создаёт только video hook, script, filming card.
 - Workflow A hook research идёт только через `ProducerHookSearchTask -> HookResearchOutcomeBoard`; без task Research Agent возвращает `BLOCKED`.
+- Workflow A hook research должен сканировать минимум 50 релевантных публичных видео за loop и сохранять реальные public video URLs + observed metrics.
 - Workflow B создаёт один final text asset на approved opportunity и selected platform.
 - LinkedIn: publish text на английском, internal RU master может существовать для ревью.
 - Нет активного Publisher, Scheduler, Auto-publishing, publish queue, visual producer, platform adapter или format adapter.
@@ -119,6 +120,9 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - проверяет compliance;
 - собирает только public data;
 - выбирает high-performing posts/signals;
+- для Workflow A ищет по Producer brief на TikTok / Instagram / YouTube / Shorts и approved public video sources;
+- ранжирует видео по public engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
+- для research-mined hook rows сохраняет `source_video_url`, observed hook/opening, first-frame text, public metrics, engagement score/rank, scan batch size и selection reason;
 - создаёт `SourceItem` и evidence fields;
 - маршрутизирует сигнал в Workflow A, Workflow B, both или drop.
 - создаёт `HookResearchOutcomeBoard` только для producer-directed hook research.
@@ -245,9 +249,11 @@ MCP / external stack policy:
 - Brief Builder не создаёт platform variants.
 - Brief Builder не создаёт publish dates / scheduler / publisher fields.
 - Brief Builder должен сохранять factual boundaries и evidence refs.
+- Brief Builder должен переносить public `source_video_url` из `ApprovedWorkflowAHandoff.source_context` в `WorkflowABrief.video_refs`.
 - Brief Builder должен отклонять route mismatch между `ApprovedOpportunity` и `ProducerDecision`.
 - `SceneCard` должен совпадать по `scene_id` / `episode_id`; иначе brief не создаётся.
 - Hook rows проходят в Workflow A только если `human_decision = APPROVE_FOR_WORKFLOW_A`, `qa_status = PASS`, risk acceptable.
+- Research-mined hook rows проходят в Workflow A только если есть public source video URL, observed hook/first frame, public metrics, engagement score/rank, scan batch size >= 50 и selection reason.
 
 ### HookResearchOutcomeBoard
 
@@ -257,6 +263,8 @@ MCP / external stack policy:
 - показывает Producer task, research scope, source evidence, hook opportunities, expanded hook cards, QA, approved handoffs;
 - не является viral hook bank;
 - не создаёт scripts, filming cards, publish queue, scheduler или final captions.
+- блокируется, если `search_summary.sources_scanned` меньше `ProducerHookSearchTask.source_count_target`.
+- блокируется, если source evidence использует internal refs вместо public video URLs.
 
 Ключевые файлы:
 

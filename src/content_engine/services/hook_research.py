@@ -36,7 +36,13 @@ def build_hook_research_outcome_board(
             message="HookResearchOutcomeBoard requires board payload after ProducerHookSearchTask validation.",
         )
 
-    hook_opportunities = _coerce_hooks(board_payload.get("hook_opportunities", []))
+    try:
+        hook_opportunities = _coerce_hooks(board_payload.get("hook_opportunities", []))
+    except (TypeError, ValidationError, ValueError) as exc:
+        return HookResearchBlockedResult(
+            blocked_reason="PRODUCER_HOOK_SEARCH_TASK_INVALID",
+            message=f"HookResearchOutcomeBoard cannot be built from incomplete hook opportunity evidence: {exc}",
+        )
     board_payload["producer_hook_search_task"] = task
     board_payload["hook_opportunities"] = hook_opportunities
     if not board_payload.get("approved_for_workflow_a"):
@@ -47,7 +53,26 @@ def build_hook_research_outcome_board(
         board_payload["rejected_or_held"] = [
             _rejected_or_held_row(hook) for hook in hook_opportunities if not is_workflow_a_eligible_hook(hook)
         ]
-    return HookResearchOutcomeBoard(**board_payload)
+    try:
+        return HookResearchOutcomeBoard(**board_payload)
+    except (TypeError, ValidationError, ValueError) as exc:
+        return HookResearchBlockedResult(
+            blocked_reason="PRODUCER_HOOK_SEARCH_TASK_INVALID",
+            message=f"HookResearchOutcomeBoard cannot be built from incomplete hook research evidence: {exc}",
+        )
+
+
+def calculate_video_engagement_score(metrics: Mapping[str, int]) -> float:
+    """Weighted public engagement score used to rank video hook candidates."""
+
+    return (
+        metrics.get("likes", 0)
+        + metrics.get("comments", 0) * 4
+        + metrics.get("shares", 0) * 5
+        + metrics.get("saves", 0) * 5
+        + metrics.get("views", 0) * 0.02
+        + metrics.get("video_views", 0) * 0.02
+    )
 
 
 def format_hook_research_outcome_board_markdown(
@@ -104,14 +129,15 @@ def format_hook_research_outcome_board_markdown(
         f"| Top priority hooks | {board.search_summary.top_priority_hooks} |",
         "",
         "## 5. Source Evidence Log",
-        "| Evidence | Platform | Signal | Boundary |",
-        "|---|---|---|---|",
+        "| Evidence | Platform | Source URL | Signal | Boundary |",
+        "|---|---|---|---|---|",
     ]
     for evidence in board.source_evidence_log:
         lines.append(
             "| "
             f"{evidence.evidence_ref} | "
             f"{evidence.source_platform} | "
+            f"{evidence.source_url_or_internal_ref} | "
             f"{evidence.performance_signal_type} | "
             f"{evidence.reuse_boundary} |"
         )
@@ -120,8 +146,8 @@ def format_hook_research_outcome_board_markdown(
         [
             "",
             "## 6. Hook Opportunities",
-            "| Priority | Status | Mode | Producer Topic | Hook Mechanic | Adapted Hook for Jane | First Frame Text | Video Angle | Why It Might Work | Risk | Score | Human Decision | Next Action |",
-            "|---:|---|---|---|---|---|---|---|---|---|---:|---|---|",
+            "| Priority | Status | Mode | Source URL | Metrics | Producer Topic | Hook Mechanic | Adapted Hook for Jane | First Frame Text | Video Angle | Why It Might Work | Risk | Score | Human Decision | Next Action |",
+            "|---:|---|---|---|---|---|---|---|---|---|---|---|---:|---|---|",
         ]
     )
     for hook in board.hook_opportunities:
@@ -130,6 +156,8 @@ def format_hook_research_outcome_board_markdown(
             f"{hook.priority_rank} | "
             f"{hook.decision_status} | "
             f"{hook.input_mode} | "
+            f"{hook.source_video_url or '-'} | "
+            f"{_format_metrics(hook.observed_engagement_metrics)} | "
             f"{hook.producer_topic} | "
             f"{hook.hook_mechanic} | "
             f"{hook.adapted_hook_for_jane} | "
@@ -253,6 +281,14 @@ def _approved_handoff_from_hook(hook: HookOpportunity) -> ApprovedWorkflowAHando
             "creator_archetype": hook.creator_archetype,
             "performance_signal": hook.performance_signal,
             "performance_signal_strength": hook.performance_signal_strength,
+            "source_video_url": hook.source_video_url,
+            "observed_source_hook": hook.observed_source_hook,
+            "observed_first_frame_text": hook.observed_first_frame_text,
+            "observed_engagement_metrics": hook.observed_engagement_metrics,
+            "engagement_score": hook.engagement_score,
+            "engagement_rank": hook.engagement_rank,
+            "scan_batch_size": hook.scan_batch_size,
+            "engagement_selection_reason": hook.engagement_selection_reason,
             "source_relevance_score": hook.source_relevance_score,
             "source_confidence_score": hook.source_confidence_score,
             "why_it_performed": hook.why_it_performed,
@@ -267,6 +303,10 @@ def _approved_handoff_from_hook(hook: HookOpportunity) -> ApprovedWorkflowAHando
             "Workflow A must not perform research.",
             "Do not create publish queue, scheduler, auto-posting, or final platform captions.",
             "Do not copy source wording, story, creator identity, or visual sequence.",
+            f"Source video URL: {hook.source_video_url}"
+            if hook.source_video_url
+            else "Producer-original hook; no external source URL.",
+            f"Public metrics: {_format_metrics(hook.observed_engagement_metrics)}",
             hook.reuse_boundary,
             hook.risk_notes,
         ],
@@ -286,7 +326,21 @@ def _rejected_or_held_row(hook: HookOpportunity) -> dict[str, Any]:
     }
 
 
+def _format_metrics(metrics: Mapping[str, int]) -> str:
+    if not metrics:
+        return "-"
+    ordered_keys = ["views", "video_views", "likes", "comments", "shares", "saves"]
+    parts = [f"{key}={metrics[key]}" for key in ordered_keys if metrics.get(key) is not None]
+    parts.extend(
+        f"{key}={value}"
+        for key, value in sorted(metrics.items())
+        if key not in ordered_keys and value is not None
+    )
+    return ", ".join(parts) if parts else "-"
+
+
 __all__ = [
     "build_hook_research_outcome_board",
+    "calculate_video_engagement_score",
     "format_hook_research_outcome_board_markdown",
 ]
