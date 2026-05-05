@@ -172,6 +172,9 @@ Add later, without breaking current collectors:
 - for Workflow A hook research, the 50-video validation set must be platform-distributed: 15 YouTube, 15 TikTok, 20 Instagram;
 - the 50-video validation set counts only qualified videos: short-form, public metrics present, minimum gate passed;
 - discovery-only links, zero/low metric videos, incomplete Instagram metrics, and off-format links are recorded as dropped/blocked discovery and do not count toward the 50;
+- the Producer task must carry `topic_source_targets`; the board must stay topic-balanced and cannot pass with one dominant topic;
+- for Jane's current season, use 5 search rubrics with 10 qualified videos each: `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, `founder_ceo_transition`;
+- the role-shift line is merged into `founder_ceo_transition`; audience participation is a CTA/feedback mechanic, not a separate search topic;
 - short-form is default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, normally <= 180 seconds;
 - long educational YouTube videos are support-only and capped at 5 sources per 50-video validation set;
 - apply the minimum analysis gate before hook mining or ranking; views alone are not enough;
@@ -642,6 +645,7 @@ core_pain
 core_desire
 core_tension
 target_themes
+topic_source_targets
 forbidden_themes
 desired_hook_mechanics
 platforms
@@ -664,8 +668,10 @@ Rules:
 
 - `source_count_target` must be at least 50 for one hook-search loop.
 - `platform_source_targets` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
-- `qualified_sources` must be at least `source_count_target`; discovered links do not count.
+- `topic_source_targets` must match `target_themes`, sum to `source_count_target`, and be evenly distributed.
+- `qualified_sources` must equal `source_count_target`; discovered links do not count.
 - `qualified_platform_counts` must be exactly `youtube=15`, `tiktok=15`, `instagram=20`.
+- `qualified_topic_counts` must match `topic_source_targets`; one-topic boards are invalid.
 - `qualified_format_counts` must include at least 45 short-form videos and no more than 5 long-form videos.
 - Short-form means Reels/TikTok/Shorts/vertical 9:16, usually <= 180 seconds.
 - The Research Agent searches the Producer-approved platforms/themes, especially TikTok, Instagram, YouTube/Shorts, and public video sources available through Exa, Firecrawl, Apify, or Playwright.
@@ -748,11 +754,12 @@ Boundary:
 - this board must not expose raw source dumps as the main human table.
 - every research-mined hook must include `source_video_url`, `observed_source_hook`, `observed_first_frame_text`, `observed_engagement_metrics`, `engagement_score`, `engagement_rank`, `scan_batch_size >= 50`, and `engagement_selection_reason`;
 - every research-mined hook must pass `evaluate_video_research_minimums`; if it fails the minimum gate, it cannot become a hook opportunity;
-- `search_summary.sources_scanned` must be greater than or equal to `producer_hook_search_task.source_count_target`;
+- `search_summary.sources_scanned` must equal `producer_hook_search_task.source_count_target`;
 - `search_summary.platform_scan_counts` must match `ProducerHookSearchTask.platform_source_targets`;
 - `search_summary.format_scan_counts.long_form` must be `<= 5`, and `short_form` must be `>= 45`;
-- `search_summary.qualified_sources` must be greater than or equal to `producer_hook_search_task.source_count_target`;
+- `search_summary.qualified_sources` must equal `producer_hook_search_task.source_count_target`;
 - `search_summary.qualified_platform_counts` must match `ProducerHookSearchTask.platform_source_targets`;
+- `search_summary.qualified_topic_counts` must match `ProducerHookSearchTask.topic_source_targets`;
 - `search_summary.qualified_format_counts.long_form` must be `<= 5`, and `short_form` must be `>= 45`;
 - `source_evidence_log.source_url_or_internal_ref` must be a public URL for hook research evidence.
 

@@ -9,6 +9,15 @@ from content_engine.models.hook_research import (
 )
 
 
+WORKFLOW_A_TOPIC_TARGETS = {
+    "recovery_energy": 10,
+    "invisible_quality": 10,
+    "bali_real_estate": 10,
+    "phygital_villa_experience": 10,
+    "founder_ceo_transition": 10,
+}
+
+
 def make_task_payload(**overrides: object) -> dict[str, object]:
     payload: dict[str, object] = {
         "directive_id": "hook_rd_001",
@@ -20,7 +29,8 @@ def make_task_payload(**overrides: object) -> dict[str, object]:
         "core_pain": "I do everything right, but I still have no energy.",
         "core_desire": "Recover energy without violence toward the body.",
         "core_tension": "do more versus restore the system first",
-        "target_themes": ["fatigue", "nervous system", "discipline"],
+        "target_themes": list(WORKFLOW_A_TOPIC_TARGETS),
+        "topic_source_targets": WORKFLOW_A_TOPIC_TARGETS,
         "forbidden_themes": ["rapid weight loss", "medical diagnosis"],
         "desired_hook_mechanics": ["belief_reversal", "pain_mirror"],
         "platforms": ["Instagram Reels", "TikTok", "YouTube Shorts"],
@@ -164,6 +174,36 @@ def test_producer_hook_search_task_requires_workflow_a_platform_mix() -> None:
 def test_producer_hook_search_task_limits_long_form_sources() -> None:
     with pytest.raises(ValueError, match="max_long_form_sources"):
         ProducerHookSearchTask(**make_task_payload(max_long_form_sources=6))
+
+
+def test_producer_hook_search_task_requires_balanced_topic_targets() -> None:
+    with pytest.raises(ValueError, match="topic_source_targets"):
+        ProducerHookSearchTask(
+            **make_task_payload(
+                topic_source_targets={
+                    "recovery_energy": 20,
+                    "invisible_quality": 10,
+                    "bali_real_estate": 10,
+                    "phygital_villa_experience": 5,
+                    "founder_ceo_transition": 5,
+                },
+            )
+        )
+
+
+def test_producer_hook_search_task_requires_topic_targets_for_all_themes() -> None:
+    with pytest.raises(ValueError, match="topic_source_targets"):
+        ProducerHookSearchTask(
+            **make_task_payload(
+                topic_source_targets={
+                    "recovery_energy": 10,
+                    "invisible_quality": 10,
+                    "bali_real_estate": 10,
+                    "phygital_villa_experience": 10,
+                    "extra_topic": 10,
+                },
+            )
+        )
 
 
 def test_research_mined_hook_requires_source_item_refs() -> None:

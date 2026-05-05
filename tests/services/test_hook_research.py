@@ -7,7 +7,7 @@ from content_engine.services.hook_research import (
     calculate_video_engagement_score,
     format_hook_research_outcome_board_markdown,
 )
-from tests.models.test_hook_research_models import make_hook_payload, make_task_payload
+from tests.models.test_hook_research_models import WORKFLOW_A_TOPIC_TARGETS, make_hook_payload, make_task_payload
 
 
 def make_board_payload(**overrides: object) -> dict[str, object]:
@@ -47,9 +47,11 @@ def make_board_payload(**overrides: object) -> dict[str, object]:
             "sources_scanned": 50,
             "platform_scan_counts": {"youtube": 15, "tiktok": 15, "instagram": 20},
             "format_scan_counts": {"short_form": 45, "long_form": 5},
+            "topic_scan_counts": WORKFLOW_A_TOPIC_TARGETS,
             "qualified_sources": 50,
             "qualified_platform_counts": {"youtube": 15, "tiktok": 15, "instagram": 20},
             "qualified_format_counts": {"short_form": 45, "long_form": 5},
+            "qualified_topic_counts": WORKFLOW_A_TOPIC_TARGETS,
             "metrics_incomplete_sources": 0,
             "gate_rejected_sources": 0,
             "raw_candidates_collected": 12,
@@ -193,6 +195,20 @@ def test_hook_research_board_requires_scan_count_to_match_task_target() -> None:
     assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
 
 
+def test_hook_research_board_rejects_oversized_validation_set() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "sources_scanned": 51,
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
 def test_hook_research_board_requires_exact_platform_distribution() -> None:
     result = build_hook_research_outcome_board(
         **make_board_payload(
@@ -231,6 +247,22 @@ def test_hook_research_board_rejects_discovered_links_as_qualified_sources() -> 
                 "qualified_format_counts": {"short_form": 5},
                 "metrics_incomplete_sources": 20,
                 "gate_rejected_sources": 25,
+            }
+        )
+    )
+
+    assert isinstance(result, HookResearchBlockedResult)
+    assert result.blocked_reason == "PRODUCER_HOOK_SEARCH_TASK_INVALID"
+
+
+def test_hook_research_board_requires_balanced_qualified_topic_distribution() -> None:
+    result = build_hook_research_outcome_board(
+        **make_board_payload(
+            search_summary={
+                **make_board_payload()["search_summary"],
+                "qualified_topic_counts": {
+                    "bali_real_estate": 50,
+                },
             }
         )
     )

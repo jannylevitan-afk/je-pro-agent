@@ -108,6 +108,7 @@ class ProducerHookSearchTask(BaseModel):
     core_desire: str = Field(min_length=1)
     core_tension: str = Field(min_length=1)
     target_themes: list[str] = Field(default_factory=list, min_length=1)
+    topic_source_targets: dict[str, int] = Field(default_factory=dict)
     forbidden_themes: list[str] = Field(default_factory=list)
     desired_hook_mechanics: list[str] = Field(default_factory=list, min_length=1)
     platforms: list[str] = Field(default_factory=list, min_length=1)
@@ -145,6 +146,16 @@ class ProducerHookSearchTask(BaseModel):
             raise ValueError("ProducerHookSearchTask.short_form_source_count_target must leave at most max_long_form_sources")
         if self.preferred_aspect_ratio.strip() != "9:16":
             raise ValueError("ProducerHookSearchTask.preferred_aspect_ratio must be 9:16")
+        normalized_topic_targets = _normalize_count_map(self.topic_source_targets)
+        normalized_target_themes = {_normalize_key(theme) for theme in self.target_themes}
+        if len(normalized_topic_targets) < 2:
+            raise ValueError("ProducerHookSearchTask.topic_source_targets must include at least two producer themes")
+        if set(normalized_topic_targets) != normalized_target_themes:
+            raise ValueError("ProducerHookSearchTask.topic_source_targets must match target_themes")
+        if sum(normalized_topic_targets.values()) != self.source_count_target:
+            raise ValueError("ProducerHookSearchTask.topic_source_targets must sum to source_count_target")
+        if len(set(normalized_topic_targets.values())) != 1:
+            raise ValueError("ProducerHookSearchTask.topic_source_targets must be evenly distributed")
         return self
 
 
@@ -170,9 +181,11 @@ class SearchSummary(BaseModel):
     sources_scanned: int = Field(ge=0)
     platform_scan_counts: dict[str, int] = Field(default_factory=dict)
     format_scan_counts: dict[str, int] = Field(default_factory=dict)
+    topic_scan_counts: dict[str, int] = Field(default_factory=dict)
     qualified_sources: int = Field(default=0, ge=0)
     qualified_platform_counts: dict[str, int] = Field(default_factory=dict)
     qualified_format_counts: dict[str, int] = Field(default_factory=dict)
+    qualified_topic_counts: dict[str, int] = Field(default_factory=dict)
     metrics_incomplete_sources: int = Field(default=0, ge=0)
     gate_rejected_sources: int = Field(default=0, ge=0)
     raw_candidates_collected: int = Field(ge=0)
@@ -452,8 +465,8 @@ class HookResearchOutcomeBoard(BaseModel):
             raise ValueError("hook opportunities must reference ProducerHookSearchTask directive_id")
         if not self.qa_report.workflow_boundary_ok:
             raise ValueError("HookResearchOutcomeBoard must preserve Workflow A boundaries")
-        if self.search_summary.sources_scanned < self.producer_hook_search_task.source_count_target:
-            raise ValueError("HookResearchOutcomeBoard sources_scanned must meet ProducerHookSearchTask source_count_target")
+        if self.search_summary.sources_scanned != self.producer_hook_search_task.source_count_target:
+            raise ValueError("HookResearchOutcomeBoard sources_scanned must equal ProducerHookSearchTask source_count_target")
         platform_counts = _normalize_count_map(self.search_summary.platform_scan_counts)
         if platform_counts != _normalize_count_map(self.producer_hook_search_task.platform_source_targets):
             raise ValueError("HookResearchOutcomeBoard platform_scan_counts must match ProducerHookSearchTask platform_source_targets")
@@ -464,8 +477,11 @@ class HookResearchOutcomeBoard(BaseModel):
             raise ValueError("HookResearchOutcomeBoard short_form scan count must meet ProducerHookSearchTask.short_form_source_count_target")
         if sum(format_counts.values()) != self.search_summary.sources_scanned:
             raise ValueError("HookResearchOutcomeBoard format_scan_counts must sum to sources_scanned")
-        if self.search_summary.qualified_sources < self.producer_hook_search_task.source_count_target:
-            raise ValueError("HookResearchOutcomeBoard qualified_sources must meet ProducerHookSearchTask source_count_target")
+        topic_counts = _normalize_count_map(self.search_summary.topic_scan_counts)
+        if topic_counts != _normalize_count_map(self.producer_hook_search_task.topic_source_targets):
+            raise ValueError("HookResearchOutcomeBoard topic_scan_counts must match ProducerHookSearchTask topic_source_targets")
+        if self.search_summary.qualified_sources != self.producer_hook_search_task.source_count_target:
+            raise ValueError("HookResearchOutcomeBoard qualified_sources must equal ProducerHookSearchTask source_count_target")
         qualified_platform_counts = _normalize_count_map(self.search_summary.qualified_platform_counts)
         if qualified_platform_counts != _normalize_count_map(self.producer_hook_search_task.platform_source_targets):
             raise ValueError(
@@ -482,6 +498,11 @@ class HookResearchOutcomeBoard(BaseModel):
             )
         if sum(qualified_format_counts.values()) != self.search_summary.qualified_sources:
             raise ValueError("HookResearchOutcomeBoard qualified_format_counts must sum to qualified_sources")
+        qualified_topic_counts = _normalize_count_map(self.search_summary.qualified_topic_counts)
+        if qualified_topic_counts != _normalize_count_map(self.producer_hook_search_task.topic_source_targets):
+            raise ValueError(
+                "HookResearchOutcomeBoard qualified_topic_counts must match ProducerHookSearchTask topic_source_targets"
+            )
         if self.source_evidence_log and any(
             not _is_public_url(evidence.source_url_or_internal_ref) for evidence in self.source_evidence_log
         ):
@@ -640,8 +661,12 @@ def _normalize_count_map(values: Mapping[str, int]) -> dict[str, int]:
     for key, value in values.items():
         if not isinstance(value, int):
             continue
-        normalized[key.strip().lower().replace(" ", "_")] = value
+        normalized[_normalize_key(key)] = value
     return normalized
+
+
+def _normalize_key(value: str) -> str:
+    return value.strip().lower().replace(" ", "_")
 
 
 def _metric(metrics: Mapping[str, int], key: str) -> int:

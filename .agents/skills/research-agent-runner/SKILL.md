@@ -85,6 +85,8 @@ Workflow A hook research requires a Producer task:
 - Do not run hook research without `ProducerHookSearchTask`.
 - Validate a 50-video short-form-first set before hook mining: 15 YouTube, 15 TikTok, 20 Instagram.
 - Count only qualified videos toward the 50-video set. Qualified means short-form, public metrics present, and minimum gate passed. Discovery-only links, zero/low metrics, missing Instagram metrics, and long/off-format links must be recorded as dropped or blocked and must not count toward 50.
+- Require `topic_source_targets` from the Producer brief and keep the research set topic-balanced. For Jane's current season, use 10 videos per topic across `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, and `founder_ceo_transition`. The role-shift line is merged into `founder_ceo_transition`; audience participation is a CTA/feedback mechanic, not a separate search topic.
+- Return `qualified_topic_counts` in the board summary. It must match `topic_source_targets`; if 50 qualified videos all come from one rubric, the board stays blocked.
 - Use Reels / TikTok / YouTube Shorts / 9:16 vertical videos as the default. Long educational YouTube videos may support context, but no more than 5 long-form sources may appear in the 50-video validation set.
 - Treat the short-form duration target as <= 180 seconds unless Producer says otherwise.
 - Focus on the Producer brief: season, episode, scene, audience, pain, desire, tension, target themes, forbidden themes, desired hook mechanics, creator archetypes, languages/regions, and date window.

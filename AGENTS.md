@@ -116,6 +116,8 @@ Workflow A hook research is stricter than general routing:
 - It must start from `ProducerHookSearchTask`; otherwise return `BLOCKED`.
 - One hook-search loop must validate exactly 50 platform-distributed videos before board approval: YouTube = 15, TikTok = 15, Instagram = 20.
 - The 50-video set means 50 qualified videos, not 50 discovered links. A qualified video must be short-form, have public metrics, and pass the minimum gate. Low/zero metrics, incomplete metrics, or off-format links go to dropped/blocked discovery and do not count toward 50.
+- The Producer task must include `topic_source_targets` from the season content lines. For Jane's current season use a topic-balanced split of 10 videos per topic: `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, `founder_ceo_transition`. `audience_participation` is a CTA/feedback mechanic, not a separate search topic.
+- `qualified_topic_counts` must match `topic_source_targets`; a board with all 50 videos in one topic is invalid even if the platform and metric gates pass.
 - Short-form is the default: Reels / TikTok / YouTube Shorts / 9:16 vertical videos, usually <= 180 seconds. Long educational YouTube videos are allowed only as support sources and max 5 per 50-video validation set.
 - Research-mined hook rows must include public `source_video_url`, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason.
 - Do not treat views alone as "viral"; Shorts/Reels/TikTok views can be inflated by autoplay. Apply the minimum analysis gate before ranking:

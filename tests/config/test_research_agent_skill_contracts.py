@@ -69,3 +69,18 @@ def test_research_agent_runner_requires_best_performing_post_scan_contract() -> 
 
     for phrase in required_phrases:
         assert phrase in skill
+
+
+def test_research_agent_runner_requires_topic_balanced_hook_research() -> None:
+    skill = _read_skill("research-agent-runner")
+
+    required_phrases = [
+        "topic_source_targets",
+        "topic-balanced",
+        "10 videos per topic",
+        "qualified_topic_counts",
+        "audience participation is a CTA/feedback mechanic",
+    ]
+
+    for phrase in required_phrases:
+        assert phrase in skill

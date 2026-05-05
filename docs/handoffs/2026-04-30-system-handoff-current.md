@@ -124,6 +124,8 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - для Workflow A hook research валидирует ровно 50-video set по платформам: YouTube 15, TikTok 15, Instagram 20;
 - 50-video set считается только по qualified videos: short-form, есть публичные метрики, minimum gate пройден;
 - найденные ссылки без метрик, видео с нулевыми/низкими метриками и off-format видео уходят в dropped/blocked discovery и не считаются в 50;
+- Producer task передаёт `topic_source_targets`; для текущего сезона Jane используется равный сплит 10 видео на тему: `recovery_energy`, `invisible_quality`, `bali_real_estate`, `phygital_villa_experience`, `founder_ceo_transition`;
+- линия смены роли объединяется в `founder_ceo_transition`, а участие аудитории является CTA/feedback-механикой, не отдельной search-темой;
 - short-form является дефолтом: Reels / TikTok / YouTube Shorts / vertical 9:16, обычно <= 180 секунд;
 - long educational YouTube допускается только как support, максимум 5 из 50;
 - перед hook mining применяет minimum analysis gate: views alone не считаются доказательством залёта;
@@ -270,11 +272,12 @@ MCP / external stack policy:
 - показывает Producer task, research scope, source evidence, hook opportunities, expanded hook cards, QA, approved handoffs;
 - не является viral hook bank;
 - не создаёт scripts, filming cards, publish queue, scheduler или final captions.
-- блокируется, если `search_summary.sources_scanned` меньше `ProducerHookSearchTask.source_count_target`.
+- блокируется, если `search_summary.sources_scanned` не равен `ProducerHookSearchTask.source_count_target`.
 - блокируется, если `platform_scan_counts` не равен `youtube=15, tiktok=15, instagram=20`.
 - блокируется, если `format_scan_counts.long_form > 5` или `format_scan_counts.short_form < 45`.
-- блокируется, если `qualified_sources` меньше `ProducerHookSearchTask.source_count_target`.
+- блокируется, если `qualified_sources` не равен `ProducerHookSearchTask.source_count_target`.
 - блокируется, если `qualified_platform_counts` не равен `youtube=15, tiktok=15, instagram=20`.
+- блокируется, если `qualified_topic_counts` не совпадает с `ProducerHookSearchTask.topic_source_targets`.
 - блокируется, если `qualified_format_counts.long_form > 5` или `qualified_format_counts.short_form < 45`.
 - блокируется, если source evidence использует internal refs вместо public video URLs.
 - блокируется, если research-mined video не проходит minimum analysis gate:
