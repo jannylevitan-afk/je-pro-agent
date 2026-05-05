@@ -116,6 +116,13 @@ Workflow A hook research is stricter than general routing:
 - It must start from `ProducerHookSearchTask`; otherwise return `BLOCKED`.
 - One hook-search loop must scan at least 50 relevant public videos across the Producer-approved platforms/themes.
 - Research-mined hook rows must include public `source_video_url`, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason.
+- Do not treat views alone as "viral"; Shorts/Reels/TikTok views can be inflated by autoplay. Apply the minimum analysis gate before ranking:
+  - `BROAD_VIRAL`: `views >= 100000` and `like_rate >= 2%`
+  - `NICHE_VIRAL`: `views >= 20000` and `views_to_followers_ratio >= 5`
+  - `STRONG_DISCUSSION`: `comments >= 100` and `comment_rate >= 0.1%`
+  - `HIGH_VALUE_SIGNAL`: `share_rate >= 0.5%` or `save_rate >= 0.5%`
+  - `SMALL_ACCOUNT_BREAKOUT`: `views >= 10000` and `views_to_followers_ratio >= 10`
+  - reject unless small-account override applies: `views < 10000`, `like_rate < 1%`, `comments < 10`, or known `views_to_followers_ratio < 1`
 - Video engagement score is `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`.
 - Brief Builder may convert only rows with `human_decision = APPROVE_FOR_WORKFLOW_A`, `qa_status = PASS`, and acceptable risk into `WorkflowABrief`.
 - Workflow A must not perform research or create publish queue; it only creates selected hook, script, filming card, editorial QA, and `HumanReviewAsset`.

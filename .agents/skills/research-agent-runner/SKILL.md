@@ -86,6 +86,13 @@ Workflow A hook research requires a Producer task:
 - Scan at least 50 relevant public videos per hook-search loop.
 - Focus on the Producer brief: season, episode, scene, audience, pain, desire, tension, target themes, forbidden themes, desired hook mechanics, creator archetypes, languages/regions, and date window.
 - Search TikTok, Instagram, YouTube/Shorts, and other Producer-approved public video sources using Exa/Firecrawl/Apify/Playwright as appropriate.
+- Apply the minimum analysis gate before hook mining or ranking. Do not count views alone as "залетело":
+  - `BROAD_VIRAL`: `views >= 100000` and `like_rate >= 2%`
+  - `NICHE_VIRAL`: `views >= 20000` and `views_to_followers_ratio >= 5`
+  - `STRONG_DISCUSSION`: `comments >= 100` and `comment_rate >= 0.1%`
+  - `HIGH_VALUE_SIGNAL`: `share_rate >= 0.5%` or `save_rate >= 0.5%`
+  - `SMALL_ACCOUNT_BREAKOUT`: `views >= 10000` and `views_to_followers_ratio >= 10`
+  - reject unless the small-account override applies: `views < 10000`, `like_rate < 1%`, `comments < 10`, or known `views_to_followers_ratio < 1`
 - Return `HookResearchOutcomeBoard` with public video URL, observed source hook/opening, observed first-frame text, public metrics, engagement score, engagement rank, scan batch size, and selection reason for each research-mined hook.
 - Do not convert weak/no-proof hooks into Workflow A. Only `APPROVE_FOR_WORKFLOW_A` + `qa_status = PASS` + acceptable risk may be handed to Brief Builder.
 

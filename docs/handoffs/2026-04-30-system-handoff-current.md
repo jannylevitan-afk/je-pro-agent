@@ -121,6 +121,7 @@ Readable ProducerOutput нужен для клиента, продюсера и 
 - собирает только public data;
 - выбирает high-performing posts/signals;
 - для Workflow A ищет по Producer brief на TikTok / Instagram / YouTube / Shorts и approved public video sources;
+- перед hook mining применяет minimum analysis gate: views alone не считаются доказательством залёта;
 - ранжирует видео по public engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
 - для research-mined hook rows сохраняет `source_video_url`, observed hook/opening, first-frame text, public metrics, engagement score/rank, scan batch size и selection reason;
 - создаёт `SourceItem` и evidence fields;
@@ -254,6 +255,7 @@ MCP / external stack policy:
 - `SceneCard` должен совпадать по `scene_id` / `episode_id`; иначе brief не создаётся.
 - Hook rows проходят в Workflow A только если `human_decision = APPROVE_FOR_WORKFLOW_A`, `qa_status = PASS`, risk acceptable.
 - Research-mined hook rows проходят в Workflow A только если есть public source video URL, observed hook/first frame, public metrics, engagement score/rank, scan batch size >= 50 и selection reason.
+- Research-mined hook rows также должны пройти minimum analysis gate: `BROAD_VIRAL`, `NICHE_VIRAL`, `STRONG_DISCUSSION`, `HIGH_VALUE_SIGNAL` или `SMALL_ACCOUNT_BREAKOUT`.
 
 ### HookResearchOutcomeBoard
 
@@ -265,6 +267,13 @@ MCP / external stack policy:
 - не создаёт scripts, filming cards, publish queue, scheduler или final captions.
 - блокируется, если `search_summary.sources_scanned` меньше `ProducerHookSearchTask.source_count_target`.
 - блокируется, если source evidence использует internal refs вместо public video URLs.
+- блокируется, если research-mined video не проходит minimum analysis gate:
+- keep: `views >= 100000 AND like_rate >= 2%`;
+- keep: `views >= 20000 AND views_to_followers_ratio >= 5`;
+- keep: `comments >= 100 AND comment_rate >= 0.1%`;
+- keep: `share_rate >= 0.5% OR save_rate >= 0.5%`;
+- keep: `views >= 10000 AND views_to_followers_ratio >= 10`;
+- drop unless small-account override applies: `views < 10000`, `like_rate < 1%`, `comments < 10`, or known `views_to_followers_ratio < 1`.
 
 Ключевые файлы:
 

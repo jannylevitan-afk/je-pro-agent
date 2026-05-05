@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from content_engine.models.hook_research import HookOpportunity, ProducerHookSearchTask
+from content_engine.models.hook_research import (
+    HookOpportunity,
+    ProducerHookSearchTask,
+    evaluate_video_research_minimums,
+)
 
 
 def make_task_payload(**overrides: object) -> dict[str, object]:
@@ -161,6 +165,69 @@ def test_research_mined_hook_requires_public_video_url() -> None:
 def test_research_mined_hook_requires_observed_engagement_metrics() -> None:
     with pytest.raises(ValueError, match="observed_engagement_metrics"):
         HookOpportunity(**make_hook_payload(observed_engagement_metrics={}))
+
+
+def test_video_minimum_gate_keeps_broad_viral_with_real_engagement() -> None:
+    decision = evaluate_video_research_minimums(
+        {
+            "views": 120_000,
+            "likes": 3_600,
+            "comments": 80,
+            "shares": 250,
+            "saves": 0,
+        }
+    )
+
+    assert decision.passes is True
+    assert "BROAD_VIRAL" in decision.keep_reasons
+    assert decision.like_rate == 3.0
+
+
+def test_video_minimum_gate_rejects_views_without_engagement() -> None:
+    decision = evaluate_video_research_minimums(
+        {
+            "views": 200_000,
+            "likes": 900,
+            "comments": 8,
+            "shares": 0,
+            "saves": 0,
+        }
+    )
+
+    assert decision.passes is False
+    assert "LIKE_RATE_BELOW_1_PERCENT" in decision.reject_reasons
+    assert "COMMENTS_BELOW_10" in decision.reject_reasons
+
+
+def test_video_minimum_gate_keeps_small_account_breakout() -> None:
+    decision = evaluate_video_research_minimums(
+        {
+            "views": 18_000,
+            "likes": 540,
+            "comments": 12,
+            "followers": 1_200,
+        }
+    )
+
+    assert decision.passes is True
+    assert "SMALL_ACCOUNT_BREAKOUT" in decision.keep_reasons
+    assert decision.views_to_followers_ratio == 15.0
+
+
+def test_research_mined_hook_requires_minimum_analysis_gate() -> None:
+    with pytest.raises(ValueError, match="minimum analysis gate"):
+        HookOpportunity(
+            **make_hook_payload(
+                observed_engagement_metrics={
+                    "views": 30_000,
+                    "likes": 120,
+                    "comments": 5,
+                    "shares": 0,
+                    "saves": 0,
+                },
+                engagement_score=720.0,
+            )
+        )
 
 
 def test_producer_original_hook_must_not_contain_source_refs() -> None:

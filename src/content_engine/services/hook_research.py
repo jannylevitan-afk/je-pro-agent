@@ -11,6 +11,7 @@ from content_engine.models.hook_research import (
     HookResearchBlockedResult,
     HookResearchOutcomeBoard,
     ProducerHookSearchTask,
+    evaluate_video_research_minimums,
     is_workflow_a_eligible_hook,
 )
 
@@ -146,11 +147,12 @@ def format_hook_research_outcome_board_markdown(
         [
             "",
             "## 6. Hook Opportunities",
-            "| Priority | Status | Mode | Source URL | Metrics | Producer Topic | Hook Mechanic | Adapted Hook for Jane | First Frame Text | Video Angle | Why It Might Work | Risk | Score | Human Decision | Next Action |",
-            "|---:|---|---|---|---|---|---|---|---|---|---|---|---:|---|---|",
+            "| Priority | Status | Mode | Source URL | Metrics | Minimum Gate | Producer Topic | Hook Mechanic | Adapted Hook for Jane | First Frame Text | Video Angle | Why It Might Work | Risk | Score | Human Decision | Next Action |",
+            "|---:|---|---|---|---|---|---|---|---|---|---|---|---|---:|---|---|",
         ]
     )
     for hook in board.hook_opportunities:
+        minimum_gate = evaluate_video_research_minimums(hook.observed_engagement_metrics)
         lines.append(
             "| "
             f"{hook.priority_rank} | "
@@ -158,6 +160,7 @@ def format_hook_research_outcome_board_markdown(
             f"{hook.input_mode} | "
             f"{hook.source_video_url or '-'} | "
             f"{_format_metrics(hook.observed_engagement_metrics)} | "
+            f"{minimum_gate.classification} | "
             f"{hook.producer_topic} | "
             f"{hook.hook_mechanic} | "
             f"{hook.adapted_hook_for_jane} | "
@@ -250,6 +253,7 @@ def _coerce_hooks(values: object) -> list[HookOpportunity]:
 
 def _approved_handoff_from_hook(hook: HookOpportunity) -> ApprovedWorkflowAHandoff:
     approved_opportunity_id = hook.opportunity_id or f"hook_opp_{hook.hook_id}"
+    minimum_gate = evaluate_video_research_minimums(hook.observed_engagement_metrics)
     return ApprovedWorkflowAHandoff(
         approved_hook_id=hook.hook_id,
         approved_opportunity_id=approved_opportunity_id,
@@ -289,6 +293,7 @@ def _approved_handoff_from_hook(hook: HookOpportunity) -> ApprovedWorkflowAHando
             "engagement_rank": hook.engagement_rank,
             "scan_batch_size": hook.scan_batch_size,
             "engagement_selection_reason": hook.engagement_selection_reason,
+            "minimum_analysis_gate": minimum_gate.model_dump(),
             "source_relevance_score": hook.source_relevance_score,
             "source_confidence_score": hook.source_confidence_score,
             "why_it_performed": hook.why_it_performed,
@@ -307,6 +312,7 @@ def _approved_handoff_from_hook(hook: HookOpportunity) -> ApprovedWorkflowAHando
             if hook.source_video_url
             else "Producer-original hook; no external source URL.",
             f"Public metrics: {_format_metrics(hook.observed_engagement_metrics)}",
+            f"Minimum analysis gate: {minimum_gate.classification}",
             hook.reuse_boundary,
             hook.risk_notes,
         ],

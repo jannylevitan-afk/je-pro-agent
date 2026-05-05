@@ -169,6 +169,7 @@ Add later, without breaking current collectors:
 - optional `ResearchDirective` input from Producer;
 - `ProducerHookSearchTask` input for Workflow A hook research boards;
 - for `ProducerHookSearchTask`, a loop must scan at least 50 relevant public videos before board creation;
+- apply the minimum analysis gate before hook mining or ranking; views alone are not enough;
 - public video engagement score: `likes + comments*4 + shares*5 + saves*5 + views*0.02 + video_views*0.02`;
 - persistent monitoring fields:
   - `source_scanned`;
@@ -656,6 +657,44 @@ Rules:
 - The Research Agent must not invent hook evidence. A research-mined row needs a public video URL and observed public metrics.
 - Producer-original hooks are allowed as backup strategy rows only; they must not pretend to be research-mined.
 
+Minimum analysis gate before ranking:
+
+```text
+Analyze only if one of these is true:
+
+BROAD_VIRAL:
+views >= 100000 AND like_rate >= 2%
+
+NICHE_VIRAL:
+views >= 20000 AND views_to_followers_ratio >= 5
+
+STRONG_DISCUSSION:
+comments >= 100 AND comment_rate >= 0.1%
+
+HIGH_VALUE_SIGNAL:
+share_rate >= 0.5% OR save_rate >= 0.5%
+
+SMALL_ACCOUNT_BREAKOUT:
+views >= 10000 AND views_to_followers_ratio >= 10
+
+Reject unless the small-account override applies:
+views < 10000
+OR like_rate < 1%
+OR comments < 10
+OR known views_to_followers_ratio < 1
+```
+
+Rate formulas:
+
+```text
+like_rate = likes / views * 100
+comment_rate = comments / views * 100
+share_rate = shares / views * 100
+save_rate = saves / views * 100
+engagement_rate_by_views = (likes + comments + shares + saves) / views * 100
+views_to_followers_ratio = views / followers
+```
+
 ### 5.6B HookResearchOutcomeBoard
 
 Human-facing outcome for producer-directed Workflow A hook research.
@@ -693,6 +732,7 @@ Boundary:
 - this board must not create publish queue, scheduler, or final captions;
 - this board must not expose raw source dumps as the main human table.
 - every research-mined hook must include `source_video_url`, `observed_source_hook`, `observed_first_frame_text`, `observed_engagement_metrics`, `engagement_score`, `engagement_rank`, `scan_batch_size >= 50`, and `engagement_selection_reason`;
+- every research-mined hook must pass `evaluate_video_research_minimums`; if it fails the minimum gate, it cannot become a hook opportunity;
 - `search_summary.sources_scanned` must be greater than or equal to `producer_hook_search_task.source_count_target`;
 - `source_evidence_log.source_url_or_internal_ref` must be a public URL for hook research evidence.
 

@@ -168,6 +168,7 @@ def test_hook_research_board_derives_approved_workflow_a_handoffs() -> None:
     assert handoff.selected_hook.startswith("Ты не ленивая.")
     assert handoff.source_context["source_video_url"] == "https://www.instagram.com/reel/example/"
     assert handoff.source_context["observed_engagement_metrics"]["saves"] == 740
+    assert handoff.source_context["minimum_analysis_gate"]["classification"] == "BROAD_VIRAL"
     assert handoff.factual_boundaries
 
 
@@ -233,5 +234,6 @@ def test_hook_research_board_markdown_is_readable_not_raw_json() -> None:
     assert "## 6. Hook Opportunities" in markdown
     assert "https://www.instagram.com/reel/example/" in markdown
     assert "saves=740" in markdown
+    assert "BROAD_VIRAL" in markdown
     assert "```json" not in markdown
     assert "| Priority | Status | Mode |" in markdown

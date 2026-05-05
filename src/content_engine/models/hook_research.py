@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -32,6 +33,39 @@ HumanDecision = Literal[
 RiskLevel = Literal["none", "low", "medium", "high", "blocker"]
 QAStatus = Literal["PASS", "NEEDS_REWRITE", "FAIL", "BLOCKED"]
 BlockedReason = Literal["PRODUCER_HOOK_SEARCH_TASK_MISSING", "PRODUCER_HOOK_SEARCH_TASK_INVALID"]
+VideoResearchMinimumClassification = Literal[
+    "DROP",
+    "BROAD_VIRAL",
+    "NICHE_VIRAL",
+    "SMALL_ACCOUNT_BREAKOUT",
+    "STRONG_DISCUSSION",
+    "HIGH_VALUE_SIGNAL",
+    "ABOVE_ACCOUNT_BASELINE",
+    "GOLD",
+]
+
+
+class VideoResearchMinimumDecision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    passes: bool
+    classification: VideoResearchMinimumClassification
+    keep_reasons: list[str] = Field(default_factory=list)
+    reject_reasons: list[str] = Field(default_factory=list)
+    views: int = Field(ge=0)
+    likes: int = Field(ge=0)
+    comments: int = Field(ge=0)
+    shares: int = Field(ge=0)
+    saves: int = Field(ge=0)
+    followers: int | None = Field(default=None, ge=1)
+    account_average_views: int | None = Field(default=None, ge=1)
+    like_rate: float = Field(ge=0)
+    comment_rate: float = Field(ge=0)
+    share_rate: float = Field(ge=0)
+    save_rate: float = Field(ge=0)
+    engagement_rate_by_views: float = Field(ge=0)
+    views_to_followers_ratio: float | None = Field(default=None, ge=0)
+    views_to_average_ratio: float | None = Field(default=None, ge=0)
 
 
 class HookResearchBlockedResult(BaseModel):
@@ -270,6 +304,8 @@ class HookOpportunity(BaseModel):
                 raise ValueError("RESEARCH_MINED hooks require observed_first_frame_text")
             if not _has_public_engagement_metrics(self.observed_engagement_metrics):
                 raise ValueError("RESEARCH_MINED hooks require observed_engagement_metrics")
+            if not evaluate_video_research_minimums(self.observed_engagement_metrics).passes:
+                raise ValueError("RESEARCH_MINED hooks require observed_engagement_metrics that pass minimum analysis gate")
             if self.engagement_score is None:
                 raise ValueError("RESEARCH_MINED hooks require engagement_score")
             if self.engagement_rank is None:
@@ -419,6 +455,101 @@ def is_workflow_a_eligible_hook(hook: HookOpportunity) -> bool:
     )
 
 
+def evaluate_video_research_minimums(metrics: Mapping[str, int]) -> VideoResearchMinimumDecision:
+    """Decide whether a public video is worth hook analysis before ranking.
+
+    This gate intentionally blocks view-only spikes. A candidate first needs a
+    minimum views floor plus engagement, discussion, high-value actions, or
+    small-account breakout evidence. Only videos that pass this gate should be
+    ranked for Workflow A hook research.
+    """
+
+    views = max(_metric(metrics, "views"), _metric(metrics, "video_views"))
+    likes = _metric(metrics, "likes")
+    comments = _metric(metrics, "comments")
+    shares = _metric(metrics, "shares")
+    saves = _metric(metrics, "saves")
+    followers = _optional_positive_metric(metrics, "followers", "follower_count", "account_followers")
+    account_average_views = _optional_positive_metric(metrics, "account_average_views", "average_views")
+
+    like_rate = _rate(likes, views)
+    comment_rate = _rate(comments, views)
+    share_rate = _rate(shares, views)
+    save_rate = _rate(saves, views)
+    engagement_rate = _rate(likes + comments + shares + saves, views)
+    views_to_followers_ratio = _ratio(views, followers)
+    views_to_average_ratio = _ratio(views, account_average_views)
+
+    keep_reasons: list[str] = []
+    reject_reasons: list[str] = []
+
+    if views >= 100_000 and like_rate >= 2:
+        keep_reasons.append("BROAD_VIRAL")
+    if views >= 20_000 and views_to_followers_ratio is not None and views_to_followers_ratio >= 5:
+        keep_reasons.append("NICHE_VIRAL")
+    if views >= 10_000 and views_to_followers_ratio is not None and views_to_followers_ratio >= 10:
+        keep_reasons.append("SMALL_ACCOUNT_BREAKOUT")
+    if comments >= 100 and comment_rate >= 0.1:
+        keep_reasons.append("STRONG_DISCUSSION")
+    if share_rate >= 0.5 or save_rate >= 0.5:
+        keep_reasons.append("HIGH_VALUE_SIGNAL")
+    if views_to_average_ratio is not None and views_to_average_ratio >= 2 and like_rate >= 2:
+        keep_reasons.append("ABOVE_ACCOUNT_BASELINE")
+    if (views >= 500_000 and engagement_rate >= 5) or (
+        views_to_followers_ratio is not None and views_to_followers_ratio >= 10
+    ):
+        keep_reasons.append("GOLD")
+
+    if views < 10_000:
+        reject_reasons.append("VIEWS_BELOW_10K")
+    if like_rate < 1:
+        reject_reasons.append("LIKE_RATE_BELOW_1_PERCENT")
+    if comments < 10:
+        reject_reasons.append("COMMENTS_BELOW_10")
+    if views_to_followers_ratio is not None and views_to_followers_ratio < 1:
+        reject_reasons.append("VIEWS_FOLLOWERS_RATIO_BELOW_1")
+
+    small_account_override = views_to_followers_ratio is not None and views_to_followers_ratio >= 10 and views >= 10_000
+    effective_reject_reasons = [] if small_account_override else reject_reasons
+    passes = bool(keep_reasons) and not effective_reject_reasons
+    classification: VideoResearchMinimumClassification = "DROP"
+    for candidate in [
+        "GOLD",
+        "BROAD_VIRAL",
+        "NICHE_VIRAL",
+        "SMALL_ACCOUNT_BREAKOUT",
+        "STRONG_DISCUSSION",
+        "HIGH_VALUE_SIGNAL",
+        "ABOVE_ACCOUNT_BASELINE",
+    ]:
+        if candidate in keep_reasons:
+            classification = cast(VideoResearchMinimumClassification, candidate)
+            break
+    if not passes:
+        classification = "DROP"
+
+    return VideoResearchMinimumDecision(
+        passes=passes,
+        classification=classification,
+        keep_reasons=keep_reasons,
+        reject_reasons=effective_reject_reasons,
+        views=views,
+        likes=likes,
+        comments=comments,
+        shares=shares,
+        saves=saves,
+        followers=followers,
+        account_average_views=account_average_views,
+        like_rate=like_rate,
+        comment_rate=comment_rate,
+        share_rate=share_rate,
+        save_rate=save_rate,
+        engagement_rate_by_views=engagement_rate,
+        views_to_followers_ratio=views_to_followers_ratio,
+        views_to_average_ratio=views_to_average_ratio,
+    )
+
+
 def _is_public_url(value: str | None) -> bool:
     if not value:
         return False
@@ -433,6 +564,31 @@ def _clean_text(value: str | None) -> str:
 def _has_public_engagement_metrics(metrics: dict[str, int]) -> bool:
     metric_keys = {"views", "video_views", "likes", "comments", "shares", "saves"}
     return any(metrics.get(key, 0) > 0 for key in metric_keys)
+
+
+def _metric(metrics: Mapping[str, int], key: str) -> int:
+    value = metrics.get(key, 0)
+    return int(value) if isinstance(value, int) and value > 0 else 0
+
+
+def _optional_positive_metric(metrics: Mapping[str, int], *keys: str) -> int | None:
+    for key in keys:
+        value = _metric(metrics, key)
+        if value > 0:
+            return value
+    return None
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    if denominator <= 0:
+        return 0.0
+    return round((numerator / denominator) * 100, 2)
+
+
+def _ratio(numerator: int, denominator: int | None) -> float | None:
+    if denominator is None or denominator <= 0:
+        return None
+    return round(numerator / denominator, 2)
 
 
 __all__ = [
@@ -454,7 +610,9 @@ __all__ = [
     "RiskLevel",
     "SearchSummary",
     "SourceEvidenceLogItem",
+    "VideoResearchMinimumDecision",
     "WorkflowRoute",
+    "evaluate_video_research_minimums",
     "is_acceptable_workflow_a_risk",
     "is_workflow_a_eligible_hook",
 ]
