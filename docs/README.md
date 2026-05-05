@@ -8,9 +8,11 @@ This file is the documentation entrypoint for agents and humans.
 2. `architecture/2026-04-29-content-factory-producer-restructure.md`
 3. `architecture/2026-04-29-producer-agent-entity.md`
 4. `architecture/2026-04-30-producer-output-contract.md`
-5. `decisions/0001-agent-first-contract.md`
-6. `runbooks/validation-and-deploy.md`
-7. `scripts/smoke/README.md` when smoke or remote validation is involved
+5. Active season workspace when the task is season-specific: `seasons/2026-04-jane-health-villa/README.md`
+6. Active season research directives for Workflow A hook research: `docs/seasons/2026-04-jane-health-villa/research-directives.md`
+7. `decisions/0001-agent-first-contract.md`
+8. `runbooks/validation-and-deploy.md`
+9. `scripts/smoke/README.md` when smoke or remote validation is involved
 
 ## Source Of Truth Map
 
@@ -20,6 +22,9 @@ This file is the documentation entrypoint for agents and humans.
 | Current architecture | `docs/architecture/2026-04-29-content-factory-producer-restructure.md` |
 | Producer entity | `docs/architecture/2026-04-29-producer-agent-entity.md` and `.codex/agents/producer_entity.md` |
 | Producer readable output | `docs/architecture/2026-04-30-producer-output-contract.md` |
+| Active season workspaces | `docs/seasons/` |
+| Current Jane season human output | `docs/seasons/2026-04-jane-health-villa/producer-output.md` |
+| Current Jane season research directives | `docs/seasons/2026-04-jane-health-villa/research-directives.md` |
 | Workflow A hook research | `src/content_engine/models/hook_research.py`, `src/content_engine/services/hook_research.py`, and matching tests |
 | Analyst entity | `.codex/agents/analyst_entity.md` |
 | Shared contracts | `src/content_engine/models/` |
@@ -51,6 +56,7 @@ This file is the documentation entrypoint for agents and humans.
 │   ├── incidents/
 │   ├── plans/
 │   ├── research/
+│   ├── seasons/
 │   ├── tasks/
 │   └── runbooks/
 ├── scripts/
@@ -90,6 +96,7 @@ folder below before final handoff.
 | Validation/deploy/debug procedure | `docs/runbooks/` | Include exact commands and rollback caveats |
 | Durable decision or process rule | `docs/decisions/` | Use ADR format with status/date/consequences |
 | Regression or hidden constraint | `docs/incidents/` | Include symptom, cause, fix, prevention |
+| Season workspace | `docs/seasons/` | Keep `producer-output.md` human-facing and `research-directives.md` agent-facing |
 | Temporary active handoff | `docs/tasks/active/` | Include owner/status/next command; remove or archive when done |
 | Historical plan/design | `docs/plans/` | Mark historical; do not override current architecture |
 | External research | `docs/research/` | Include source URLs and date |

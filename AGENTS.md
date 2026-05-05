@@ -15,8 +15,9 @@ not become a second source of truth.
 2. `docs/README.md`
 3. `docs/architecture/2026-04-29-content-factory-producer-restructure.md`
 4. `docs/architecture/2026-04-29-producer-agent-entity.md`
-5. `docs/decisions/0001-agent-first-contract.md`
-6. `docs/runbooks/validation-and-deploy.md`
+5. `docs/seasons/README.md`
+6. `docs/decisions/0001-agent-first-contract.md`
+7. `docs/runbooks/validation-and-deploy.md`
 
 Historical handoffs, generated outputs, screenshots, logs, local downloads, and
 root-level scratch files are not source of truth unless the current task names
@@ -41,6 +42,7 @@ constraint, regression, decision, or operator procedure, write it to `docs/`.
 | `docs/tasks/active/` | Temporary handoff notes for active work only |
 | `docs/plans/` | Historical design context and old plans |
 | `docs/research/` | External research and source analysis |
+| `docs/seasons/` | Active season workspaces with human producer output and agent research directives |
 | `examples/` | Safe sample inputs and seed configs |
 | `knowledge/kmd/` | Generated knowledge material for agent handoff |
 | `outputs/` | Generated local outputs, never source of truth |
@@ -151,6 +153,14 @@ Codex Producer Entity:
 - The full Producer prompt lives at `.codex/agents/producer_entity.md`
 - Producer creates season logic, research directives, decisions, and brief constraints
 - Producer does not search, scrape, write final copy, publish, or schedule
+
+Season Workspace:
+
+- Each active season lives in `docs/seasons/<season-id>/`
+- `producer-output.md` is the human-facing program that the Jane Superstar interface may render
+- `research-directives.md` is the machine-facing source of truth for Search Agent collection
+- Search Agent must read the active season `research-directives.md` before Workflow A hook research
+- Generated files in `outputs/` may be promoted into a season workspace, but `outputs/` itself remains non-authoritative
 
 ## High-Risk Files
 

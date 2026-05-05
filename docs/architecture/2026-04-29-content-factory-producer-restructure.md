@@ -164,10 +164,13 @@ Keep:
 - route suggestion: `workflow_a`, `workflow_b`, `both`, `drop`;
 - KMD/source material handoff.
 
-Add later, without breaking current collectors:
+Current strict additions, without breaking current collectors:
 
 - optional `ResearchDirective` input from Producer;
 - `ProducerHookSearchTask` input for Workflow A hook research boards;
+- active season inputs live in `docs/seasons/<season-id>/`; Search Agent reads
+  `research-directives.md` for topic/platform quotas and uses `producer-output.md`
+  only as the human-facing program reference;
 - for `ProducerHookSearchTask`, a loop must scan at least 50 relevant public videos before board creation;
 - for Workflow A hook research, the 50-video validation set must be platform-distributed: 15 YouTube, 15 TikTok, 20 Instagram;
 - the 50-video validation set counts only qualified videos: short-form, public metrics present, minimum gate passed;

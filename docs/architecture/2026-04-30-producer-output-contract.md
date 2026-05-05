@@ -14,6 +14,17 @@ The Producer has two outputs:
 
 The second output is what Jane reviews as a season plan. It must look like a professional production document, not like a raw JSON dump or a list of disconnected post ideas.
 
+When a readable ProducerOutput is accepted for an active season, promote it from
+`outputs/` into the season workspace:
+
+```text
+docs/seasons/<season-id>/producer-output.md
+```
+
+That promoted file is the human-facing program that the Jane Superstar admin
+interface may render. The raw file under `outputs/` remains a generated artifact
+and is not source of truth.
+
 ## 2. Non-Negotiable Separation
 
 Workflow A and Workflow B stay separate inside the readable ProducerOutput.
@@ -176,6 +187,27 @@ readable_producer_output
 ```
 
 This lets the dry-run keep the machine-safe runtime contract while also exposing the human-readable Producer season document to future CLI, admin, or export layers.
+
+## 6.1 Season Workspace Integration
+
+Every active season has a workspace:
+
+```text
+docs/seasons/<season-id>/
+├── README.md
+├── producer-output.md
+└── research-directives.md
+```
+
+Responsibilities:
+
+- `producer-output.md`: human-facing season program, admin display, client review;
+- `research-directives.md`: machine-facing Search Agent instructions derived from
+  Producer season lines, topic targets, platform targets, and collection gates;
+- `README.md`: local season index, status, and file roles.
+
+Search Agent must read `research-directives.md` before Workflow A hook research.
+It must not infer active season topics from `outputs/` or chat history.
 
 ## 7. Guardrails
 
