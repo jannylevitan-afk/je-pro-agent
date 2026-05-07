@@ -336,6 +336,136 @@ content_theme_sources:
         source_url: https://www.wallpaper.com/
         collect_for: design, interiors, architecture, luxury lifestyle cues
 
+  - name: viral_health_recovery
+    title: Health recovery and septoplasty transformation content
+    route_to: both
+    audience_segments: [dreamer_woman, lifestyle_expat]
+    primary_audience_segment: dreamer_woman
+    content_pillars: [lifestyle, human_struggle]
+    narrative_types: [founder_struggle, journey_of_creation]
+    suggested_registers: [register_7, register_8, register_9]
+    collect_fields:
+      - recovery moment
+      - before/after contrast
+      - body as system metaphor
+      - energy transformation
+      - burnout trigger
+      - audience pain recognition
+    discovery_keywords:
+      - septoplasty transformation
+      - deviated septum changed my life
+      - mom entrepreneur burnout recovery
+      - health forced pause founder
+      - breathing reset energy
+    similar_source_targets: [tiktok health creators, instagram recovery stories, youtube transformation]
+    sources:
+      - platform: tiktok
+        source_name: Halle Buttafuso
+        handle: hallebuttafuso
+        source_url: https://www.tiktok.com/@hallebuttafuso
+        collect_for: septoplasty transformation, breathing recovery, life-changing surgery stories
+      - platform: tiktok
+        source_name: Deviated Septum Community
+        source_url: https://www.tiktok.com/discover/deviated-septum-help
+        collect_for: deviated septum content patterns, viral breathing hooks
+      - platform: web
+        source_name: Mom Entrepreneur Burnout Recovery
+        source_url: https://momsmakemoneycollective.com/burnout-recovery-for-mom-entrepreneurs-how-i-rebuilt-my-confidence-and-business-after-hitting-rock-bottom/
+        collect_for: mompreneur burnout narrative patterns, recovery frameworks
+      - platform: web
+        source_name: Creator Burnout 2026 Guide
+        source_url: https://influenceflow.io/resources/creator-burnout-your-2026-guide-to-sustainable-success-in-the-creator-economy/
+        collect_for: creator burnout stats, algorithm pressure data, recovery strategies
+
+  - name: bali_construction_reality
+    title: Bali construction problems and hidden costs
+    route_to: both
+    audience_segments: [developer_investor, broker, architect_designer]
+    primary_audience_segment: developer_investor
+    content_pillars: [expertise, proof]
+    narrative_types: [authority, market_observation, professional_lesson]
+    suggested_registers: [register_3, register_4, register_6]
+    collect_fields:
+      - construction defect
+      - material failure
+      - cost data
+      - regulatory enforcement
+      - investor mistake
+      - proof point with source
+    discovery_keywords:
+      - tropical build rot Bali
+      - drywall mold Bali villa
+      - Bali villa demolition 2025
+      - PBG permit enforcement Bali
+      - Bali construction hidden costs
+      - waterproofing failure villa
+    similar_source_targets: [tiktok Bali expat, instagram real estate, youtube construction, web construction guides]
+    sources:
+      - platform: web
+        source_name: Coco Development Group Construction Guide
+        source_url: https://cocodevelopmentgroup.com/blog/bali-villa-construction/
+        collect_for: construction costs, regulations, risks, material degradation data
+      - platform: web
+        source_name: Bukit Vista Construction Mistakes
+        source_url: https://www.bukitvista.com/blog/bali-villa-construction-mistakes-2026
+        collect_for: critical construction mistakes, waterproofing failures, HVAC issues
+      - platform: web
+        source_name: Bali Best Design Renovation Nightmares
+        source_url: https://balibestdesign.com/bali-villa-renovation-2026-the-ultimate-guide-to-boosting-roi-avoiding-nightmares/
+        collect_for: renovation failures, mold problems, material choices, ROI data
+      - platform: web
+        source_name: Prestige Property Bali Investment Risks
+        source_url: https://prestigepropertybali.com/blog/risks-of-investing-in-bali-real-estate
+        collect_for: investment risks, permit enforcement, zoning violations
+      - platform: web
+        source_name: Kingswood Sustainable Construction
+        source_url: https://kingswoodbalivillas.com/beyond-the-instagram-villa-2026s-sustainable-construction-trends-in-bali/
+        collect_for: sustainable construction vs Instagram villa gap, industrial style mold prevention
+
+  - name: phygital_luxury_experience
+    title: Phygital architecture and immersive event venues
+    route_to: both
+    audience_segments: [developer_investor, architect_designer, dreamer_woman]
+    primary_audience_segment: architect_designer
+    content_pillars: [lifestyle, expertise, invitation]
+    narrative_types: [aesthetic_reflection, authority, journey_of_creation]
+    suggested_registers: [register_2, register_6, register_7]
+    collect_fields:
+      - immersive technology
+      - event scenario
+      - visual hook
+      - architecture detail
+      - experience design
+      - wedding/event format
+    discovery_keywords:
+      - phygital luxury activation 2026
+      - immersive wedding venue ocean view
+      - holographic architecture villa
+      - clifftop wedding venue Bali
+      - brand event immersive experience
+    similar_source_targets: [instagram wedding venues, web luxury design, architecture magazines, tiktok venue tours]
+    sources:
+      - platform: web
+        source_name: Luxonomy Phygital Activations 2026
+        source_url: https://luxonomy.net/luxury-goes-mobile-the-new-era-of-phygital-activations-reshapes-brand-experience-in-2026/
+        collect_for: phygital luxury trends, mobile activations, brand experience design
+      - platform: web
+        source_name: Villa Plenilunio Bali Wedding Venue
+        source_url: https://www.totheaisleweddings.com/2026/05/bali-villa-plenilunio-luxury-destination-clifftop-wedding-venue.html
+        collect_for: competitor reference, clifftop wedding venue, ocean view event space
+      - platform: web
+        source_name: WedStay Viral Wedding Estates 2025
+        source_url: https://www.thewedstay.com/wedding-trends-2025
+        collect_for: viral wedding venue formats, Instagram-worthy features, millions of views
+      - platform: web
+        source_name: Looking Glass Holographic Displays
+        source_url: https://lookingglassfactory.com/
+        collect_for: holographic technology for homes, phygital reality anchor
+      - platform: web
+        source_name: Salone del Mobile 2026 Design Trends
+        source_url: https://www.artchitectours.com/salone-del-mobile-2026-design-trends/
+        collect_for: furniture as interactive screens, phygital design trends, AR installations
+
   - name: marketing_cases
     title: Hospitality and real estate marketing cases
     route_to: workflow_b

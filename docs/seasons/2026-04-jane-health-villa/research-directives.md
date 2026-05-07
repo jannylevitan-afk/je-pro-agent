@@ -73,11 +73,11 @@ links do not count.
 
 | Topic Key | Producer Rubric | What To Search | Required Qualified Videos |
 |---|---|---|---:|
-| `recovery_energy` | Линия восстановления | recovery after burnout, health reset, breathing, body as system, founder energy, post-overload recovery | 10 |
-| `invisible_quality` | Линия невидимого качества | mold, humidity, waterproofing, air quality, hidden systems, invisible defects, material choices | 10 |
-| `bali_real_estate` | Линия недвижимости на Бали | Bali villa buying mistakes, due diligence, construction delays, project risks, quality checks, investor mistakes | 10 |
-| `phygital_villa_experience` | Линия проекта | phygital spaces, immersive villas, ocean-view event venues, wedding venues, brand events, architecture as experience | 10 |
-| `founder_ceo_transition` | Линия предпринимательства + смены роли | founder role shift, CEO reality, launch behind the scenes, team building, from broker/operator to creator | 10 |
+| `recovery_energy` | Линия восстановления | septoplasty transformation, deviated septum recovery, breathing reset, mom entrepreneur burnout, health forced pause, body as system, founder energy crash, post-overload recovery | 10 |
+| `invisible_quality` | Линия невидимого качества | tropical build rot, drywall mold Bali, waterproofing failure villa, flat roof drainage, air quality hidden defects, gypsum humidity damage, material degradation tropics | 10 |
+| `bali_real_estate` | Линия недвижимости на Бали | Bali villa demolition 2025, PBG permit enforcement, construction quote scam, Bali villa buying mistakes, due diligence checklist, construction delays, market saturation 39000 listings | 10 |
+| `phygital_villa_experience` | Линия проекта | phygital luxury activation, immersive wedding venue ocean view, holographic architecture, brand event villa, clifftop venue viral, architecture as experience | 10 |
+| `founder_ceo_transition` | Линия предпринимательства + смены роли | woman CEO real estate transition, full circle moment founder, NDA project reveal, day in my life CEO, founder team building launch, broker to creator | 10 |
 
 `audience_participation is a CTA/feedback mechanic`, not a search topic.
 
@@ -115,11 +115,11 @@ per_topic_platform_targets:
 
 | Topic Key | Russian Search Examples | English Search Examples |
 |---|---|---|
-| `recovery_energy` | восстановление после выгорания; дыхание здоровье усталость; нервная система восстановление энергия | burnout recovery nervous system; breathing health reset; body as system recovery |
-| `invisible_quality` | плесень влажность дом; скрытые дефекты гидроизоляция; вентиляция качество воздуха | mold humidity waterproofing; air quality mold inspection; hidden defects waterproofing failure |
-| `bali_real_estate` | Бали вилла покупка ошибки; Бали недвижимость due diligence; Бали стройка виллы задержки | Bali villa buying mistakes; Bali real estate due diligence; Bali construction delays villa |
-| `phygital_villa_experience` | иммерсивное пространство свадьба; фиджитал пространство архитектура; вилла для свадьбы событие | immersive wedding venue; phygital space architecture; luxury ocean villa event venue |
-| `founder_ceo_transition` | основатель CEO запуск проекта; предприниматель новая роль; фаундер команда запуск | founder CEO startup launch; building a team founder reality; founder transition operator to creator |
+| `recovery_energy` | септопластика восстановление дыхание; мама предприниматель выгорание; 20 раз болела иммунитет; нервная система восстановление энергия; тело остановило раньше головы | septoplasty transformation breathing; deviated septum changed my life; mom entrepreneur burnout recovery; health crisis forced pause best thing; body as system recovery |
+| `invisible_quality` | плесень Бали гипсокартон влажность; гидроизоляция вилла провал; тропическая гниль стройка; скрытые дефекты плоская крыша дренаж | tropical build rot villa 3 years; drywall mold Bali humidity; waterproofing failure flat roof drainage; villa hidden defects material degradation |
+| `bali_real_estate` | Бали снос вилл 2025; PBG разрешение Бали; смета 30-40% разница; 39000 листингов загрузка 65%; Бали покупка ошибки due diligence | Bali villa demolition 2025 48 villas; PBG permit enforcement; construction quote 30-40% difference scam; Bali 39000 listings occupancy 65%; Bali buying mistakes checklist |
+| `phygital_villa_experience` | иммерсивное пространство свадьба океан; фиджитал архитектура голограмма; вилла событие бренд ивент; свадебная площадка океан вид | immersive wedding venue ocean view clifftop; phygital hologram architecture luxury; Hugo Boss hologram viral; brand event villa experience; wedding venue millions views |
+| `founder_ceo_transition` | женщина CEO недвижимость переход; full circle moment квартира 4 года назад; NDA проект раскрытие; день из жизни CEO; от брокера к создателю команда | woman CEO real estate transition CNBC; full circle moment founder apartment hologram; NDA project reveal launch; day in my life CEO founder; broker to creator team building |
 
 ## Required Board Counts
 
@@ -198,6 +198,53 @@ likes.
 - calculated rates and minimum gate classification;
 - topic alignment reason;
 - reuse boundary: adapt pattern only, never copy wording, creator identity, footage, or sequence.
+
+## Validated Viral References (May 2026 Research)
+
+Research Agent verified the following viral patterns and data points for each
+topic. Use these as hook templates and evidence anchors when scoring candidates.
+
+### recovery_energy
+
+| Reference | Platform | Signal | Adaptation |
+|---|---|---|---|
+| @hallebuttafuso septoplasty transformation | TikTok | millions views, "septoplasty changed my LIFE" | "2 года дышала одной ноздрёй. Управляла бизнесом на 50% кислорода" |
+| @izzybizzyspider breathing hack | TikTok | 6M+ views, deviated septum self-test | Simple hook: "раздвинь ноздри и вдохни — если разница огромная, ты дышишь неправильно" |
+| Mompreneur burnout trend | IG/TikTok | 71% мам несут невидимую когнитивную нагрузку (2025 study); 68% креаторов — алгоритмическое давление | "20 простуд за 2 года. Иммунитет сдался раньше, чем я" |
+| "Charger for myself" format | IG Reels | viral comparison: зарядка для телефона vs зарядка для себя | Show recovery routine as "recharging the system" |
+
+### invisible_quality
+
+| Reference | Platform | Signal | Adaptation |
+|---|---|---|---|
+| Tropical Build Rot exposés | IG/TikTok/Web | Villas at $600-800/m² degrade in 3-5 years; drywall molds fastest in Bali | "Гипсокартон на Бали = плесень через 2 года" |
+| Bali villa demolition wave 2025 | Web/News | 48 illegal villas demolished, 40% investors skip zoning checks | "В 2025 году на Бали снесли 48 вилл. Без компенсации" |
+| Flat roof drainage failures | Web | Flat roofs without drainage → leaks and mold during rainy season | "Плоская крыша без дренажа = плесень к первому сезону дождей" |
+
+### bali_real_estate
+
+| Reference | Platform | Signal | Adaptation |
+|---|---|---|---|
+| Construction cost exposés | Web | Quotes differ 30-40% for similar villas; cheapest = unlicensed subcontractors | "Разница в сметах 30-40% — дешёвая = без лицензии" |
+| Bali market saturation data | Web | 39,000+ short-term listings, median occupancy 65%, stock grew 20% annually | "39,000 вилл на Airbnb. Медианная загрузка 65%" |
+| PBG permit enforcement | Web | 50% demolished villas lacked valid PBG; Governor-led demolition July 2025 | "50% снесённых вилл — без PBG" |
+
+### phygital_villa_experience
+
+| Reference | Platform | Signal | Adaptation |
+|---|---|---|---|
+| Hugo Boss 20m hologram viral | Web/Social | Gisele Bündchen + Lee Min-ho holograms at Tower Bridge, millions views | Phygital = not just lights; it transforms the event |
+| Wedding venue viral estates | IG | 70+ estates with millions of views; ocean view + architecture = top content | "Представьте свадьбу, где пространство — часть церемонии" |
+| Villa Plenilunio Bali | Web/IG | Clifftop wedding venue with panoramic ocean views, viral bookings | Competitor reference for positioning |
+| Looking Glass holographic displays | Web | Home holograms, 2-inch thick, no subscription | Technology anchor for "phygital is real, not sci-fi" |
+
+### founder_ceo_transition
+
+| Reference | Platform | Signal | Adaptation |
+|---|---|---|---|
+| CNBC Changemakers 2026 | Web | Women leaders redefining real estate; vulnerable founder stories trending | "Весь год я была CEO проекта под NDA" |
+| "Day in my life as CEO" format | IG Reels | Consistently viral format across platforms | Show 9-17 work + evening culture in Moscow |
+| Full circle moment trend | IG/TikTok | "X years ago in this room" → present transformation | "4 года назад в этой квартире муж сделал голограммы. Теперь мы строим это на Бали" |
 
 ## Handoff Rule
 
